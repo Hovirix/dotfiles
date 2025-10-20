@@ -1,0 +1,17 @@
+#!/bin/sh
+
+notify() {
+  if command -v fyi >/dev/null 2>&1; then
+    fyi "$1"
+  else
+    notify-send "$1"
+  fi
+}
+
+if nmcli connection show --active | grep -q wg0; then
+  nmcli connection down wg0
+  notify "wg0 Off"
+else
+  nmcli connection up wg0
+  notify "wg0 On"
+fi

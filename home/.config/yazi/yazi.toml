@@ -1,0 +1,30 @@
+[log]
+enabled = false
+
+[mgr]
+ratio = [2, 3, 4]
+show_hidden = false
+show_symlink = true
+sort_by = "extension"
+
+[opener]
+imv = [ { run = 'imv "$@"', orphan = true, for = "unix" } ]
+zip = [ { run = 'unzip "$@"', orphan = true, for = "unix" } ]
+pdf = [ { run = 'zathura "$@"', orphan = true, for = "unix" } ]
+
+[open]
+prepend_rules = [
+  { name = "*.7z",  use = "zip" },
+  { name = "*.zip",  use = "zip" },
+  { name = "*.pdf",  use = "pdf" },
+  { name = "*.jpg",  use = "imv" },
+  { name = "*.png",  use = "imv" },
+  { name = "*.gif",  use = "imv" },
+  { name = "*.bmp",  use = "imv" },
+  { name = "*.svg",  use = "imv" },
+  { name = "*.ico",  use = "imv" },
+  { name = "*.heic", use = "imv" },
+  { name = "*.jpeg", use = "imv" },
+  { name = "*.tiff", use = "imv" },
+  { name = "*.webp", use = "imv" },
+]

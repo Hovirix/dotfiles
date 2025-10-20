@@ -1,0 +1,2 @@
+# Only allow wheel, no password
+%wheel ALL=(ALL) NOPASSWD: ALL

@@ -1,0 +1,52 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <path> [more paths...]" >&2
+  exit 1
+fi
+
+for target in "$@"; do
+  if [ ! -e "$target" ]; then
+    echo "Error: '$target' does not exist" >&2
+    continue
+  fi
+
+  name=$(basename "$target")
+
+  echo "Select format for '$name':"
+  echo "1) tar.gz"
+  echo "2) tar.bz2"
+  echo "3) zip"
+  echo "4) 7z"
+  printf "Enter number [1-4]: "
+  read -r ans || exit 1
+
+  case "$ans" in
+    1)
+      archive="${name}.tar.gz"
+      tar czf "$archive" "$target"
+      ;;
+    2)
+      archive="${name}.tar.bz2"
+      tar cjf "$archive" "$target"
+      ;;
+    3)
+      archive="${name}.zip"
+      zip -r "$archive" "$target"
+      ;;
+    4)
+      archive="${name}.7z"
+      7z a "$archive" "$target"
+      ;;
+    *)
+      echo "Invalid choice, skipping '$name'." >&2
+      continue
+      ;;
+  esac
+
+  if [ $? -eq 0 ]; then
+    echo "Created: $archive"
+  else
+    echo "Failed to create archive for '$target'" >&2
+  fi
+done

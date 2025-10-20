@@ -1,0 +1,16 @@
+[user]
+    name = hovirix
+    email = hovirix@noreply.codeberg.org
+
+[init]
+    defaultBranch = main
+
+[color]
+    ui = auto
+
+[push]
+    default = simple
+    autoSetupRemote = true
+
+[credential]
+    helper = cache

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+notify() {
+  if command -v fyi >/dev/null 2>&1; then
+    fyi "$1"
+  else
+    notify-send "$1"
+  fi
+}
+
+if pgrep -x swayidle >/dev/null 2>&1; then
+  pkill -x swayidle
+  notify "swayidle stopped"
+else
+  swaymsg exec "swayidle -w"
+  notify "swayidle started"
+fi

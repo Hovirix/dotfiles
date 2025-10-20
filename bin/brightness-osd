@@ -1,0 +1,24 @@
+#!/bin/sh
+# Adjust brightness and show a notification (progress-bar with mako)
+
+dir=${1:-up}
+step=${2:-5%}
+
+if [ "$dir" = "up" ]; then
+  brightnessctl set "+$step"
+else
+  brightnessctl set "${step}-"
+fi
+
+cur=$(brightnessctl g)
+max=$(brightnessctl m)
+pct=$((100 * cur / max))
+
+notify-send -p \
+  -a "Brightness" \
+  -h int:value:"$pct" \
+  -h string:x-canonical-private-synchronous:brightness \
+  -h string:category:device \
+  -u low \
+  -t 900 \
+  "Brightness: ${pct}%"

@@ -1,0 +1,52 @@
+#!/bin/sh
+set -eu
+
+notify=false
+if [ "${1:-}" = "--notify" ]; then
+  notify=true
+  shift
+fi
+
+action="${1:-}"
+target="${2:-}"
+ts="$(date +'%Y-%m-%d_%H-%M-%S')"
+outdir="${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}"
+mkdir -p "$outdir"
+outfile="$outdir/screenshot-$ts.png"
+
+notify_msg() { $notify && command -v notify-send >/dev/null && notify-send "screenshot" "$1" || true; }
+
+case "$action:$target" in
+  copy:anything)
+    if geo="$(slurp)"; then
+      grim -g "$geo" - | wl-copy
+      notify_msg "copied selection"
+    else
+      notify_msg "selection canceled"
+      exit 1
+    fi
+    ;;
+  save:anything)
+    if geo="$(slurp)"; then
+      grim -g "$geo" "$outfile"
+      notify_msg "saved $outfile"
+      printf '%s\n' "$outfile"
+    else
+      notify_msg "selection canceled"
+      exit 1
+    fi
+    ;;
+  save:screen)
+    grim "$outfile" # all outputs
+    notify_msg "saved $outfile"
+    printf '%s\n' "$outfile"
+    ;;
+  copy:screen)
+    grim - | wl-copy
+    notify_msg "copied full screen"
+    ;;
+  *)
+    echo "usage: $(basename "$0") [--notify] {copy|save} {anything|screen}" >&2
+    exit 2
+    ;;
+esac

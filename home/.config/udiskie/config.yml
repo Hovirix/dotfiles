@@ -1,0 +1,16 @@
+program_options:
+  tray: false
+  automount: true
+      
+device_config:
+  - id_type: vfat
+    options: [uid=1000, gid=1000, utf8=1, umask=022]
+
+  - id_type: ext4
+    options: [defaults]
+
+  - id_type: ntfs
+    options: [uid=1000, gid=1000, umask=022]
+
+keyfiles:
+  # /dev/disk/by-uuid/<uuid>: /path/to/keyfile

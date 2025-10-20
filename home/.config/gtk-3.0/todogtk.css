@@ -1,0 +1,591 @@
+/* -------------------------------------------------------------- */
+/* Catppuccin Mocha GTK 3.0 Theme
+/* -------------------------------------------------------------- */
+
+/* Color Palette */
+@define-color rosewater   #f5e0dc;
+@define-color flamingo    #f2cdcd;
+@define-color pink        #f5c2e7;
+@define-color mauve       #cba6f7;
+@define-color red         #f38ba8;
+@define-color maroon      #eba0ac;
+@define-color peach       #fab387;
+@define-color yellow      #f9e2af;
+@define-color green       #a6e3a1;
+@define-color teal        #94e2d5;
+@define-color sky         #89dceb;
+@define-color sapphire    #74c7ec;
+@define-color blue        #89b4fa;
+@define-color lavender    #b4befe;
+@define-color text        #cdd6f4;
+@define-color subtext1    #bac2de;
+@define-color subtext0    #a6adc8;
+@define-color overlay2    #9399b2;
+@define-color overlay1    #7f849c;
+@define-color overlay0    #6c7086;
+@define-color surface2    #585b70;
+@define-color surface1    #45475a;
+@define-color surface0    #313244;
+@define-color base        #1e1e2e;
+@define-color mantle      #181825;
+@define-color crust       #11111b;
+
+/* GTK Role Mappings */
+@define-color accent_bg_color    @peach;
+@define-color accent_fg_color    @crust;
+@define-color destructive_bg_color @red;
+@define-color destructive_fg_color @crust;
+@define-color success_bg_color   @green;
+@define-color success_fg_color   @crust;
+@define-color warning_bg_color   @yellow;
+@define-color warning_fg_color   @crust;
+@define-color window_bg_color    @base;
+@define-color window_fg_color    @text;
+@define-color view_bg_color      @base;
+@define-color view_fg_color      @text;
+@define-color headerbar_bg_color @mantle;
+@define-color headerbar_fg_color @text;
+@define-color headerbar_border_color @surface0;
+@define-color sidebar_bg_color   @mantle;
+@define-color sidebar_fg_color   @text;
+@define-color card_bg_color      @surface0;
+@define-color card_fg_color      @text;
+@define-color popover_bg_color   @surface1;
+@define-color popover_fg_color   @text;
+
+/* Import base Adwaita theme */
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained.css");
+
+/* -------------------------------------------------------------- */
+/* Base Elements
+/* -------------------------------------------------------------- */
+
+/* Windows & Main Containers */
+window, 
+.background,
+.view,
+.content-view,
+.list,
+.sidebar,
+textview,
+treeview {
+  background-color: @view_bg_color;
+  color: @view_fg_color;
+}
+
+/* Application background */
+.background {
+  background-color: @base;
+}
+
+/* -------------------------------------------------------------- */
+/* Header Elements
+/* -------------------------------------------------------------- */
+
+/* Headerbar & Titlebar */
+headerbar,
+.titlebar,
+.header-bar {
+  background-color: @headerbar_bg_color;
+  color: @headerbar_fg_color;
+  border-bottom: 1px solid @headerbar_border_color;
+  box-shadow: none;
+}
+
+headerbar button,
+.titlebar button,
+.header-bar button {
+  background-color: transparent;
+  color: @headerbar_fg_color;
+  border: none;
+}
+
+headerbar button:hover,
+.titlebar button:hover,
+.header-bar button:hover {
+  background-color: alpha(@text, 0.1);
+}
+
+headerbar button:active,
+.titlebar button:active,
+.header-bar button:active {
+  background-color: alpha(@text, 0.2);
+}
+
+/* Window controls */
+.titlebutton {
+  background-color: transparent;
+  border: none;
+}
+
+.titlebutton:hover {
+  background-color: alpha(@text, 0.15);
+}
+
+.titlebutton.close:hover {
+  background-color: @red;
+}
+
+/* -------------------------------------------------------------- */
+/* Buttons
+/* -------------------------------------------------------------- */
+
+button {
+  background-image: none;
+  background-color: @card_bg_color;
+  color: @card_fg_color;
+  border: 1px solid @surface1;
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+
+button:hover {
+  background-color: alpha(@text, 0.05);
+  border-color: @surface2;
+}
+
+button:active,
+button:checked {
+  background-color: alpha(@text, 0.1);
+  border-color: @surface2;
+}
+
+button:disabled {
+  background-color: @surface0;
+  color: @overlay0;
+  border-color: @surface1;
+}
+
+/* Accent buttons */
+button.suggested-action,
+button.default {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+  border-color: @accent_bg_color;
+}
+
+button.suggested-action:hover,
+button.default:hover {
+  background-color: alpha(@accent_bg_color, 0.8);
+}
+
+/* Destructive buttons */
+button.destructive-action {
+  background-color: @destructive_bg_color;
+  color: @destructive_fg_color;
+  border-color: @destructive_bg_color;
+}
+
+button.destructive-action:hover {
+  background-color: alpha(@destructive_bg_color, 0.8);
+}
+
+/* Flat buttons */
+button.flat {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+button.flat:hover {
+  background-color: alpha(@text, 0.05);
+}
+
+/* -------------------------------------------------------------- */
+/* Input Elements
+/* -------------------------------------------------------------- */
+
+/* Text entries */
+entry,
+.entry {
+  background-color: @card_bg_color;
+  color: @card_fg_color;
+  border: 1px solid @surface1;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+entry:focus,
+.entry:focus {
+  border-color: @accent_bg_color;
+  box-shadow: 0 0 0 2px alpha(@accent_bg_color, 0.2);
+}
+
+entry:disabled,
+.entry:disabled {
+  background-color: @surface0;
+  color: @overlay0;
+  border-color: @surface1;
+}
+
+/* Text views */
+textview text {
+  background-color: @card_bg_color;
+  color: @card_fg_color;
+}
+
+/* -------------------------------------------------------------- */
+/* Lists & Trees
+/* -------------------------------------------------------------- */
+
+/* List rows */
+row,
+.list-row {
+  background-color: transparent;
+  color: @view_fg_color;
+  border-bottom: 1px solid alpha(@surface1, 0.5);
+}
+
+row:hover,
+.list-row:hover {
+  background-color: alpha(@text, 0.05);
+}
+
+row:selected,
+.list-row:selected {
+  background-color: alpha(@accent_bg_color, 0.3);
+  color: @text;
+}
+
+row:selected:hover,
+.list-row:selected:hover {
+  background-color: alpha(@accent_bg_color, 0.4);
+}
+
+/* Tree view */
+treeview {
+  background-color: @view_bg_color;
+  color: @view_fg_color;
+}
+
+treeview.view {
+  border: none;
+}
+
+treeview.view:selected {
+  background-color: alpha(@accent_bg_color, 0.3);
+  color: @text;
+}
+
+/* -------------------------------------------------------------- */
+/* Sidebars & Panels
+/* -------------------------------------------------------------- */
+
+.sidebar {
+  background-color: @sidebar_bg_color;
+  color: @sidebar_fg_color;
+  border-right: 1px solid @surface0;
+}
+
+.sidebar row {
+  background-color: transparent;
+}
+
+.sidebar row:hover {
+  background-color: alpha(@text, 0.05);
+}
+
+.sidebar row:selected {
+  background-color: alpha(@accent_bg_color, 0.3);
+}
+
+/* -------------------------------------------------------------- */
+/* Cards & Containers
+/* -------------------------------------------------------------- */
+
+.card {
+  background-color: @card_bg_color;
+  color: @card_fg_color;
+  border: 1px solid @surface1;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px alpha(@crust, 0.2);
+}
+
+/* -------------------------------------------------------------- */
+/* Popovers & Menus
+/* -------------------------------------------------------------- */
+
+popover,
+.popover,
+menu,
+.menu {
+  background-color: @popover_bg_color;
+  color: @popover_fg_color;
+  border: 1px solid @surface2;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px alpha(@crust, 0.3);
+}
+
+popover > contents,
+.popover > contents {
+  padding: 8px;
+}
+
+menuitem,
+.menuitem {
+  background-color: transparent;
+  color: @popover_fg_color;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+menuitem:hover,
+.menuitem:hover {
+  background-color: alpha(@text, 0.1);
+}
+
+/* -------------------------------------------------------------- */
+/* Scrollbars
+/* -------------------------------------------------------------- */
+
+scrollbar {
+  background-color: transparent;
+}
+
+scrollbar slider {
+  background-color: alpha(@overlay0, 0.5);
+  border-radius: 6px;
+  min-width: 6px;
+  min-height: 6px;
+}
+
+scrollbar slider:hover {
+  background-color: @overlay0;
+}
+
+scrollbar slider:active {
+  background-color: @overlay1;
+}
+
+/* -------------------------------------------------------------- */
+/* Tabs
+/* -------------------------------------------------------------- */
+
+notebook {
+  background-color: @view_bg_color;
+}
+
+notebook > header {
+  background-color: @mantle;
+  border-bottom: 1px solid @surface0;
+}
+
+notebook > header > tabs > tab {
+  background-color: transparent;
+  color: @subtext0;
+  border: none;
+  padding: 8px 16px;
+}
+
+notebook > header > tabs > tab:hover {
+  background-color: alpha(@text, 0.05);
+  color: @text;
+}
+
+notebook > header > tabs > tab:checked {
+  background-color: @view_bg_color;
+  color: @text;
+  border-bottom: 2px solid @accent_bg_color;
+}
+
+/* -------------------------------------------------------------- */
+/* Progress & Scales
+/* -------------------------------------------------------------- */
+
+progressbar {
+  background-color: @surface0;
+  border-radius: 4px;
+}
+
+progressbar progress {
+  background-color: @accent_bg_color;
+  border-radius: 4px;
+}
+
+scale {
+  background-color: transparent;
+}
+
+scale trough {
+  background-color: @surface0;
+  border-radius: 4px;
+}
+
+scale highlight {
+  background-color: @accent_bg_color;
+  border-radius: 4px;
+}
+
+scale slider {
+  background-color: @accent_bg_color;
+  border-radius: 50%;
+  border: 2px solid @view_bg_color;
+}
+
+/* -------------------------------------------------------------- */
+/* Switches & Checkboxes
+/* -------------------------------------------------------------- */
+
+switch {
+  background-color: @surface0;
+  border-radius: 12px;
+}
+
+switch:checked {
+  background-color: @accent_bg_color;
+}
+
+switch slider {
+  background-color: @text;
+  border-radius: 50%;
+}
+
+checkbutton check,
+radiobutton radio {
+  background-color: @surface0;
+  border: 1px solid @surface1;
+  border-radius: 4px;
+}
+
+checkbutton check:checked,
+radiobutton radio:checked {
+  background-color: @accent_bg_color;
+  border-color: @accent_bg_color;
+  color: @accent_fg_color;
+}
+
+/* Radio buttons - fix for virt-manager */
+radiobutton,
+.radio {
+  background-color: transparent !important;
+}
+
+radiobutton radio,
+.radio {
+  background-color: @surface0 !important;
+  border: 2px solid @surface1 !important;
+  border-radius: 50% !important;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+radiobutton radio:checked,
+.radio:checked {
+  background-color: @accent_bg_color !important;
+  border-color: @accent_bg_color !important;
+  color: @accent_fg_color !important;
+}
+
+radiobutton radio:checked::before,
+.radio:checked::before {
+  content: "●";
+  color: @crust;
+  font-size: 8px;
+  text-align: center;
+}
+
+/* Labels next to radio buttons */
+radiobutton label,
+.radio + label {
+  color: @text !important;
+  background-color: transparent !important;
+}
+
+/* -------------------------------------------------------------- */
+/* Selection & Links
+/* -------------------------------------------------------------- */
+
+*:selected,
+selection,
+treeview:selected,
+text:selected {
+  background-color: alpha(@accent_bg_color, 0.25);
+  color: @view_fg_color;
+}
+
+a,
+.link {
+  color: @accent_bg_color;
+}
+
+a:hover,
+.link:hover {
+  color: alpha(@accent_bg_color, 0.8);
+}
+
+/* -------------------------------------------------------------- */
+/* Tooltips
+/* -------------------------------------------------------------- */
+
+tooltip {
+  background-color: @surface2;
+  color: @text;
+  border: 1px solid @overlay0;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+/* -------------------------------------------------------------- */
+/* Separators
+/* -------------------------------------------------------------- */
+
+separator {
+  background-color: @surface0;
+  min-width: 1px;
+  min-height: 1px;
+}
+
+/* -------------------------------------------------------------- */
+/* Status Elements
+/* -------------------------------------------------------------- */
+
+.success {
+  background-color: @success_bg_color;
+  color: @success_fg_color;
+}
+
+.warning {
+  background-color: @warning_bg_color;
+  color: @warning_fg_color;
+}
+
+.error {
+  background-color: @destructive_bg_color;
+  color: @destructive_fg_color;
+}
+
+/* -------------------------------------------------------------- */
+/* Misc Elements
+/* -------------------------------------------------------------- */
+
+/* Info bars */
+infobar {
+  background-color: @surface1;
+  color: @text;
+  border: none;
+}
+
+infobar.info {
+  background-color: @blue;
+  color: @crust;
+}
+
+infobar.warning {
+  background-color: @warning_bg_color;
+  color: @warning_fg_color;
+}
+
+infobar.error {
+  background-color: @destructive_bg_color;
+  color: @destructive_fg_color;
+}
+
+/* Spinners */
+spinner {
+  color: @accent_bg_color;
+}
+
+/* Frame borders */
+frame {
+  border: 1px solid @surface1;
+  border-radius: 6px;
+}

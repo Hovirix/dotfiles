@@ -1,0 +1,17 @@
+[[mgr.append_keymap]]
+on = ["g", "t"]
+run = "cd ~/.local/share/Trash/files/"
+
+[[mgr.append_keymap]]
+on = ["g", "."]
+run = "cd ~/.dotfiles"
+
+[[mgr.append_keymap]]
+on = ["g", "p"]
+run = "cd ~/projects"
+
+[[mgr.prepend_keymap]]
+on   = "!"
+for  = "unix"
+run  = 'shell "$SHELL" --block'
+desc = "Open $SHELL here"

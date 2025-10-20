@@ -1,0 +1,8 @@
+# <file system>                              <mount point>         <type>   <options>                                                   <dump>  <pass>
+UUID=046A-7237                               /boot/efi             vfat     defaults,noexec,nodev,nosuid,umask=0077                      0       2
+UUID=ee9c6c85-31c7-4004-b26d-423cd68f03d0    /                     ext4     defaults,noatime,lazytime,commit=600                         0       1
+
+# Volatile directories on tmpfs
+tmpfs                                        /tmp                  tmpfs    defaults,noatime,nosuid,nodev,noexec,mode=1777,size=1G       0       0
+tmpfs                                        /var/tmp              tmpfs    defaults,noatime,nosuid,nodev,noexec,mode=1777,size=1G       0       0
+tmpfs                                        /var/log              tmpfs    defaults,noatime,nosuid,nodev,noexec,mode=0755,size=1G       0       0
