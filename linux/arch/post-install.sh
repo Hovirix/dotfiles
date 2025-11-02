@@ -7,6 +7,7 @@ packages=(
   linux-firmware
 
   # Networking
+  openssh
   nftables
   networkmanager
 
@@ -32,10 +33,11 @@ packages=(
   swayidle
   swaylock
   i3status
+  autotiling-rs
 
   # Fonts and themes
-  ttf-hack
   ttf-dejavu
+  ttf-hack-nerd
   ttf-nerd-fonts-symbols
   noto-fonts-emoji
   papirus-icon-theme
@@ -45,6 +47,7 @@ packages=(
   grim
   slurp
   wlsunset
+  libnotify
   wf-recorder
   wl-clipboard
   brightnessctl
@@ -57,9 +60,16 @@ packages=(
   yazi
   btop
   helix
+  lazygit
   freetube
   zathura-pdf-mupdf
   ungoogled-chromium-bin
+
+  # Files
+  p7zip
+  zip
+  unzip
+  unrar
 
   # CLI tools
   zsh
@@ -81,8 +91,10 @@ done
 
 sudo systemctl enable --now tlp
 sudo systemctl enable --now nftables
-sudo systemctl enable --now bluetooth
+# sudo systemctl enable --now bluetooth
 sudo systemctl enable --now NetworkManager
 
 exec ~/.dotfiles/linkdots.sh
 chsh -s /bin/zsh
+
+exec ./debloat.sh
