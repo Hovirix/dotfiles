@@ -10,6 +10,10 @@ run = "cd ~/.dotfiles"
 on = ["g", "p"]
 run = "cd ~/projects"
 
+[[mgr.append_keymap]]
+on = ["g", "w"]
+run = "cd ~/work"
+
 [[mgr.prepend_keymap]]
 on   = "!"
 for  = "unix"

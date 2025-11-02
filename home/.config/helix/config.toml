@@ -24,7 +24,7 @@ mode.select = "SELECT"
 left   = ["mode", "spinner"]
 center = ["file-name"]
 right  = ["diagnostics", "version-control"]
-# diagnostics = ["warning", "error", "info"]
+diagnostics = ["warning", "error", "info"]
 
 [editor.lsp]
 display-progress-messages = true

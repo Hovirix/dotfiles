@@ -44,17 +44,11 @@ set $crust #11111b
 # ------------------------------------------------
 
 exec mako
+exec autotiling-rs
 # exec autotiling-rs-musl
 exec wlsunset -t 3000 -T 6500 -s 20:00 -S 07:00 -g 0.7
 exec swaybg -i ~/.dotfiles/assets/wallpapers/alpine-peach-6k.png
 exec swayidle -w
-
-exec_always {
-    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-    gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
-    gsettings set org.gnome.desktop.interface font-name 'DejaVu Sans 10'
-    gsettings set org.gnome.desktop.interface monospace-font-name 'DejaVu Sans Mono 10'
-  }
 
 # ------------------------------------------------
 # Monitors
@@ -112,7 +106,7 @@ floating_modifier $mod
 # -------------------------------
 
 assign [app_id="^chromium$"]          → workspace number 1
-assign [app_id="^org.pwmt.zathura$"]  → workspace number 2
+# assign [app_id="^org.pwmt.zathura$"]  → workspace number 2
 assign [app_id="^FreeTube$"]          → workspace number 5
 
 for_window [app_id="chrome-nngceckbapebfimnlniiiahkandclblb-Default"] floating enable
@@ -165,20 +159,22 @@ bindsym $mod+Return            exec foot
 
 bindsym Control+1              exec chromium-wrapper
 bindsym Control+2              exec foot -e yazi 
+bindsym Control+4              exec virt-manager
+bindsym Control+5              exec freetube 
 
 # Scripts
 bindsym $mod+w                 exec toggle-wg0
 bindsym $mod+c                 exec toggle-swayidle
 
 # Screenshots
-bindsym $mod+s                 exec grimshot --notify copy anything
-bindsym $mod+Ctrl+s            exec grimshot --notify save anything
-bindsym $mod+Ctrl+Mod1+s       exec grimshot --notify save screen
+bindsym $mod+s                 exec grimlite --notify copy anything
+bindsym $mod+Ctrl+s            exec grimlite --notify save anything
+bindsym $mod+Ctrl+Mod1+s       exec grimlite --notify save screen
 
 # Brightness
 bindsym $mod+b                exec brightnessctl --quiet --save set 100% 
 bindsym $mod+Shift+b          exec brightnessctl --quiet --save set 0%
-bindsym XF86MonBrightnessUp   exec brightness-osd.sh up
+bindsym XF86MonBrightnessUp   exec brightness-osd up
 bindsym XF86MonBrightnessDown exec brightness-osd down
 
 # Audio (ALSA / amixer)
@@ -201,8 +197,8 @@ bindsym $mod+Shift+e         exec swaymsg exit
 bindsym $mod+Shift+r         exec swaymsg reload
 
 # Sys
-bindsym $mod+Shift+Ctrl+r    exec sudo reboot
-bindsym $mod+Shift+Ctrl+p    exec sudo poweroff
+bindsym $mod+Shift+Ctrl+r    exec reboot
+bindsym $mod+Shift+Ctrl+p    exec poweroff
 bindsym $mod+Shift+Ctrl+s    exec loginctl suspend
 
 # Focus / move

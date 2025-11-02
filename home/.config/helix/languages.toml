@@ -37,6 +37,11 @@ name = "javascript"
 auto-format = true
 
 [[language]]
+name = "typescript"
+auto-format = true
+# formatter = { command = "prettier", args = [ "--stdin-filepath", "%" ] }
+
+[[language]]
 name = "dockerfile"
 auto-format = true
 formatter = { command = "dockerfmt" }

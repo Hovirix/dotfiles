@@ -23,7 +23,7 @@ zinit for wait=0 lucid light-mode \
       zdharma-continuum/fast-syntax-highlighting
 
 # Load stuff
-if [ -e /home/alpine/.nix-profile/etc/profile.d/nix.sh ]; then . /home/alpine/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+if [ -e /home/cachy/.nix-profile/etc/profile.d/nix.sh ]; then . /home/cachy/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 autoload -Uz compinit
 compinit -C
 zinit cdreplay -q
@@ -73,8 +73,9 @@ alias cat='bat'
 alias grep="grep --color=auto"
 
 alias ls='eza --icons --group-directories-first'
-alias la='eza --all --long --icons --group-directories-first'
-alias ll='eza --long --icons --group-directories-first --header --git'
+alias la='eza --all'
+alias ll='eza --long'
+alias tree='ls -T'
 
 alias g="git"
 alias lg="lazygit"
@@ -104,11 +105,13 @@ alias pps='podman ps -a'
 alias pc='podman compose'
 
 # Nix
+alias nc='nix flake check'
 alias nfu='nix flake update'
-alias npu='nix profile upgrade --all --impure'
-alias npa='nix profile add ~/.dotfiles/dev --impure'
 alias nd='nix develop --command zsh'
 alias ns='nix-shell -p --command zsh'
-alias ng='sudo nix-collect-garbage -d && sudo nix-store --gc && sudo nix-store --repair --verify --check-contents && sudo nix-store --optimise -vvv'
+alias npu='nix profile upgrade --all --impure'
+alias npa='nix profile add ~/.dotfiles/dev --impure'
+alias ng='nix-collect-garbage -d && nix-store --gc && nix-store --repair --verify --check-contents && nix-store --optimise -vvv'
+
 
 
