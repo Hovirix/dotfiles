@@ -19,6 +19,7 @@
           bash-language-server
           docker-language-server
           dockerfile-language-server
+          typescript-language-server
           vscode-langservers-extracted
           # Formatters
           ruff

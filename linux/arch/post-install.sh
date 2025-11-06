@@ -80,6 +80,13 @@ packages=(
   zoxide
   starship
   fastfetch
+  github-cli
+
+  # Virtualization
+  libvirt
+  dnsmasq
+  virt-manager
+  qemu-desktop
 )
 
 sudo pacman -Syu --noconfirm >/dev/null
@@ -91,8 +98,11 @@ done
 
 sudo systemctl enable --now tlp
 sudo systemctl enable --now nftables
+sudo systemctl enable --now libvirtd
 # sudo systemctl enable --now bluetooth
 sudo systemctl enable --now NetworkManager
+
+sudo usermod -aG libvirt "$USER"
 
 exec ~/.dotfiles/linkdots.sh
 chsh -s /bin/zsh
