@@ -21,7 +21,7 @@ if [ "$(tty)" = "/dev/tty1" ]; then
   export GTK_BACKEND=wayland
   export GTK_WAYLAND_DISABLE_WINDOWDECORATION=1
 
-  export PATH="$HOME/.dotfiles/bin:$PATH"
+  export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
   exec dbus-run-session sway 
 fi
