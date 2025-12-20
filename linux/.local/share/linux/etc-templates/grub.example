@@ -1,9 +1,0 @@
-GRUB_TIMEOUT=0
-GRUB_TIMEOUT_STYLE=hidden
-GRUB_TERMINAL=gfxterm
-GRUB_CMDLINE_LINUX="quiet splash nvme pcie_aspm=force nowatchdog nmi_watchdog=0 amd_pstate=active rcutree.enable_rcu_lazy=1 rd.luks.allow-discards rd.luks.uuid=a9a3a87f-0eb3-4e41-999c-8d61e8426510 root=UUID=ee9c6c85-31c7-4004-b26d-423cd68f03d0"
-GRUB_DISABLE_RECOVERY=true
-GRUB_GFXMODE=800x600
-GRUB_GFXPAYLOAD_LINUX=keep
-GRUB_DISABLE_OS_PROBER=true
-GRUB_DISABLE_SUBMENU=true
