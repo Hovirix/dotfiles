@@ -1,0 +1,45 @@
+/* ------------------------------------------------ */
+/* Wofi Styling                                     */
+/* ------------------------------------------------ */
+
+* {
+  font-family: sans-serif;
+  font-size: 14px;
+  border-radius: 0;
+}
+
+/* ================================ */
+/*            Window                */
+/* ================================ */
+
+window {
+  margin: 0;
+  border: 2px solid #C6A0F6;
+  background-color: transparent;
+}
+
+/* ================================ */
+/*            Input                 */
+/* ================================ */
+
+#input {
+  margin: 5px;
+  padding: 6px;
+  border: 2px solid #8AADF4;
+  color: #CAD4F5;
+  background-color: transparent;
+}
+
+/* ================================ */
+/*            Entries               */
+/* ================================ */
+
+#entry {
+  padding: 6px;
+  margin: 2px 5px;
+}
+
+#entry:selected {
+  background-color: #8AADF4;
+  color: #000000;
+}

@@ -1,0 +1,19 @@
+# ------------------------------------------------
+# Wofi Config
+# ------------------------------------------------
+
+show            = drun
+prompt          = Search
+insensitive     = true
+allow_images    = true
+image_size      = 32
+gtk_dark        = true
+
+width           = 500
+height          = 400
+location        = top
+xoffset         = 0
+yoffset         = 0
+
+columns         = 1
+sort_order      = default
