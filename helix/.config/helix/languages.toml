@@ -1,0 +1,85 @@
+# ----------------------------------------------------
+# Systems
+# ----------------------------------------------------
+
+[[language]]
+name = "c"
+auto-format = true
+formatter = { command = "clang-format", args = ["--style=LLVM"] }
+
+# ----------------------------------------------------
+# Scripting
+# ----------------------------------------------------
+
+[[language]]
+name = "bash"
+auto-format = true
+file-types = ["sh"]
+formatter = { command = "shfmt", args = ["-i", "2", "-ci"] }
+
+[[language]]
+name = "python"
+auto-format = true
+language-servers = ["pyright"]
+formatter = { command = "ruff", args = ["format", "-"] }
+
+# ----------------------------------------------------
+# Infrastructure
+# ----------------------------------------------------
+
+[[language]]
+name = "hcl"
+auto-format = true
+formatter = { command = "terraform", args = ["format"] }
+
+[[language]]
+name = "nix"
+auto-format = true
+formatter = { command = "nixpkgs-fmt" }
+
+# ----------------------------------------------------
+# Web core
+# ----------------------------------------------------
+
+[[language]]
+name = "html"
+language-servers = [ "vscode-html-language-server", "tailwindcss-ls" ]
+
+[[language]]
+name = "css"
+language-servers = [ "vscode-css-language-server", "tailwindcss-ls" ]
+
+[[language]]
+name = "javascript"
+auto-format = true
+
+# ----------------------------------------------------
+# Web frameworks
+# ----------------------------------------------------
+
+[[language]]
+name = "svelte"
+auto-format = true
+language-servers = [ "svelteserver", "tailwindcss-ls" ]
+
+# ----------------------------------------------------
+# LSP
+# ----------------------------------------------------
+
+# [language-server.clangd]
+# command = "clangd"
+# args = ["--clang-tidy", "-j=5", "--malloc-trim"]
+
+[language-server.tailwindcss-ls]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
+
+[language-server.ruff]
+command = "ruff"
+args = ["server"]
+
+[language-server.ruff.config.settings]
+show-fixes = true
+target-version = "py313"
+lint = { preview = true }
+format = { docstring-code-format = true, preview = true }

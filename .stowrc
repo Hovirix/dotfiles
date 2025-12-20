@@ -1,0 +1,4 @@
+--target=$HOME
+--ignore=.stowrc
+--ignore=assets/*
+--ignore=linux/*

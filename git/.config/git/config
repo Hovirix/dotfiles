@@ -1,0 +1,16 @@
+[user]
+    name = Hovirix
+    email = 184756415+Hovirix@users.noreply.github.com
+
+[init]
+    defaultBranch = main
+
+[color]
+    ui = auto
+
+[push]
+    default = simple
+    autoSetupRemote = true
+
+[credential]
+    helper = cache

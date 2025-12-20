@@ -1,4 +1,0 @@
-#!/bin/sh
-
-FLAGS=$(cat ~/.config/chromium-flags.conf | xargs)
-exec /usr/bin/chromium "$FLAGS" "$@"

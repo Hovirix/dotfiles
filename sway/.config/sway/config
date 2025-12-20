@@ -1,0 +1,271 @@
+# ------------------------------------------------
+# Sway core
+# ------------------------------------------------
+
+xwayland disable
+input * xkb_options ctrl:nocaps
+seat * xcursor_theme Bibata-Modern-Amber 24
+
+# ------------------------------------------------
+# Variables
+# ------------------------------------------------
+
+set $mod Mod4
+
+set $rosewater #f5e0dc
+set $flamingo #f2cdcd
+set $pink #f5c2e7
+set $mauve #cba6f7
+set $red #f38ba8
+set $maroon #eba0ac
+set $peach #fab387
+set $yellow #f9e2af
+set $green #a6e3a1
+set $teal #94e2d5
+set $sky #89dceb
+set $sapphire #74c7ec
+set $blue #89b4fa
+set $lavender #b4befe
+set $text #cdd6f4
+set $subtext1 #bac2de
+set $subtext0 #a6adc8
+set $overlay2 #9399b2
+set $overlay1 #7f849c
+set $overlay0 #6c7086
+set $surface2 #585b70
+set $surface1 #45475a
+set $surface0 #313244
+set $base #1e1e2e
+set $mantle #181825
+set $crust #11111b
+
+# ------------------------------------------------
+# Autostart
+# ------------------------------------------------
+
+exec mako
+exec autotiling-rs
+# exec autotiling-rs-musl
+exec wlsunset -t 3000 -T 6500 -s 19:00 -S 08:00 -g 0.7
+exec swaybg -i ~/.dotfiles/assets/wallpapers/catppuccin-wallpapers.png
+exec swayidle -w
+
+# ------------------------------------------------
+# Monitors
+# ------------------------------------------------
+
+output eDP-1 {
+  scale 1.5
+  # mode 2880x1800@60.001Hz
+  mode 2880x1800@120.000Hz
+
+  subpixel rgb
+  color_profile srgb
+  render_bit_depth 10
+}
+
+output HDMI-A-1 {
+  scale 1.25
+  pos -1920 0
+  mode 2560x1440
+
+  subpixel rgb
+  color_profile srgb
+}
+
+# ------------------------------------------------
+# Inputs
+# ------------------------------------------------
+
+input type:touchpad {
+  dwt enabled
+  tap enabled
+  pointer_accel 1
+  accel_profile flat
+  natural_scroll enabled
+}
+
+input type:mouse {
+  pointer_accel 0.4
+  accel_profile flat
+}
+
+# ------------------------------------------------
+# Window
+# ------------------------------------------------
+
+default_border pixel 2
+default_floating_border pixel 2
+titlebar_border_thickness 0
+titlebar_padding 0 0
+hide_edge_borders both
+floating_modifier $mod
+
+# -------------------------------
+# Window Rules
+# -------------------------------
+
+assign [app_id="^chromium$"]          → workspace number 1
+# assign [app_id="^org.pwmt.zathura$"]  → workspace number 2
+assign [app_id="^FreeTube$"]          → workspace number 5
+
+for_window [app_id="chrome-nngceckbapebfimnlniiiahkandclblb-Default"] floating enable
+
+# -------------------------------
+# Workspace
+# -------------------------------
+
+workspace 1  output eDP-1
+workspace 2  output eDP-1
+workspace 3  output eDP-1
+workspace 4  output eDP-1
+workspace 5  output eDP-1
+workspace 6  output HDMI-A-1
+workspace 7  output HDMI-A-1
+workspace 8  output HDMI-A-1
+workspace 9  output HDMI-A-1
+workspace 10 output HDMI-A-1
+
+# -------------------------------
+# Keybindings 
+# -------------------------------
+
+bindcode $mod+9             scratchpad show
+bindcode $mod+10            workspace number 1
+bindcode $mod+11            workspace number 2
+bindcode $mod+12            workspace number 3
+bindcode $mod+13            workspace number 4
+bindcode $mod+14            workspace number 5
+bindcode $mod+15            workspace number 6
+bindcode $mod+16            workspace number 7
+bindcode $mod+17            workspace number 8
+bindcode $mod+18            workspace number 9
+bindcode $mod+19            workspace number 10
+
+bindcode $mod+Shift+9       move scratchpad
+bindcode $mod+Shift+10      move container to workspace number 1
+bindcode $mod+Shift+11      move container to workspace number 2
+bindcode $mod+Shift+12      move container to workspace number 3
+bindcode $mod+Shift+13      move container to workspace number 4
+bindcode $mod+Shift+14      move container to workspace number 5
+bindcode $mod+Shift+15      move container to workspace number 6
+bindcode $mod+Shift+16      move container to workspace number 7
+bindcode $mod+Shift+17      move container to workspace number 8
+bindcode $mod+Shift+18      move container to workspace number 9
+bindcode $mod+Shift+19      move container to workspace number 10
+
+# Apps
+bindsym $mod+Return            exec foot
+bindsym $mod+R                 exec fuzzel
+bindsym Control+1              exec chromium-wrapper
+bindsym Control+2              exec foot -e yazi 
+
+# Scripts
+bindsym $mod+w                 exec toggle-wg0
+bindsym $mod+c                 exec toggle-swayidle
+
+# Screenshots
+bindsym $mod+s                 exec grimlite --notify copy anything
+bindsym $mod+Ctrl+s            exec grimlite --notify save anything
+bindsym $mod+Ctrl+Mod1+s       exec grimlite --notify save screen
+
+# Brightness
+bindsym $mod+b                exec brightnessctl --quiet --save set 100% 
+bindsym $mod+Shift+b          exec brightnessctl --quiet --save set 0%
+bindsym XF86MonBrightnessUp   exec brightness-osd up
+bindsym XF86MonBrightnessDown exec brightness-osd down
+
+# Audio (ALSA / amixer)
+bindsym XF86AudioMute          exec amixer set Master toggle
+bindsym XF86AudioLowerVolume   exec amixer set Master 2%-
+bindsym XF86AudioRaiseVolume   exec amixer set Master 2%+
+
+# Audio (PipeWire / WirePlumber)
+# bindsym XF86AudioMute          exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+# bindsym XF86AudioLowerVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-
+# bindsym XF86AudioRaiseVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ -l 1
+
+# Window management
+bindsym $mod+q               kill
+bindsym $mod+t               floating toggle
+bindsym $mod+f               fullscreen toggle
+
+# Sway
+bindsym $mod+Shift+e         exec swaymsg exit
+bindsym $mod+Shift+r         exec swaymsg reload
+
+# Sys
+bindsym $mod+Shift+Ctrl+r    exec reboot
+bindsym $mod+Shift+Ctrl+p    exec poweroff
+bindsym $mod+Shift+Ctrl+s    exec loginctl suspend
+
+# Focus / move
+bindsym $mod+h               focus left
+bindsym $mod+l               focus right
+bindsym $mod+k               focus up
+bindsym $mod+j               focus down
+
+bindsym $mod+Shift+h         move left
+bindsym $mod+Shift+l         move right
+bindsym $mod+Shift+k         move up
+bindsym $mod+Shift+j         move down
+
+bindsym $mod+Ctrl+h          resize shrink width 10px
+bindsym $mod+Ctrl+l          resize grow width 10px
+bindsym $mod+Ctrl+k          resize shrink height 10px
+bindsym $mod+Ctrl+j          resize grow height 10px
+
+# -------------------------------
+# Gaps / borders
+# -------------------------------
+
+# gaps inner 10
+# gaps outer 5
+smart_borders on
+
+# -------------------------------
+# Colors
+# -------------------------------
+
+# target                 title     bg    text   indicator  border
+client.focused           $peach    $base $text  $rosewater $peach
+client.focused_inactive  $overlay0 $base $text  $rosewater $overlay0
+client.unfocused         $overlay0 $base $text  $rosewater $overlay0
+client.urgent            $red      $base $red   $overlay0  $red
+client.placeholder       $overlay0 $base $text  $overlay0  $overlay0
+client.background        $base
+
+# -------------------------------
+# Bar
+# -------------------------------
+
+bar {
+  position top
+  tray_padding 0
+  status_command i3status
+  output eDP-1
+  separator_symbol ""
+  # workspace_buttons no
+
+  # disable mouse 
+    bindsym button1 nop
+    bindsym button2 nop
+    bindsym button3 nop
+    bindsym button4 nop
+    bindsym button5 nop
+
+  font DejaVu Sans Mono 11
+
+  colors {
+    background         $base
+    statusline         $text
+    focused_statusline $text
+    focused_separator  $base
+
+    # target           border bg        text
+    focused_workspace  $base  $peach    $crust
+    active_workspace   $base  $surface2 $text
+    inactive_workspace $base  $base     $text
+    urgent_workspace   $base  $red      $crust
+  }
+}
