@@ -24,6 +24,7 @@ zinit for wait=0 lucid light-mode \
 
 # Load stuff
 if [ -e /home/cachy/.nix-profile/etc/profile.d/nix.sh ]; then . /home/cachy/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+# bindkey -v
 autoload -Uz compinit
 compinit -C
 zinit cdreplay -q
@@ -110,11 +111,7 @@ alias cr='copilot --resume'
 alias cc='copilot --continue'
 
 # Nix
-alias nc='nix flake check'
-alias nfu='nix flake update'
 alias nd='nix develop --command zsh'
-alias ns='nix-shell -p --command zsh'
-alias npu='nix profile upgrade --all --impure'
-alias npa='nix profile add ~/.dotfiles/dev --impure'
-alias ng='nix-collect-garbage -d && nix-store --gc && nix-store --repair --verify --check-contents && nix-store --optimise -vvv'
-export PATH="$HOME/.npm-global/bin:$PATH"
+alias nfc='nix flake check'
+alias nfu='nix flake update'
+alias ncg='nix-collect-garbage -d && nix-store --gc && nix-store --repair --verify --check-contents && nix-store --optimise -vvv'  

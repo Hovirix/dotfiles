@@ -7,6 +7,10 @@ name = "c"
 auto-format = true
 formatter = { command = "clang-format", args = ["--style=LLVM"] }
 
+[[language]]
+name = "rust"
+auto-format = true
+
 # ----------------------------------------------------
 # Scripting
 # ----------------------------------------------------
@@ -38,7 +42,7 @@ auto-format = true
 formatter = { command = "nixpkgs-fmt" }
 
 # ----------------------------------------------------
-# Web core
+# Web
 # ----------------------------------------------------
 
 [[language]]
@@ -53,14 +57,19 @@ language-servers = [ "vscode-css-language-server", "tailwindcss-ls" ]
 name = "javascript"
 auto-format = true
 
-# ----------------------------------------------------
-# Web frameworks
-# ----------------------------------------------------
-
 [[language]]
 name = "svelte"
 auto-format = true
 language-servers = [ "svelteserver", "tailwindcss-ls" ]
+
+# ----------------------------------------------------
+# Configs
+# ----------------------------------------------------
+
+[[language]]
+name = "json"
+auto-format = true
+formatter = { command = "jq", args = ["."] }
 
 # ----------------------------------------------------
 # LSP
@@ -83,3 +92,6 @@ show-fixes = true
 target-version = "py313"
 lint = { preview = true }
 format = { docstring-code-format = true, preview = true }
+
+[language-server.rust-analyzer.config]
+check.command = "clippy"

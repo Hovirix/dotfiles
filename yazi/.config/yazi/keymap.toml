@@ -1,6 +1,6 @@
-[[mgr.append_keymap]]
-on = ["g", "t"]
-run = "cd ~/.local/share/Trash/files/"
+# [[mgr.append_keymap]]
+# on = ["g", "t"]
+# run = "cd ~/.local/share/Trash/files/"
 
 [[mgr.append_keymap]]
 on = ["g", "."]
@@ -15,6 +15,11 @@ on = ["g", "w"]
 run = "cd ~/work"
 
 [[mgr.prepend_keymap]]
+on = [ "g", "t" ]
+run = "plugin recycle-bin"
+desc = "Open Recycle Bin menu" 
+
+[[mgr.prepend_keymap]]
 on   = "!"
 for  = "unix"
 run  = 'shell "$SHELL" --block'
@@ -24,3 +29,4 @@ desc = "Open $SHELL here"
 on = [ "g", "r" ]
 run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"'
 desc = "cd back to the root of the current Git repository"
+
