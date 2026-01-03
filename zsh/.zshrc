@@ -16,8 +16,8 @@ fi
 export EDITOR=hx
 export VISUAL=hx
 
-export NIX_REMOTE=local
-export NIXPKGS_ALLOW_UNFREE=1
+# export NIX_REMOTE=local
+# export NIXPKGS_ALLOW_UNFREE=1
 
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
@@ -143,6 +143,10 @@ alias es='doas emerge --sync'
 alias eds='doas emerge --deselect'
 alias eclean='doas emerge --ask --depclean'
 alias update='doas emerge --ask --update --newuse --deep @world'
+
+# Nixos
+alias rebuild='nh os switch'
+alias update='nh os switch --update'
 
 # Containers
 alias p='podman'
