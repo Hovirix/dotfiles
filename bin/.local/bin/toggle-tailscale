@@ -1,0 +1,17 @@
+#!/bin/sh
+
+notify() {
+  if command -v fyi >/dev/null 2>&1; then
+    fyi "$1"
+  else
+    notify-send "$1"
+  fi
+}
+
+if tailscale status --active >/dev/null 2>&1; then
+  tailscale down
+  echo "Tailscale has been disconnected."
+else
+  tailscale up
+  echo "Tailscale is now connected."
+fi

@@ -105,7 +105,7 @@ floating_modifier $mod
 # Window Rules
 # -------------------------------
 
-assign [app_id="^chromium$"]          → workspace number 1
+assign [app_id="^librewolf$"]          → workspace number 1
 # assign [app_id="^org.pwmt.zathura$"]  → workspace number 2
 assign [app_id="^FreeTube$"]          → workspace number 5
 
@@ -157,8 +157,7 @@ bindcode $mod+Shift+19      move container to workspace number 10
 # Apps
 bindsym $mod+Return            exec foot
 bindsym $mod+R                 exec fuzzel
-# bindsym Control+1              exec chromium-wrapper
-bindsym Control+1              exec firefox
+bindsym Control+1              exec librewolf
 bindsym Control+2              exec foot -e yazi 
 
 # Scripts

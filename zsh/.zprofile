@@ -23,5 +23,6 @@ if [ "$(tty)" = "/dev/tty1" ]; then
 
   export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
-  exec dbus-run-session sway 
+  # exec dbus-run-session sway 
+  exec systemd-run --user --scope sway
 fi

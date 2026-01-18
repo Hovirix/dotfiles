@@ -148,10 +148,28 @@ alias update='doas emerge --ask --update --newuse --deep @world'
 alias rebuild='nh os switch'
 alias update='nh os switch --update'
 
+# Systemd
+alias sc='systemctl'
+alias scu='systemctl --user'
+
+# Journald
+alias j='journalctl'
+alias ju='journalctl --user'
+
+alias jc='journalctl --unit'
+alias jf='journalctl --follow'
+
+alias juc='journalctl --user --unit'
+alias juf='journalctl --user -follow'
+
 # Containers
 alias p='podman'
 alias pps='podman ps -a'
 alias pc='podman compose'
+alias pvl='podman volume list'
+alias pql='podman quadlet list'
+alias pnl='podman network list'
+alias psl='podman secret list'
 
 # JS
 alias npm='pnpm'
