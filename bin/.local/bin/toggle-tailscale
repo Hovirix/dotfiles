@@ -10,8 +10,8 @@ notify() {
 
 if tailscale status --active >/dev/null 2>&1; then
   tailscale down
-  echo "Tailscale has been disconnected."
+  notify "🌐❌ Tailscale Down"
 else
   tailscale up
-  echo "Tailscale is now connected."
+  notify "🌐 Tailscale UP"
 fi

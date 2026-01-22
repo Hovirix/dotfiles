@@ -42,7 +42,7 @@ setopt HIST_FCNTL_LOCK
 
 # Input/Output
 setopt ALIASES
-setopt CORRECT
+# setopt CORRECT
 setopt NO_FLOW_CONTROL
 setopt IGNORE_EOF
 setopt HASH_CMDS
@@ -53,6 +53,7 @@ setopt HASH_DIRS
 # -----------------------------------------------------
 
 zinit for wait=0 lucid light-mode \
+  atuinsh/atuin \
   Aloxaf/fzf-tab \
   zsh-users/zsh-completions \
   zsh-users/zsh-autosuggestions \
@@ -160,7 +161,7 @@ alias jc='journalctl --unit'
 alias jf='journalctl --follow'
 
 alias juc='journalctl --user --unit'
-alias juf='journalctl --user -follow'
+alias juf='journalctl --user --follow'
 
 # Containers
 alias p='podman'

@@ -22,6 +22,11 @@ file-types = ["sh"]
 formatter = { command = "shfmt", args = ["-i", "2", "-ci"] }
 
 [[language]]
+name = "lua"
+auto-format = true
+formatter = { command = "stylua", args = ["-"] }
+
+[[language]]
 name = "python"
 auto-format = true
 language-servers = ["pyright"]

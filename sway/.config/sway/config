@@ -66,12 +66,22 @@ output eDP-1 {
 
 output HDMI-A-1 {
   scale 1.25
-  pos -1920 0
+  pos 0 0
   mode 2560x1440
 
   subpixel rgb
   color_profile srgb
 }
+
+# output HDMI-A-1 {
+#     mode 3840x2160@60Hz
+#     scale 1.5
+#     pos 0 0
+
+#     subpixel rgb
+#     color_profile srgb
+# }
+
 
 # ------------------------------------------------
 # Inputs
@@ -155,14 +165,14 @@ bindcode $mod+Shift+18      move container to workspace number 9
 bindcode $mod+Shift+19      move container to workspace number 10
 
 # Apps
-bindsym $mod+Return            exec foot
 bindsym $mod+R                 exec fuzzel
+bindsym $mod+Return            exec wezterm-gui
 bindsym Control+1              exec librewolf
-bindsym Control+2              exec foot -e yazi 
+bindsym Control+2              exec wezterm-gui -e yazi 
 
 # Scripts
-bindsym $mod+w                 exec toggle-wg0
 bindsym $mod+c                 exec toggle-swayidle
+bindsym $mod+w                 exec toggle-tailscale
 
 # Screenshots
 bindsym $mod+s                 exec grimlite --notify copy anything
@@ -176,14 +186,14 @@ bindsym XF86MonBrightnessUp   exec brightness-osd up
 bindsym XF86MonBrightnessDown exec brightness-osd down
 
 # Audio (ALSA / amixer)
-bindsym XF86AudioMute          exec amixer set Master toggle
-bindsym XF86AudioLowerVolume   exec amixer set Master 2%-
-bindsym XF86AudioRaiseVolume   exec amixer set Master 2%+
+# bindsym XF86AudioMute          exec amixer set Master toggle
+# bindsym XF86AudioLowerVolume   exec amixer set Master 2%-
+# bindsym XF86AudioRaiseVolume   exec amixer set Master 2%+
 
 # Audio (PipeWire / WirePlumber)
-# bindsym XF86AudioMute          exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-# bindsym XF86AudioLowerVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-
-# bindsym XF86AudioRaiseVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ -l 1
+bindsym XF86AudioMute          exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym XF86AudioLowerVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-
+bindsym XF86AudioRaiseVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ -l 1
 
 # Window management
 bindsym $mod+q               kill

@@ -1,16 +1,28 @@
-[user]
-    name = Hovirix
-    email = 184756415+Hovirix@users.noreply.github.com
+[commit]
+    cleanup = whitespace
+    gpgSign = true
+
+[credential]
+    helper = cache
+
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+    program = ssh-keygen
 
 [init]
     defaultBranch = main
 
-[color]
-    ui = auto
-
 [push]
-    default = simple
     autoSetupRemote = true
+    default = simple
 
-[credential]
-    helper = cache
+[user]
+    email = 184756415+Hovirix@users.noreply.github.com
+    name = Hovirix
+    signingKey = ~/.ssh/id_ed25519.pub
+    useConfigOnly = true
+
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/

@@ -10,8 +10,8 @@ notify() {
 
 if pgrep -x swayidle >/dev/null 2>&1; then
   pkill -x swayidle
-  notify "swayidle stopped"
+  notify "👀 swayidle STOPPED"
 else
   swaymsg exec "swayidle -w"
-  notify "swayidle started"
+  notify "😴 swayidle STARTED"
 fi

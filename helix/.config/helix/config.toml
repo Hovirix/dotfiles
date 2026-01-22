@@ -60,5 +60,6 @@ esc = ["collapse_selection", "keep_primary_selection"]
 [keys.normal.space]
 q      = ":q"
 space  = ":w"  
-p = ":sh tmux send-keys -t {down-of} 'clear && python %{buffer_name}' Enter"
+# p = ":sh tmux send-keys -t {down-of} 'clear && python %{buffer_name}' Enter"
+p = ":sh uv run python %{buffer_name}"
 
