@@ -4,6 +4,7 @@
 
 source ~/.local/share/zinit/zinit.git/zinit.zsh
 source <(fzf --zsh)
+eval "$(direnv hook zsh)"
 
 if [[ -e /home/cachy/.nix-profile/etc/profile.d/nix.sh ]]; then
   . /home/cachy/.nix-profile/etc/profile.d/nix.sh
@@ -44,7 +45,7 @@ setopt HIST_FCNTL_LOCK
 setopt ALIASES
 # setopt CORRECT
 setopt NO_FLOW_CONTROL
-setopt IGNORE_EOF
+# setopt IGNORE_EOF
 setopt HASH_CMDS
 setopt HASH_DIRS
 
@@ -53,7 +54,6 @@ setopt HASH_DIRS
 # -----------------------------------------------------
 
 zinit for wait=0 lucid light-mode \
-  atuinsh/atuin \
   Aloxaf/fzf-tab \
   zsh-users/zsh-completions \
   zsh-users/zsh-autosuggestions \
@@ -171,10 +171,6 @@ alias pvl='podman volume list'
 alias pql='podman quadlet list'
 alias pnl='podman network list'
 alias psl='podman secret list'
-
-# JS
-alias npm='pnpm'
-alias npx='pnpx'
 
 # Nix
 alias nd='nix develop --command zsh'

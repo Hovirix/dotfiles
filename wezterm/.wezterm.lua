@@ -3,12 +3,10 @@ local wezterm = require("wezterm")
 local act = wezterm.action
 local config = wezterm.config_builder()
 
-
-window_close_confirmation = "NeverPrompt"
-
 ------------------------------------------------------
 -- Appearance
 ------------------------------------------------------
+
 config.color_scheme = "Catppuccin Mocha"
 config.colors = {
   ansi = {

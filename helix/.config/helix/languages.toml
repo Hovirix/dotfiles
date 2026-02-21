@@ -39,7 +39,7 @@ formatter = { command = "ruff", args = ["format", "-"] }
 [[language]]
 name = "hcl"
 auto-format = true
-formatter = { command = "terraform", args = ["format"] }
+language-servers = [ "tofu-ls" ]
 
 [[language]]
 name = "nix"
@@ -52,20 +52,31 @@ formatter = { command = "nixpkgs-fmt" }
 
 [[language]]
 name = "html"
-language-servers = [ "vscode-html-language-server", "tailwindcss-ls" ]
+language-servers = [ { name = "vscode-html-language-server", except-features = [ "format" ] }, "tailwindcss-ls", "biome" ]
 
 [[language]]
 name = "css"
-language-servers = [ "vscode-css-language-server", "tailwindcss-ls" ]
+language-servers = [ { name = "vscode-css-language-server", except-features = [ "format" ] }, "tailwindcss-ls", "biome" ]
 
 [[language]]
 name = "javascript"
 auto-format = true
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
+
+[[language]]
+name = "typescript"
+auto-format = true
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
+
+[[language]]
+name = "astro"
+auto-format = true
+language-servers = [ "astro-ls", "tailwindcss-ls", "biome" ]
 
 [[language]]
 name = "svelte"
 auto-format = true
-language-servers = [ "svelteserver", "tailwindcss-ls" ]
+language-servers = [ "svelteserver", "tailwindcss-ls", "biome" ]
 
 # ----------------------------------------------------
 # Configs
@@ -73,12 +84,22 @@ language-servers = [ "svelteserver", "tailwindcss-ls" ]
 
 [[language]]
 name = "json"
-auto-format = true
-formatter = { command = "jq", args = ["."] }
+language-servers = [ { name = "vscode-json-language-server", except-features = [ "format" ] }, "biome" ]
 
 # ----------------------------------------------------
 # LSP
 # ----------------------------------------------------
+
+[language-server]
+biome = { command = "biome", args = ["lsp-proxy"] }
+
+[language-server.astro-ls]
+command = "astro-ls"
+args = ["--stdio"]
+
+[language-server.tofu-ls]
+command = "tofu-ls"
+args = ["serve"]
 
 # [language-server.clangd]
 # command = "clangd"

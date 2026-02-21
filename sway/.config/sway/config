@@ -39,16 +39,19 @@ set $base #1e1e2e
 set $mantle #181825
 set $crust #11111b
 
+swaybg_command ~/.dotfiles/assets/wallpapers/nixos-mocha.png
+
 # ------------------------------------------------
 # Autostart
 # ------------------------------------------------
 
-exec mako
-exec autotiling-rs
-# exec autotiling-rs-musl
-exec wlsunset -t 3000 -T 6500 -s 19:00 -S 08:00 -g 0.7
-exec swaybg -i ~/.dotfiles/assets/wallpapers/nixos-mocha.png
-exec swayidle -w
+exec {
+  mako
+  autotiling-rs
+  wlsunset -t 3000 -T 6500 -s 19:00 -S 08:00 -g 0.7
+  swaybg -i ~/.dotfiles/assets/wallpapers/nixos-mocha.png
+  swayidle -w
+}
 
 # ------------------------------------------------
 # Monitors
@@ -81,7 +84,6 @@ output HDMI-A-1 {
 #     subpixel rgb
 #     color_profile srgb
 # }
-
 
 # ------------------------------------------------
 # Inputs
@@ -119,6 +121,8 @@ assign [app_id="^librewolf$"]          → workspace number 1
 # assign [app_id="^org.pwmt.zathura$"]  → workspace number 2
 assign [app_id="^FreeTube$"]          → workspace number 5
 
+# Bitwarden
+for_window [app_id="800a80d9585430a3efdf470098089480"] floating enable
 for_window [app_id="chrome-nngceckbapebfimnlniiiahkandclblb-Default"] floating enable
 
 # -------------------------------
@@ -230,7 +234,7 @@ bindsym $mod+Ctrl+j          resize grow height 10px
 # -------------------------------
 
 # gaps inner 10
-# gaps outer 5
+# gaps outer 10
 smart_borders on
 
 # -------------------------------
@@ -250,21 +254,22 @@ client.background        $base
 # -------------------------------
 
 bar {
-  position top
-  tray_padding 0
-  status_command i3status
-  output eDP-1
-  separator_symbol ""
-  # workspace_buttons no
-
-  # disable mouse 
-    bindsym button1 nop
-    bindsym button2 nop
-    bindsym button3 nop
-    bindsym button4 nop
-    bindsym button5 nop
+  # disable mouse
+  bindsym button1  nop
+  bindsym button2  nop
+  bindsym button3  nop
+  bindsym button4  nop
+  bindsym button5  nop
+  bindsym button6  nop
+  bindsym button7  nop
+  bindsym button8  nop
+  bindsym button9  nop
 
   font DejaVu Sans Mono 11
+  output eDP-1
+  position top
+  separator_symbol ""
+  status_command i3status
 
   colors {
     background         $base
