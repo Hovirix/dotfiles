@@ -8,6 +8,7 @@
 {"_id":"bounds","value":{"x":0,"y":0,"width":1920,"height":1176,"maximized":false,"fullScreen":true}}
 {"_id":"checkForBlogPosts","value":false}
 {"_id":"checkForUpdates","value":false}
+{"_id":"defaultInvidiousInstance","value":"https://invidious.nerdvpn.de"}
 {"_id":"defaultQuality","value":"2160"}
 {"_id":"enableSearchSuggestions","value":false}
 {"_id":"expandSideBar","value":false}

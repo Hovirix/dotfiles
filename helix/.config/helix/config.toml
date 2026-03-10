@@ -54,7 +54,6 @@ cursor-line = "warning"
 
 [keys.normal]
 C-q = ":q!"
-del = ":buffer-close!"
 esc = ["collapse_selection", "keep_primary_selection"]
 
 [keys.normal.space]

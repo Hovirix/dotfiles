@@ -1,11 +1,9 @@
-[log]
-enabled = false
-
 [mgr]
 ratio = [2, 3, 4]
 show_hidden = false
 show_symlink = true
 sort_by = "extension"
+title_format = ""
 
 [opener]
 imv = [ { run = 'imv "$@"', orphan = true, for = "unix" } ]
