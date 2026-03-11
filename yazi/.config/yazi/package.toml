@@ -8,5 +8,10 @@ use = "uhs-robert/recycle-bin"
 rev = "fa68711"
 hash = "8714306b5cac6359edbacbf545fbd691"
 
+[[plugin.deps]]
+use = "luccahuguet/auto-layout"
+rev = "e24bee9"
+hash = "2e744ac2938468fd4244beca1e022c4f"
+
 [flavor]
 deps = []
