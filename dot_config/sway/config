@@ -39,8 +39,6 @@ set $base #1e1e2e
 set $mantle #181825
 set $crust #11111b
 
-swaybg_command ~/.dotfiles/assets/wallpapers/nixos-mocha.png
-
 # ------------------------------------------------
 # Autostart
 # ------------------------------------------------
@@ -49,7 +47,7 @@ exec {
   mako
   autotiling-rs
   wlsunset -t 3000 -T 6500 -s 19:00 -S 08:00 -g 0.7
-  swaybg -i ~/.dotfiles/assets/wallpapers/nixos-mocha.png
+  swaybg -i ~/assets/wallpapers/nixos-mocha.png
   swayidle -w
 }
 

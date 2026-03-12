@@ -126,7 +126,6 @@ alias lg='lazygit'
 
 # System info
 alias fetch='fastfetch'
-alias hxd='hx ~/.dotfiles'
 
 # Alpine
 alias as='apk search'
