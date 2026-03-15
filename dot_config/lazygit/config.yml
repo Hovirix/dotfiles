@@ -6,5 +6,5 @@ showCommandLog: false
 showListFooter: false
 git:
   pagers:
-    - pager: delta --paging=never
+    - pager: delta --dark --paging=never
 

@@ -1,0 +1,32 @@
+defaults:
+  preview:
+    open: true
+    width: 0.50
+
+prSections:
+  - title: "Created"
+    filters: "is:open author:@me"
+  - title: "Assigned"
+    filters: "is:open assignee:@me"
+  - title: "Mentioned"
+    filters: "is:open mentions:@me -author:@me"
+
+pager:
+  diff: delta --side-by-side
+
+theme:
+  colors:
+    text:
+      primary: "#cdd6f4"
+      secondary: "#fab387"
+      inverted: "#11111b"
+      faint: "#bac2de"
+      warning: "#f9e2af"
+      success: "#a6e3a1"
+      error: "#f38ba8"
+    background:
+      selected: "#313244"
+    border:
+      primary: "#fab387"
+      secondary: "#45475a"
+      faint: "#313244"

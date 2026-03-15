@@ -122,6 +122,7 @@ alias grep='grep --color=auto'
 
 # Git
 alias g='git'
+alias gd='gh-dash'
 alias lg='lazygit'
 
 # System info
