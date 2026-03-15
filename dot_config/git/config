@@ -2,17 +2,34 @@
     cleanup = whitespace
     gpgSign = true
 
+[core]
+    pager = delta
+
 [credential]
     helper = cache
+
+[delta]
+    dark = true
+    navigate = true
+    features = catppuccin-mocha
+
+[include]
+    path = ~/.config/delta/catppuccin.gitconfig
+
+[init]
+    defaultBranch = main
+
+[interactive]
+    diffFilter = delta --color-only
+
+[merge]
+    conflictStyle = zdiff3
 
 [gpg]
     format = ssh
 
 [gpg "ssh"]
     program = ssh-keygen
-
-[init]
-    defaultBranch = main
 
 [push]
     autoSetupRemote = true

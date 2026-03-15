@@ -4,4 +4,7 @@ showRandomTip: false
 showBottomLine: false
 showCommandLog: false
 showListFooter: false
+git:
+  pagers:
+    - pager: delta --paging=never
 
