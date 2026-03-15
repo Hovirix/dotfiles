@@ -1,0 +1,45 @@
+[commit]
+    cleanup = whitespace
+    gpgSign = true
+
+[core]
+    pager = delta
+
+[credential]
+    helper = cache
+
+[delta]
+    dark = true
+    navigate = true
+    features = catppuccin-mocha
+
+[include]
+    path = ~/.config/delta/catppuccin.gitconfig
+
+[init]
+    defaultBranch = main
+
+[interactive]
+    diffFilter = delta --color-only
+
+[merge]
+    conflictStyle = zdiff3
+
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+    program = ssh-keygen
+
+[push]
+    autoSetupRemote = true
+    default = simple
+
+[user]
+    email = 184756415+Hovirix@users.noreply.github.com
+    name = Hovirix
+    signingKey = ~/.ssh/id_ed25519.pub
+    useConfigOnly = true
+
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
