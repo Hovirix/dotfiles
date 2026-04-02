@@ -1,10 +1,39 @@
-nerdFontsVersion: '3'
-notARepository: skip
-showRandomTip: false
-showBottomLine: false
-showCommandLog: false
-showListFooter: false
-git:
-  pagers:
-    - pager: delta --dark --paging=never
+gui:
+  theme:
+    activeBorderColor:
+      - "#fab387"
+      - bold
+    inactiveBorderColor:
+      - "#a6adc8"
+    optionsTextColor:
+      - "#89b4fa"
+    selectedLineBgColor:
+      - "#313244"
+    cherryPickedCommitBgColor:
+      - "#45475a"
+    cherryPickedCommitFgColor:
+      - "#fab387"
+    unstagedChangesColor:
+      - "#f38ba8"
+    defaultFgColor:
+      - "#cdd6f4"
+    searchingActiveBorderColor:
+      - "#f9e2af"
 
+  authorColors:
+    "*": "#b4befe"
+
+  nerdFontsVersion: "3"
+  showRandomTip: false
+  showBottomLine: true
+  showCommandLog: false
+  showListFooter: false
+
+git:
+  overrideGpg: true
+  pagers:
+    - pager: "delta --dark --paging=never"
+      colorArg: always
+  
+
+notARepository: skip
