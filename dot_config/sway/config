@@ -46,7 +46,7 @@ set $crust #11111b
 exec {
   mako
   autotiling-rs
-  wlsunset -t 3000 -T 6500 -s 19:00 -S 08:00 -g 0.7
+  wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00 -g 0.7
   swaybg -i ~/Pictures/Wallpapers/nixos-mocha.png
   swayidle -w
 }
