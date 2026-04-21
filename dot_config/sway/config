@@ -2,6 +2,8 @@
 # Sway core
 # ------------------------------------------------
 
+include /etc/sway/config.d/*
+
 xwayland disable
 input * xkb_options ctrl:nocaps
 seat * xcursor_theme Bibata-Modern-Amber 24
@@ -44,11 +46,12 @@ set $crust #11111b
 # ------------------------------------------------
 
 exec {
-  mako
-  autotiling-rs
-  wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00 -g 0.7
-  swaybg -i ~/Pictures/Wallpapers/nixos-mocha.png
-  swayidle -w
+  uwsm finalize SWAYSOCK I3SOCK
+  uwsm app -s b -- mako
+  uwsm app -s b -- autotiling-rs
+  uwsm app -s b -- wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00 -g 0.7
+  uwsm app -s b -- swaybg -i ~/Pictures/Wallpapers/nixos-mocha.png
+  uwsm app -s b -- swayidle -w
 }
 
 # ------------------------------------------------
@@ -167,10 +170,10 @@ bindcode $mod+Shift+18      move container to workspace number 9
 bindcode $mod+Shift+19      move container to workspace number 10
 
 # Apps
-bindsym $mod+R                 exec fuzzel
-bindsym $mod+Return            exec wezterm-gui
-bindsym Control+1              exec librewolf
-bindsym Control+2              exec wezterm-gui -e yazi 
+bindsym $mod+r                 exec uwsm app -- fuzzel
+bindsym $mod+Return            exec uwsm app -- wezterm-gui
+bindsym Control+1              exec uwsm app -- flatpak run io.gitlab.librewolf-community
+bindsym Control+2              exec uwsm app -- wezterm-gui -e yazi
 
 # Scripts
 bindsym $mod+c                 exec toggle-swayidle
