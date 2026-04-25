@@ -3,8 +3,8 @@
 # -----------------------------------------------------
 
 source ~/.local/share/zinit/zinit.git/zinit.zsh
-source <(fzf --zsh)
 eval "$(direnv hook zsh)"
+eval "$(tv init zsh)"
 
 if [[ -e /home/cachy/.nix-profile/etc/profile.d/nix.sh ]]; then
   . /home/cachy/.nix-profile/etc/profile.d/nix.sh
@@ -54,7 +54,6 @@ setopt HASH_DIRS
 # -----------------------------------------------------
 
 zinit for wait=0 lucid light-mode \
-  Aloxaf/fzf-tab \
   zsh-users/zsh-completions \
   zsh-users/zsh-autosuggestions \
   zdharma-continuum/fast-syntax-highlighting
