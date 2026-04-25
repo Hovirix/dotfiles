@@ -3,12 +3,6 @@
 # -----------------------------------------------------
 
 source ~/.local/share/zinit/zinit.git/zinit.zsh
-eval "$(direnv hook zsh)"
-eval "$(tv init zsh)"
-
-if [[ -e /home/cachy/.nix-profile/etc/profile.d/nix.sh ]]; then
-  . /home/cachy/.nix-profile/etc/profile.d/nix.sh
-fi
 
 # -----------------------------------------------------
 # ENVIRONMENT / EXPORTS
@@ -16,9 +10,6 @@ fi
 
 export EDITOR=hx
 export VISUAL=hx
-
-# export NIX_REMOTE=local
-# export NIXPKGS_ALLOW_UNFREE=1
 
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
@@ -88,28 +79,14 @@ bindkey '^[[127;5u' backward-kill-word
 # PROMPT / UI
 # -----------------------------------------------------
 
+eval "$(tv init zsh)"
+eval "$(direnv hook zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
-
-export FZF_DEFAULT_OPTS=" \
---color=bg+:#313244,bg:#1E1E2E,spinner:#FAB387,hl:#FAB387 \
---color=fg:#CDD6F4,header:#FAB387,info:#FAB387,pointer:#FAB387 \
---color=marker:#FAB387,fg+:#CDD6F4,prompt:#FAB387,hl+:#FAB387 \
---color=selected-bg:#45475A \
---color=border:#6C7086,label:#CDD6F4"
-
-zstyle ':fzf-tab:*' fzf-flags "${=FZF_DEFAULT_OPTS}"
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 # -----------------------------------------------------
 # ALIASES
 # -----------------------------------------------------
-
-# Navigation
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
 
 # Core
 alias ls='eza --icons --group-directories-first'
@@ -123,26 +100,6 @@ alias grep='grep --color=auto'
 alias g='git'
 alias gd='gh-dash'
 alias lg='lazygit'
-
-# System info
-alias fetch='fastfetch'
-
-# Alpine
-alias as='apk search'
-alias aa='doas apk add'
-alias ad='doas apk del'
-alias au='doas apk update && doas apk upgrade'
-
-# Arch
-alias pacs='sudo pacman -S'
-alias pacrns='sudo pacman -Rns'
-alias pacsyu='sudo pacman -Syu'
-
-# Gentoo
-alias es='doas emerge --sync'
-alias eds='doas emerge --deselect'
-alias eclean='doas emerge --ask --depclean'
-alias update='doas emerge --ask --update --newuse --deep @world'
 
 # Nixos
 alias rebuild='nh os switch'
