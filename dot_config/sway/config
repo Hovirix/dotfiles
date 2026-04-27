@@ -44,6 +44,7 @@ set $crust #11111b
 # ------------------------------------------------
 
 exec {
+  dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_DATA_DIRS
   mako
   autotiling-rs
   wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00 -g 0.7
@@ -169,7 +170,7 @@ bindcode $mod+Shift+19      move container to workspace number 10
 # Apps
 bindsym $mod+R                 exec fuzzel
 bindsym $mod+Return            exec wezterm-gui
-bindsym Control+1              exec librewolf
+bindsym Control+1              exec flatpak run io.gitlab.librewolf-community
 bindsym Control+2              exec wezterm-gui -e yazi 
 
 # Scripts
