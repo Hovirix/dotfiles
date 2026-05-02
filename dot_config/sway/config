@@ -2,6 +2,8 @@
 # Sway core
 # ------------------------------------------------
 
+include /etc/sway/config.d/*
+
 xwayland disable
 input * xkb_options ctrl:nocaps
 seat * xcursor_theme Bibata-Modern-Amber 24
@@ -44,7 +46,6 @@ set $crust #11111b
 # ------------------------------------------------
 
 exec {
-  dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_DATA_DIRS
   mako
   autotiling-rs
   wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00 -g 0.7

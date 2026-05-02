@@ -1,12 +1,5 @@
 if [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
 
-  export WLR_RENDERER=vulkan
   export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-
-  export XDG_CURRENT_DESKTOP=sway
-  export XDG_SESSION_DESKTOP=sway
-  export XDG_SESSION_TYPE=wayland
-  export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
-
-  exec sway
+  exec start-hyprland
 fi
