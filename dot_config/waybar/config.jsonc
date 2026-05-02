@@ -2,14 +2,17 @@
   "layer": "top",
   "output": "eDP-1",
   "position": "top",
-  "margin-top": 12,
+  "spacing": 4,
+  
 
   "modules-left": [
     "hyprland/workspaces"
   ],
+
   "modules-center": [
     "clock"
   ],
+
   "modules-right": [
     "network",
     "pulseaudio",
@@ -19,21 +22,14 @@
   ],
 
   "hyprland/workspaces": {
-    "format": "{icon}",
-    "format-icons": {
-      "1": "󰆍",
-      "2": "󰈹",
-      "3": "󰨞",
-      "4": "󰎄",
-      "5": "󰙯",
-    },
+  "format": "{icon}",
     "persistent-workspaces": {
       "*": 5
     }
   },
 
   "clock": {
-    "format": "{:%H:%M %Y-%m-%d}"
+    "format": " {:%A %d %b %H:%M}"
   },
 
   "network": {
@@ -77,6 +73,7 @@
   "memory": {
     "interval": 5,
     "format": " {percentage}%"
+    // "format": "  {percentage}%"
   },
 
   "cpu": {
