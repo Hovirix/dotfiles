@@ -4,48 +4,28 @@ local act = wezterm.action
 local config = wezterm.config_builder()
 
 ------------------------------------------------------
--- Appearance
+-- Config Options
 ------------------------------------------------------
 
-config.color_scheme = "Catppuccin Mocha"
-config.colors = {
-  ansi = {
-    "#45475a",
-    "#f38ba8",
-    "#a6e3a1",
-    "#f9e2af",
-    "#fab387", -- Peach instead of Blue
-    "#f5c2e7",
-    "#94e2d5",
-    "#bac2de",
-  },
+config.adjust_window_size_when_changing_font_size = false
+do
+  local scheme = wezterm.color.get_builtin_schemes()["Catppuccin Mocha"]
+  scheme.ansi[5] = "#fab387"   -- blue -> peach
+  scheme.brights[5] = "#fab387"
+  config.colors = scheme
+end
 
-  brights = {
-    "#585b70",
-    "#f38ba8",
-    "#a6e3a1",
-    "#f9e2af",
-    "#fab387", -- Peach instead of Blue
-    "#f5c2e7",
-    "#94e2d5",
-    "#a6adc8",
-  },
-}
-
-config.font_size = 12
--- config.line_height = 1.1
 config.font = wezterm.font("JetBrains Mono")
-
+config.font_size = 12
+config.hide_tab_bar_if_only_one_tab = true
+-- config.line_height = 1.1
+config.prefer_to_spawn_tabs = true
 config.tab_max_width = 1000
 config.use_fancy_tab_bar = false
-config.hide_tab_bar_if_only_one_tab = true
-config.adjust_window_size_when_changing_font_size = false
 
 ------------------------------------------------------
---  Keybidings
+--  KeyAssignment enumeration
 ------------------------------------------------------
-
-config.disable_default_key_bindings = true
 
 config.keys = {
 
@@ -56,7 +36,7 @@ config.keys = {
   { key = ' ', mods = 'ALT', action = wezterm.action.QuickSelect },
 
 	-- Search
-	{ key = "s", mods = "CTRL", action = act.Search { CaseInSensitiveString = "" } },
+	{ key = "/", mods = "ALT", action = act.Search { CaseInSensitiveString = "" } },
 	
 	-- Copy / Paste
 	{ key = "c", mods = "SHIFT|CTRL", action = act.CopyTo("Clipboard") },
@@ -97,3 +77,7 @@ for i = 1, 9 do
 	})
 end
 return config
+
+------------------------------------------------------
+--  CopyModeAssignment enumeration
+------------------------------------------------------

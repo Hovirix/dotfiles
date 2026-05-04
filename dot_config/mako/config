@@ -1,7 +1,6 @@
 default-timeout=1000
 anchor=top-right
 layer=overlay
-border-radius=8
 
 # Colors
 background-color=#1e1e2e

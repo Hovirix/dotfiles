@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if pgrep -x hypridle >/dev/null 2>&1; then
+  pkill -x hypridle
+  notify-send -i system-suspend "Idle disabled"
+else
+  hypridle &
+  notify-send -i system-run "Idle enabled"
+fi
