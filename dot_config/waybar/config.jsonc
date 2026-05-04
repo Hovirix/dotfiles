@@ -2,8 +2,7 @@
   "layer": "top",
   "output": "eDP-1",
   "position": "top",
-  "spacing": 4,
-  
+  "spacing": 8,
 
   "modules-left": [
     "hyprland/workspaces"
@@ -15,21 +14,27 @@
 
   "modules-right": [
     "network",
+    "custom/sep",
     "pulseaudio",
+    "custom/sep",
     "memory",
+    "custom/sep",
     "cpu",
+    "custom/sep",
     "battery"
   ],
 
   "hyprland/workspaces": {
-  "format": "{icon}",
-    "persistent-workspaces": {
-      "*": 5
-    }
+    "format": "{icon}",
   },
 
   "clock": {
     "format": " {:%A %d %b %H:%M}"
+  },
+
+  "custom/sep": {
+    "format": "|",
+    "tooltip": false
   },
 
   "network": {
@@ -44,11 +49,11 @@
       "󰤢",
       "󰤥",
       "󰤨"
-    ],
+    ]
   },
 
   "pulseaudio": {
-    "format": "{icon} {volume}%",
+    "format": "VOL: {volume}%",
     "format-bluetooth": "{icon} {volume}% ",
     "format-muted": "󰖁",
     "format-icons": {
@@ -58,27 +63,26 @@
       "phone": "󰏲",
       "portable": "󰏲",
       "car": "󰄋",
-       "default": [
-      "󰕿 ",
-      "󰖀 ",  
-      "󰕾 ",
-      "󰖀 ",  
-      "󰕾 ",  
-      "󰖀 ",  
-      "󰕾 "
-    ]
-    },
+      "default": [
+        "󰕿 ",
+        "󰖀 ",
+        "󰕾 ",
+        "󰖀 ",
+        "󰕾 ",
+        "󰖀 ",
+        "󰕾 "
+      ]
+    }
   },
 
   "memory": {
-    "interval": 5,
-    "format": " {percentage}%"
-    // "format": "  {percentage}%"
-  },
+  "interval": 5,
+  "format": "MEM: {used}GB"
+},
 
   "cpu": {
     "interval": 1,
-    "format": " {usage}%"
+    "format": "CPU: {usage}%"
   },
 
   "battery": {
@@ -89,8 +93,8 @@
     },
     "format": "{icon} {capacity}%",
     "format-icons": {
-    "default": [
-        "", 
+      "default": [
+        "",
         "",
         "",
         "",

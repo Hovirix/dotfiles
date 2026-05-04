@@ -17,55 +17,28 @@
 @define-color base      #1e1e2e;
 
 * {
-    border: none;
-    border-radius: 0;
-    margin: 0;
-    padding: 0;
-    min-height: 0;
-    font-family: "SF Pro Display", "JetBrainsMono Nerd Font Propo";
+    font-family: "JetBrains Mono";
     font-size: 14px;
-    font-weight: 600;
+    min-height: 0;
 }
 
-window#waybar {
-    background: @base;
-    color: @text;
+#waybar {
+  background: @base;
+  color: @text;
+  margin: 5px 5px;
 }
 
-/* modules */
-#clock,
-#network,
-#pulseaudio,
-#memory,
-#cpu,
-#battery {
-    padding: 0 10px;
-    margin: 0;
-    color: @base;
-}
-
-/* colors */
-#clock      { background: @text; }
-#network    { background: @mauve; }
-#pulseaudio { background: @blue; }
-#memory     { background: @pink; }
-#cpu        { background: @red; }
-#battery    { background: @green; }
-
-/* battery states */
-#battery.warning  { background: @yellow; color: @base; }
-#battery.critical { background: @red; }
-
-/* workspaces */
-#workspaces {
-    margin: 0;
-    padding: 0;
-}
+#clock      { color: @text; }
+#network    { color: @mauve; }
+#pulseaudio { color: @blue; }
+#memory     { color: @pink; }
+#cpu        { color: @red; }
+#battery    { color: @green; }
+#battery.warning  { color: @yellow;}
+#battery.critical { color: @red; }
 
 #workspaces button {
-    padding: 0 10px;
-    margin: 0;
-    color: @subtext0;
+    color: @text;
     background: transparent;
 }
 
