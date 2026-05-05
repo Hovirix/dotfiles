@@ -39,15 +39,12 @@
 
 #workspaces button {
     color: @text;
-    background: transparent;
 }
 
 #workspaces button.active {
-    background: @peach;
-    color: @base;
+    color: @peach;
 }
 
 #workspaces button.urgent {
-    background: @red;
-    color: @base;
+    color: @red;
 }
