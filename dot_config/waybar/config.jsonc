@@ -25,34 +25,34 @@
   ],
 
   "hyprland/workspaces": {
-  "format": "{icon}",
-  "format-icons": {
-    "1": "I",
-    "2": "II",
-    "3": "III",
-    "4": "IV",
-    "5": "V",
-    "6": "VI",
-    "7": "VII",
-    "8": "VIII",
-    "9": "IX",
-    "10": "X"
-  }
-},
+    "format": "{icon}",
+    "format-icons": {
+      "1": "I",
+      "2": "II",
+      "3": "III",
+      "4": "IV",
+      "5": "V",
+      "6": "VI",
+      "7": "VII",
+      "8": "VIII",
+      "9": "IX",
+      "10": "X"
+    }
+  },
 
   "clock": {
-    "format": " {:%A %d %b %H:%M}"
+    "format": " {:%a %d %b %H:%M}"
   },
 
   "custom/sep": {
-    "format": "|",
+    "format": "│",
     "tooltip": false
   },
 
   "network": {
     "format-wifi": "{icon} {essid}",
-    "format-ethernet": "󰈀 {ifname}",
-    "format-linked": "󰈀 {ifname}",
+    "format-ethernet": "󰈀",
+    "format-linked": "󰈀",
     "format-disconnected": "󰖪",
     "format-disabled": "󰖪",
     "format-icons": [
@@ -65,7 +65,7 @@
   },
 
   "pulseaudio": {
-    "format": "VOL: {volume}%",
+    "format": "{icon} {volume}%",
     "format-bluetooth": "{icon} {volume}% ",
     "format-muted": "󰖁",
     "format-icons": {
@@ -76,25 +76,27 @@
       "portable": "󰏲",
       "car": "󰄋",
       "default": [
-        "󰕿 ",
-        "󰖀 ",
-        "󰕾 ",
-        "󰖀 ",
-        "󰕾 ",
-        "󰖀 ",
-        "󰕾 "
+        "󰕿",
+        "󰕿",
+        "󰖀",
+        "󰖀",
+        "󰖀",
+        "󰕾",
+        "󰕾",
+        "󰕾",
+        "󰕾"
       ]
     }
   },
 
   "memory": {
-  "interval": 5,
-  "format": "MEM: {used}GB"
-},
+    "interval": 5,
+    "format": " {used}"
+  },
 
   "cpu": {
     "interval": 1,
-    "format": "CPU: {usage}%"
+    "format": " {usage}%"
   },
 
   "battery": {
@@ -103,7 +105,7 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{icon} {capacity}% ",
+    "format": "{icon} {capacity}%",
     "format-icons": {
       "default": [
         "",

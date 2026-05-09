@@ -17,15 +17,18 @@
 @define-color base      #1e1e2e;
 
 * {
-    font-family: "JetBrains Mono";
+    font-family: "JetBrainsMono", "Symbols Nerd Font";
     font-size: 14px;
     min-height: 0;
 }
 
 #waybar {
   background: @base;
-  color: @text;
-  margin: 5px 5px;
+  color: @subtext0;
+}
+
+#battery {
+    margin-right: 10px;
 }
 
 #clock      { color: @text; }
