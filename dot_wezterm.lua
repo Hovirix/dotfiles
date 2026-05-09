@@ -28,11 +28,19 @@ config.use_fancy_tab_bar = false
 ------------------------------------------------------
 
 config.keys = {
+  { key = 'p', mods = 'ALT', action = wezterm.action.ActivateCommandPalette, },
+	{ key = 'v', mods = 'ALT', action = act.ActivateCopyMode },
+
+	{ key = 'h', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Left', 5 } },
+  { key = 'l', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Right', 5 } },
+  { key = 'k', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Up', 5 } },
+  { key = 'j', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Down', 5 } },
+
+  { key = 'c', mods = 'ALT', action = wezterm.action.CharSelect },
 
 	-- General 
 	{ key = "f", mods = "ALT", action = act.TogglePaneZoomState },
 	{ key = "q", mods = "ALT", action = act.CloseCurrentPane({ confirm = false }) },
-  { key = 'p', mods = 'ALT', action = wezterm.action.ActivateCommandPalette, },
   { key = ' ', mods = 'ALT', action = wezterm.action.QuickSelect },
 
 	-- Search
@@ -52,29 +60,36 @@ config.keys = {
 	{ key = "-", mods = "ALT", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
 	{ key = "=", mods = "ALT", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 
+	{ key = 'UpArrow', mods = 'ALT', action = act.ScrollByLine(-1) },
+  { key = 'DownArrow', mods = 'ALT', action = act.ScrollByLine(1) },
+  { key = 'PageUp', mods = 'ALT', action = act.ScrollByPage(-1) },
+  { key = 'PageDown', mods = 'ALT', action = act.ScrollByPage(1) },
+
 	-- Resize
-	{ key = 'h', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Left', 5 } },
-  { key = 'l', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Right', 5 } },
-  { key = 'k', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Up', 5 } },
-  { key = 'j', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Down', 5 } },
 
 	-- Copy mode
-	{ key = 'y', mods = 'ALT', action = act.ActivateCopyMode },
 }
 
 for i = 1, 9 do
-	table.insert(config.keys, {
-		key = tostring(i),
-		mods = "ALT",
-		action = wezterm.action_callback(function(window, pane)
-			local tabs = window:mux_window():tabs()
-			if tabs[i] then
-				window:perform_action(act.ActivateTab(i - 1), pane)
-			else
-				window:perform_action(act.SpawnTab("CurrentPaneDomain"), pane)
-			end
-		end),
-	})
+  table.insert(config.keys, {
+    key = tostring(i),
+    mods = "ALT",
+    action = wezterm.action_callback(function(window, pane)
+      local tab = window:mux_window():tabs()[i]
+
+      if tab then
+        tab:activate()
+      else
+        window:perform_action(act.SpawnTab("CurrentPaneDomain"), pane)
+      end
+    end),
+  })
+
+  table.insert(config.keys, {
+    key = tostring(i),
+    mods = "CTRL|ALT",
+    action = act.MoveTab(i),
+  })
 end
 return config
 
