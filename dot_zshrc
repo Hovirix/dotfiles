@@ -79,7 +79,7 @@ bindkey '^[[127;5u' backward-kill-word
 # PROMPT / UI
 # -----------------------------------------------------
 
-eval "$(tv init zsh)"
+eval "$(atuin init zsh)"
 eval "$(direnv hook zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
