@@ -46,24 +46,21 @@ set $crust #11111b
 # ------------------------------------------------
 
 exec {
-  mako
+  dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_DATA_DIRS
   autotiling-rs
-  wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00 -g 0.7
-  swaybg -i ~/Pictures/Wallpapers/nixos-mocha.png
+  wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00
   swayidle -w -C ~/.config/sway/swayidle.conf
 }
 
 # ------------------------------------------------
-# Monitors
+# Outputs
 # ------------------------------------------------
+
+output * bg ~/Pictures/Wallpapers/nixos-mocha.png fill
 
 output eDP-1 {
   scale 1.5
-  # mode 2880x1800@60.001Hz
   mode 2880x1800@120.000Hz
-
-  subpixel rgb
-  color_profile srgb
   render_bit_depth 10
 }
 
@@ -71,19 +68,7 @@ output HDMI-A-1 {
   scale 1.25
   pos 0 0
   mode 2560x1440
-
-  subpixel rgb
-  color_profile srgb
 }
-
-# output HDMI-A-1 {
-#     mode 3840x2160@60Hz
-#     scale 1.5
-#     pos 0 0
-
-#     subpixel rgb
-#     color_profile srgb
-# }
 
 # ------------------------------------------------
 # Inputs
@@ -98,7 +83,7 @@ input type:touchpad {
 }
 
 input type:mouse {
-  pointer_accel 0.4
+  pointer_accel 0
   accel_profile flat
 }
 
@@ -112,6 +97,7 @@ titlebar_border_thickness 0
 titlebar_padding 0 0
 hide_edge_borders both
 floating_modifier $mod
+focus_on_window_activation focus
 
 # -------------------------------
 # Window Rules
@@ -189,12 +175,7 @@ bindsym $mod+Shift+b          exec brightnessctl --quiet --save set 0%
 bindsym XF86MonBrightnessUp   exec brightness-osd up
 bindsym XF86MonBrightnessDown exec brightness-osd down
 
-# Audio (ALSA / amixer)
-# bindsym XF86AudioMute          exec amixer set Master toggle
-# bindsym XF86AudioLowerVolume   exec amixer set Master 2%-
-# bindsym XF86AudioRaiseVolume   exec amixer set Master 2%+
-
-# Audio (PipeWire / WirePlumber)
+# Audio
 bindsym XF86AudioMute          exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 bindsym XF86AudioLowerVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-
 bindsym XF86AudioRaiseVolume   exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ -l 1
@@ -233,8 +214,6 @@ bindsym $mod+Ctrl+j          resize grow height 10px
 # Gaps / borders
 # -------------------------------
 
-# gaps inner 10
-# gaps outer 10
 smart_borders on
 
 # -------------------------------
@@ -254,7 +233,6 @@ client.background        $base
 # -------------------------------
 
 bar {
-  # disable mouse
   bindsym button1  nop
   bindsym button2  nop
   bindsym button3  nop
