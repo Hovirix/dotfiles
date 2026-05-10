@@ -8,10 +8,39 @@ local config = wezterm.config_builder()
 ------------------------------------------------------
 
 config.adjust_window_size_when_changing_font_size = false
+
 do
   local scheme = wezterm.color.get_builtin_schemes()["Catppuccin Mocha"]
-  scheme.ansi[5] = "#fab387"   -- blue -> peach
-  scheme.brights[5] = "#fab387"
+
+  scheme.tab_bar = {
+    background = "#1e1e2e",
+
+    active_tab = {
+      bg_color = "#fab387",
+      fg_color = "#1e1e2e",
+    },
+
+    inactive_tab = {
+      bg_color = "#181825",
+      fg_color = "#cdd6f4",
+    },
+
+    inactive_tab_hover = {
+      bg_color = "#313244",
+      fg_color = "#fab387",
+    },
+
+    new_tab = {
+      bg_color = "#1e1e2e",
+      fg_color = "#9399b2",
+    },
+
+    new_tab_hover = {
+      bg_color = "#313244",
+      fg_color = "#fab387",
+    },
+  }
+
   config.colors = scheme
 end
 
@@ -20,6 +49,7 @@ config.font_size = 12
 config.hide_tab_bar_if_only_one_tab = true
 -- config.line_height = 1.1
 config.prefer_to_spawn_tabs = true
+config.show_new_tab_button_in_tab_bar = false
 config.tab_max_width = 1000
 config.use_fancy_tab_bar = false
 
