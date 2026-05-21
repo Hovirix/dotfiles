@@ -11,6 +11,8 @@ config.adjust_window_size_when_changing_font_size = false
 
 do
   local scheme = wezterm.color.get_builtin_schemes()["Catppuccin Mocha"]
+  scheme.ansi[5] = "#fab387"   -- blue → peach
+  scheme.brights[5] = "#fab387"
 
   scheme.tab_bar = {
     background = "#1e1e2e",
@@ -58,7 +60,7 @@ config.use_fancy_tab_bar = false
 ------------------------------------------------------
 
 config.keys = {
-  { key = 'p', mods = 'ALT', action = wezterm.action.ActivateCommandPalette, },
+  -- { key = 'p', mods = 'ALT', action = wezterm.action.ActivateCommandPalette, },
 	{ key = 'v', mods = 'ALT', action = act.ActivateCopyMode },
 
 	{ key = 'h', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Left', 5 } },

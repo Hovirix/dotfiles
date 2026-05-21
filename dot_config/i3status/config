@@ -33,9 +33,9 @@ cpu_usage {
 }
 
 battery 0 {
-  format = "<span color='#a6e3a1'>%status %percentage</span>"
-  format_down = "<span color='#f38ba8'>󰂎</span>"
+  format = "<span color='#a6da95'>%status %percentage</span>"
   integer_battery_capacity = true
+  color_bad = "#f38ba8"
   low_threshold = 30
   status_bat = ""
   status_chr = ""

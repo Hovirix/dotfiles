@@ -16,6 +16,7 @@ bufferline = "multiple"
 color-modes = true
 end-of-line-diagnostics = "hint"
 
+
 [editor.statusline]
 separator = "│"
 mode.normal = "NORMAL"
