@@ -1,18 +1,14 @@
-# [[mgr.append_keymap]]
-# on = ["g", "t"]
-# run = "cd ~/.local/share/Trash/files/"
-
-[[mgr.append_keymap]]
-on = ["g", "."]
-run = "cd ~/.dotfiles"
-
 [[mgr.append_keymap]]
 on = ["g", "p"]
-run = "cd ~/projects"
+run = "cd ~/Projects"
 
 [[mgr.append_keymap]]
 on = ["g", "w"]
-run = "cd ~/work"
+run = "cd ~/Documents/work"
+
+[[mgr.append_keymap]]
+on = ["g", "o"]
+run = "cd ~/Documents/notes"
 
 [[mgr.prepend_keymap]]
 on = [ "g", "t" ]
@@ -29,4 +25,3 @@ desc = "Open $SHELL here"
 on = [ "g", "r" ]
 run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"'
 desc = "cd back to the root of the current Git repository"
-
