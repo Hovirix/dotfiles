@@ -5,8 +5,8 @@
 include /etc/sway/config.d/*
 
 xwayland disable
-input * xkb_options ctrl:nocaps
 seat * xcursor_theme Bibata-Modern-Amber 24
+seat * shortcuts_inhibitor disable
 
 # ------------------------------------------------
 # Variables
@@ -52,6 +52,11 @@ exec {
   swayidle -w -C ~/.config/sway/swayidle.conf
 }
 
+exec {
+  flatpak run io.gitlab.librewolf-community
+  wezterm-gui
+}
+
 # ------------------------------------------------
 # Outputs
 # ------------------------------------------------
@@ -73,6 +78,8 @@ output HDMI-A-1 {
 # ------------------------------------------------
 # Inputs
 # ------------------------------------------------
+
+input * xkb_options ctrl:nocaps
 
 input type:touchpad {
   dwt enabled
@@ -103,13 +110,16 @@ focus_on_window_activation focus
 # Window Rules
 # -------------------------------
 
-assign [app_id="^librewolf$"]          → workspace number 1
-# assign [app_id="^org.pwmt.zathura$"]  → workspace number 2
-assign [app_id="^FreeTube$"]          → workspace number 5
+for_window [app_id="(?i).*librewolf.*"]    move to workspace 1, focus
+for_window [app_id="(?i).*virt-manager.*"] move to workspace 2, focus
+for_window [app_id="(?i).*wezterm.*"]      move to workspace 3, focus
+for_window [app_id="(?i).*obsidian.*"]     move to workspace 4, focus
+for_window [app_id="(?i).*freetube.*"]     move to workspace 5, focus
 
 # Bitwarden
-for_window [app_id="800a80d9585430a3efdf470098089480"] floating enable
-for_window [app_id="chrome-nngceckbapebfimnlniiiahkandclblb-Default"] floating enable
+for_window [app_id="(?i)^(bitwarden|chrome-nngceckbapebfimnlniiiahkandclblb-Default|800a80d9585430a3efdf470098089480)$"] floating enable
+for_window [class="(?i)^bitwarden$"] floating enable
+for_window [title="(?i).*bitwarden.*"] floating enable
 
 # -------------------------------
 # Workspace
