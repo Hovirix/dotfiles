@@ -48,13 +48,12 @@ set $crust #11111b
 exec {
   dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_DATA_DIRS
   autotiling-rs
-  wlsunset -t 3000 -T 6500 -s 20:30 -S 07:00
+  wlsunset -t 3000 -T 6500 -s 21:00 -S 07:00
   swayidle -w -C ~/.config/sway/swayidle.conf
 }
 
 exec {
   flatpak run io.gitlab.librewolf-community
-  wezterm-gui
 }
 
 # ------------------------------------------------
@@ -115,11 +114,7 @@ for_window [app_id="(?i).*virt-manager.*"] move to workspace 2, focus
 for_window [app_id="(?i).*wezterm.*"]      move to workspace 3, focus
 for_window [app_id="(?i).*obsidian.*"]     move to workspace 4, focus
 for_window [app_id="(?i).*freetube.*"]     move to workspace 5, focus
-
-# Bitwarden
-for_window [app_id="(?i)^(bitwarden|chrome-nngceckbapebfimnlniiiahkandclblb-Default|800a80d9585430a3efdf470098089480)$"] floating enable
-for_window [class="(?i)^bitwarden$"] floating enable
-for_window [title="(?i).*bitwarden.*"] floating enable
+for_window [title="(?i).*bitwarden.*"]     floating enable
 
 # -------------------------------
 # Workspace
@@ -168,7 +163,9 @@ bindcode $mod+Shift+19      move container to workspace number 10
 bindsym $mod+R                 exec fuzzel
 bindsym $mod+Return            exec wezterm-gui
 bindsym Control+1              exec flatpak run io.gitlab.librewolf-community
-bindsym Control+2              exec wezterm-gui -e yazi 
+bindsym Control+2              exec virt-manager 
+bindsym Control+4              exec flatpak run md.obsidian.Obsidian 
+bindsym Control+5              exec flatpak run io.freetubeapp.FreeTube 
 
 # Scripts
 bindsym $mod+c                 exec toggle-swayidle
