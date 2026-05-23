@@ -17,9 +17,9 @@
 @define-color base      #1e1e2e;
 
 * {
-    font-family: "JetBrainsMono", "Symbols Nerd Font";
-    font-size: 14px;
-    min-height: 0;
+  font-family: "JetBrainsMono", "Symbols Nerd Font";
+  font-size: 14px;
+  min-height: 0;
 }
 
 #waybar {
@@ -28,26 +28,42 @@
 }
 
 #battery {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
-#clock      { color: @text; }
-#network    { color: @mauve; }
-#pulseaudio { color: @blue; }
-#memory     { color: @pink; }
-#cpu        { color: @red; }
-#battery    { color: @green; }
-#battery.warning  { color: @yellow;}
-#battery.critical { color: @red; }
+#clock {
+  color: @text;
+}
+#network {
+  color: @mauve;
+}
+#pulseaudio {
+  color: @blue;
+}
+#memory {
+  color: @pink;
+}
+#cpu {
+  color: @red;
+}
+#battery {
+  color: @green;
+}
+#battery.warning {
+  color: @yellow;
+}
+#battery.critical {
+  color: @red;
+}
 
 #workspaces button {
-    color: @text;
+  color: @text;
 }
 
 #workspaces button.active {
-    color: @peach;
+  color: @peach;
 }
 
 #workspaces button.urgent {
-    color: @red;
+  color: @red;
 }

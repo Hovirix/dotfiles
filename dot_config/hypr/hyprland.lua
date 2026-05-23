@@ -12,23 +12,23 @@ col.active_border =
 layout = dwindle
 
 input {
-    touchpad {
-        disable_while_typing = true
-        tap_to_click = true
-        natural_scroll = true
-    }
+  touchpad {
+    disable_while_typing = true
+    tap_to_click = true
+    natural_scroll = true
+  }
 
-    device {
-        name = type:touchpad
-        sensitivity = 1.0
-        accel_profile = flat
-    }
+  device {
+    name = type:touchpad
+    sensitivity = 1.0
+    accel_profile = flat
+  }
 
-    device {
-        name = type:mouse
-        sensitivity = 0.4
-        accel_profile = flat
-    }
+  device {
+    name = type:mouse
+    sensitivity = 0.4
+    accel_profile = flat
+  }
 }
 
 -----
@@ -55,7 +55,7 @@ hl.monitor({
 ---
 
 -- Workspaces / scratchpad
-hl.bind(mod .. " + code:9",  hl.dsp.togglespecialworkspace())
+hl.bind(mod .. " + code:9", hl.dsp.togglespecialworkspace())
 hl.bind(mod .. " + code:10", hl.dsp.workspace("1"))
 hl.bind(mod .. " + code:11", hl.dsp.workspace("2"))
 hl.bind(mod .. " + code:12", hl.dsp.workspace("3"))
@@ -67,7 +67,7 @@ hl.bind(mod .. " + code:17", hl.dsp.workspace("8"))
 hl.bind(mod .. " + code:18", hl.dsp.workspace("9"))
 hl.bind(mod .. " + code:19", hl.dsp.workspace("10"))
 
-hl.bind(mod .. " + SHIFT + code:9",  hl.dsp.movetoworkspace("special"))
+hl.bind(mod .. " + SHIFT + code:9", hl.dsp.movetoworkspace("special"))
 hl.bind(mod .. " + SHIFT + code:10", hl.dsp.movetoworkspace("1"))
 hl.bind(mod .. " + SHIFT + code:11", hl.dsp.movetoworkspace("2"))
 hl.bind(mod .. " + SHIFT + code:12", hl.dsp.movetoworkspace("3"))
@@ -80,28 +80,28 @@ hl.bind(mod .. " + SHIFT + code:18", hl.dsp.movetoworkspace("9"))
 hl.bind(mod .. " + SHIFT + code:19", hl.dsp.movetoworkspace("10"))
 
 -- Apps
-hl.bind(mod .. " + R",      hl.dsp.exec_cmd("fuzzel"))
+hl.bind(mod .. " + R", hl.dsp.exec_cmd("fuzzel"))
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd("wezterm-gui"))
-hl.bind("CTRL + 1",         hl.dsp.exec_cmd("flatpak run io.gitlab.librewolf-community"))
-hl.bind("CTRL + 2",         hl.dsp.exec_cmd("wezterm-gui -e yazi"))
+hl.bind("CTRL + 1", hl.dsp.exec_cmd("flatpak run io.gitlab.librewolf-community"))
+hl.bind("CTRL + 2", hl.dsp.exec_cmd("wezterm-gui -e yazi"))
 
 -- Scripts
 hl.bind(mod .. " + C", hl.dsp.exec_cmd("toggle-swayidle"))
 hl.bind(mod .. " + W", hl.dsp.exec_cmd("toggle-tailscale"))
 
 -- Screenshots
-hl.bind(mod .. " + S",                 hl.dsp.exec_cmd("grimlite --notify copy anything"))
-hl.bind(mod .. " + CTRL + S",          hl.dsp.exec_cmd("grimlite --notify save anything"))
-hl.bind(mod .. " + CTRL + ALT + S",    hl.dsp.exec_cmd("grimlite --notify save screen"))
+hl.bind(mod .. " + S", hl.dsp.exec_cmd("grimlite --notify copy anything"))
+hl.bind(mod .. " + CTRL + S", hl.dsp.exec_cmd("grimlite --notify save anything"))
+hl.bind(mod .. " + CTRL + ALT + S", hl.dsp.exec_cmd("grimlite --notify save screen"))
 
 -- Brightness
-hl.bind(mod .. " + B",       hl.dsp.exec_cmd("brightnessctl --quiet --save set 100%"))
+hl.bind(mod .. " + B", hl.dsp.exec_cmd("brightnessctl --quiet --save set 100%"))
 hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("brightnessctl --quiet --save set 0%"))
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightness-osd up"))
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightness-osd up"))
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightness-osd down"))
 
 -- Audio
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"))
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ -l 1"))
 

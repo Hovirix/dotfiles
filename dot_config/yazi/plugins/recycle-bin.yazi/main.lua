@@ -52,7 +52,9 @@ end
 
 function Notify._parseContent(s, ...)
   local ok, content = pcall(string.format, s, ...)
-  if not ok then content = s end
+  if not ok then
+    content = s
+  end
   content = tostring(content):gsub(PATTERNS.whitespace_cleanup, " "):gsub(PATTERNS.trailing_space, "")
   return content
 end
@@ -104,7 +106,9 @@ local function run_command(cmd, args, input, is_silent)
 
   local child, cmd_err = cmd_obj:spawn()
   if not child then
-    if not is_silent then Notify.error(msgPrefix .. "Failed to start. Error: %s", tostring(cmd_err)) end
+    if not is_silent then
+      Notify.error(msgPrefix .. "Failed to start. Error: %s", tostring(cmd_err))
+    end
     return cmd_err and tostring(cmd_err), nil
   end
 
@@ -112,13 +116,17 @@ local function run_command(cmd, args, input, is_silent)
   if input then
     local ok, err = child:write_all(input)
     if not ok then
-      if not is_silent then Notify.error(msgPrefix .. "Failed to write, stdin: %s", tostring(err)) end
+      if not is_silent then
+        Notify.error(msgPrefix .. "Failed to write, stdin: %s", tostring(err))
+      end
       return err and tostring(err), nil
     end
 
     local flushed, flush_err = child:flush()
     if not flushed then
-      if not is_silent then Notify.error(msgPrefix .. "Failed to flush, stdin: %s", tostring(flush_err)) end
+      if not is_silent then
+        Notify.error(msgPrefix .. "Failed to flush, stdin: %s", tostring(flush_err))
+      end
       return flush_err and tostring(flush_err), nil
     end
   end
@@ -126,21 +134,29 @@ local function run_command(cmd, args, input, is_silent)
   -- Read output
   local output, out_err = child:wait_with_output()
   if not output then
-    if not is_silent then Notify.error(msgPrefix .. "Failed to get output, error: %s", tostring(out_err)) end
+    if not is_silent then
+      Notify.error(msgPrefix .. "Failed to get output, error: %s", tostring(out_err))
+    end
     return out_err and tostring(out_err), nil
   end
 
   -- Log outputs
-  if output.stdout ~= "" and not is_silent then debug(msgPrefix .. "stdout: %s", output.stdout) end
+  if output.stdout ~= "" and not is_silent then
+    debug(msgPrefix .. "stdout: %s", output.stdout)
+  end
   if output.status and output.status.code ~= 0 and not is_silent then
     debug(msgPrefix .. "Error code `%s`, success: `%s`", output.status.code, tostring(output.status.success))
   end
 
   -- Handle child output error
   if output.stderr ~= "" then
-    if not is_silent then debug(msgPrefix .. "stderr: %s", output.stderr) end
+    if not is_silent then
+      debug(msgPrefix .. "stderr: %s", output.stderr)
+    end
     -- Only treat stderr as error if command actually failed
-    if output.status and not output.status.success then return output.stderr, output end
+    if output.status and not output.status.success then
+      return output.stderr, output
+    end
   end
 
   return nil, output
@@ -168,7 +184,9 @@ local get_selected_files = ya.sync(function()
   for _, u in pairs(tab.selected) do
     paths[#paths + 1] = tostring(u)
   end
-  if #paths == 0 and tab.current.hovered then paths[1] = tostring(tab.current.hovered.url) end
+  if #paths == 0 and tab.current.hovered then
+    paths[1] = tostring(tab.current.hovered.url)
+  end
   return paths
 end)
 
@@ -185,7 +203,9 @@ end
 ---@param overrides table|nil
 ---@return table
 local function deep_merge(defaults, overrides)
-  if type(overrides) ~= "table" then return defaults end
+  if type(overrides) ~= "table" then
+    return defaults
+  end
 
   local result = {}
 
@@ -199,7 +219,9 @@ local function deep_merge(defaults, overrides)
 
   -- Include any keys in overrides not in defaults
   for k, v in pairs(overrides) do
-    if result[k] == nil then result[k] = v end
+    if result[k] == nil then
+      result[k] = v
+    end
   end
 
   return result
@@ -219,7 +241,9 @@ local function prompt(title, is_password, value)
     pos = { "center", y = 3, w = 60 },
   })
 
-  if input_event ~= 1 then return nil end
+  if input_event ~= 1 then
+    return nil
+  end
 
   return input_value
 end
@@ -288,7 +312,9 @@ local function choose_which(title, items)
   local keys = "1234567890abcdefghijklmnopqrstuvwxyz"
   local candidates = {}
   for i, item in ipairs(items) do
-    if i > #keys then break end
+    if i > #keys then
+      break
+    end
     candidates[#candidates + 1] = { on = keys:sub(i, i), desc = item }
   end
 
@@ -331,7 +357,9 @@ end
 ---@param bytes integer|nil Number of bytes to format
 ---@return string Formatted size string
 local function format_file_size(bytes)
-  if not bytes or bytes < 0 then return "0 B" end
+  if not bytes or bytes < 0 then
+    return "0 B"
+  end
 
   local units = { "B", "KB", "MB", "GB", "TB" }
   local size = bytes
@@ -370,7 +398,9 @@ local function get_files_with_sizes(file_paths, base_dir)
 
   -- Ensure base_dir ends with a slash for proper path construction
   local normalized_base_dir = base_dir
-  if not normalized_base_dir:match("/$") then normalized_base_dir = normalized_base_dir .. "/" end
+  if not normalized_base_dir:match("/$") then
+    normalized_base_dir = normalized_base_dir .. "/"
+  end
 
   for i, file_path in ipairs(file_paths) do
     -- Extract filename from the path
@@ -408,7 +438,9 @@ end
 ---@return string[], string|nil -- trash_dirs, error
 local function get_trash_directories()
   local err, output = run_command("trash-list", { "--trash-dirs" }, nil, true)
-  if err then return {}, err end
+  if err then
+    return {}, err
+  end
 
   local directories = {}
   if output and output.stdout ~= "" then
@@ -416,7 +448,9 @@ local function get_trash_directories()
       local trimmed = line:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
       if trimmed ~= "" then
         -- Ensure directory path ends with /
-        if not trimmed:match("/$") then trimmed = trimmed .. "/" end
+        if not trimmed:match("/$") then
+          trimmed = trimmed .. "/"
+        end
         table.insert(directories, trimmed)
       end
     end
@@ -434,7 +468,9 @@ local function get_trash_files_dir(config)
   -- On Linux, trash files are in a 'files' subdirectory
   if config.os ~= "macos" then
     -- Ensure trash_dir ends with / before adding 'files'
-    if not trash_files_dir:match("/$") then trash_files_dir = trash_files_dir .. "/" end
+    if not trash_files_dir:match("/$") then
+      trash_files_dir = trash_files_dir .. "/"
+    end
     trash_files_dir = trash_files_dir .. "files"
   end
   return trash_files_dir
@@ -444,7 +480,9 @@ end
 ---@param config table | nil
 local function check_has_trash_directory(config)
   -- Get Config
-  if not config then config = get_state(STATE_KEY.CONFIG) end
+  if not config then
+    config = get_state(STATE_KEY.CONFIG)
+  end
   -- Verify trash dir
   local trash_dir = config.trash_dir
   local trash_url = Url(trash_dir)
@@ -461,7 +499,9 @@ end
 ---@param directories string[] Array of trash directory paths
 ---@return string|nil -- selected_directory
 local function select_trash_directory(directories)
-  if #directories == 0 then return nil end
+  if #directories == 0 then
+    return nil
+  end
 
   -- If only one directory, use it automatically
   if #directories == 1 then
@@ -487,7 +527,9 @@ end
 ---@return boolean -- true if trash directory is available, false if cancelled or error
 local function ensure_trash_directory(config)
   -- If trash directory is already set and exists, we're good
-  if config.trash_dir and check_has_trash_directory(config) then return true end
+  if config.trash_dir and check_has_trash_directory(config) then
+    return true
+  end
 
   -- Get available trash directories
   local directories, dir_err = get_trash_directories()
@@ -523,7 +565,9 @@ end
 ---@return table<string, string>, string|nil -- filename_to_path_map, error
 local function get_trash_file_mappings()
   local err, output = run_command("trash-list", {})
-  if err then return {}, err end
+  if err then
+    return {}, err
+  end
 
   local mappings = {}
   if output and output.stdout ~= "" then
@@ -546,7 +590,9 @@ end
 local function get_trash_files_with_sizes(config)
   -- Get all files from trash-list
   local err, output = run_command("trash-list", {})
-  if err then return {}, err end
+  if err then
+    return {}, err
+  end
 
   local file_names = {}
   if output and output.stdout ~= "" then
@@ -559,7 +605,9 @@ local function get_trash_files_with_sizes(config)
     end
   end
 
-  if #file_names == 0 then return {}, nil end
+  if #file_names == 0 then
+    return {}, nil
+  end
 
   -- Get file objects with sizes using existing function
   local trash_files_dir = get_trash_files_dir(config)
@@ -576,7 +624,9 @@ end
 local function get_trash_files_older_than_days(config, days)
   -- Get all files from trash-list
   local err, output = run_command("trash-list", {})
-  if err then return {}, err end
+  if err then
+    return {}, err
+  end
 
   -- Calculate cutoff time (days ago from now)
   local current_time = os.time()
@@ -612,7 +662,9 @@ local function get_trash_files_older_than_days(config, days)
     end
   end
 
-  if #old_files == 0 then return {}, nil end
+  if #old_files == 0 then
+    return {}, nil
+  end
 
   -- Get file objects with sizes using existing function
   local trash_files_dir = get_trash_files_dir(config)
@@ -634,7 +686,9 @@ end
 --- Go to the trash directory
 local function open_trash(config)
   -- Ensure we have a trash directory selected
-  if not ensure_trash_directory(config) then return end
+  if not ensure_trash_directory(config) then
+    return
+  end
 
   local trash_files_dir = get_trash_files_dir(config)
   local trash_files_url = Url(trash_files_dir)
@@ -679,7 +733,9 @@ local function offer_to_open_trash(config)
   end
 
   for _, trash_dir in ipairs(trash_dirs) do
-    if current_dir:find(trash_dir, 1, true) == 1 then return true end
+    if current_dir:find(trash_dir, 1, true) == 1 then
+      return true
+    end
   end
 
   Notify.error("Failed to navigate to trash directory")
@@ -727,7 +783,9 @@ local is_current_dir_in_trash = function(config)
 
   -- Check if already in trash directory (check both original and resolved paths)
   for _, trash_dir in ipairs(trash_dirs) do
-    if current_dir:find(trash_dir, 1, true) == 1 or resolved_dir:find(trash_dir, 1, true) == 1 then return true end
+    if current_dir:find(trash_dir, 1, true) == 1 or resolved_dir:find(trash_dir, 1, true) == 1 then
+      return true
+    end
   end
 
   -- Not in trash directory - offer to navigate there
@@ -739,7 +797,9 @@ end
 ---@return integer, string|nil -- count, error
 local function get_trash_item_count()
   local err, output = run_command("trash-list", {})
-  if err then return 0, err end
+  if err then
+    return 0, err
+  end
 
   local item_count = 0
   if output and output.stdout ~= "" then
@@ -756,7 +816,9 @@ local function get_trash_size(config)
   local trash_files_dir = get_trash_files_dir(config)
 
   local err, output = run_command("du", { "-sh", trash_files_dir }, nil, true)
-  if err or not output or output.stdout == "" then return "unknown size", err end
+  if err or not output or output.stdout == "" then
+    return "unknown size", err
+  end
 
   local size_info = output.stdout:match(PATTERNS.size_info)
   return size_info or "unknown size", nil
@@ -776,10 +838,14 @@ local function get_trash_data(config)
     return { count, size }, { type = "error", msg = string.format("Failed to get trash contents: %s", count_err) }
   end
 
-  if item_count == 0 then return { count, size }, { type = "info", msg = "Trash is already empty" } end
+  if item_count == 0 then
+    return { count, size }, { type = "info", msg = "Trash is already empty" }
+  end
 
   local size_info, size_err = get_trash_size(config)
-  if size_err then debug("Failed to get trash size: %s", size_err) end
+  if size_err then
+    debug("Failed to get trash size: %s", size_err)
+  end
 
   return {
     count = item_count,
@@ -931,7 +997,9 @@ local function handle_restore_conflicts(restore_items)
   local non_conflicted_items, conflicts = detect_restore_conflicts(restore_items)
 
   -- No conflicts found, proceed with all items
-  if #conflicts == 0 then return restore_items end
+  if #conflicts == 0 then
+    return restore_items
+  end
 
   -- Present conflict resolution dialog
   local user_choice = prompt_conflict_resolution(conflicts, #non_conflicted_items)
@@ -1130,7 +1198,9 @@ end
 
 local function cmd_empty_trash(config)
   -- Ensure we have a trash directory selected
-  if not ensure_trash_directory(config) then return end
+  if not ensure_trash_directory(config) then
+    return
+  end
 
   -- Get trash data
   local data, data_err = get_trash_data(config)
@@ -1153,7 +1223,9 @@ local function cmd_empty_trash(config)
   end
 
   -- Show detailed confirmation dialog with file list and sizes
-  if not confirm_batch_operation("permanently delete", file_objects, "This action cannot be undone!") then return end
+  if not confirm_batch_operation("permanently delete", file_objects, "This action cannot be undone!") then
+    return
+  end
 
   -- Execute trash-empty command
   local err, _ = run_command("trash-empty", {}, "y\n")
@@ -1166,7 +1238,9 @@ end
 
 local function cmd_empty_trash_by_days(config)
   -- Ensure we have a trash directory selected
-  if not ensure_trash_directory(config) then return end
+  if not ensure_trash_directory(config) then
+    return
+  end
 
   -- Get trash data prior to the operation to calculate difference
   local begin_data, begin_err = get_trash_data(config)
@@ -1234,23 +1308,33 @@ end
 
 local function cmd_delete_selection(config)
   -- Ensure we have a trash directory selected
-  if not ensure_trash_directory(config) then return end
+  if not ensure_trash_directory(config) then
+    return
+  end
 
   -- Check if current directory is within a valid trash directory
-  if not is_current_dir_in_trash(config) then return end
+  if not is_current_dir_in_trash(config) then
+    return
+  end
 
   -- Validate selection and get filenames
   local selected_paths, _ = validate_and_get_selection("deletion")
-  if not selected_paths then return end
+  if not selected_paths then
+    return
+  end
 
   -- Get file objects with sizes for confirmation dialog
   local trash_files_dir = get_trash_files_dir(config)
   -- Ensure it ends with / for get_files_with_sizes
-  if not trash_files_dir:match("/$") then trash_files_dir = trash_files_dir .. "/" end
+  if not trash_files_dir:match("/$") then
+    trash_files_dir = trash_files_dir .. "/"
+  end
   local file_objects = get_files_with_sizes(selected_paths, trash_files_dir)
 
   -- Confirm deletion from trash with warning
-  if not confirm_batch_operation("permanently delete", file_objects, "This action cannot be undone!") then return end
+  if not confirm_batch_operation("permanently delete", file_objects, "This action cannot be undone!") then
+    return
+  end
 
   -- Create operation function for delete
   local function delete_operation(path)
@@ -1271,7 +1355,9 @@ local function cmd_delete_selection(config)
   local success_count, failed_count = execute_batch_operation(selected_paths, "permanently deleting", delete_operation)
 
   -- Clear selection after successful delete to prevent stale selections
-  if success_count > 0 then clear_selection() end
+  if success_count > 0 then
+    clear_selection()
+  end
 
   -- Report results
   report_operation_results("deleting", success_count, failed_count)
@@ -1279,14 +1365,20 @@ end
 
 local function cmd_restore_selection(config)
   -- Ensure we have a trash directory selected
-  if not ensure_trash_directory(config) then return end
+  if not ensure_trash_directory(config) then
+    return
+  end
 
   -- Check if current directory is within a valid trash directory
-  if not is_current_dir_in_trash(config) then return end
+  if not is_current_dir_in_trash(config) then
+    return
+  end
 
   -- Validate selection and get filenames
   local selected_paths, _ = validate_and_get_selection("restoration")
-  if not selected_paths then return end
+  if not selected_paths then
+    return
+  end
 
   -- Get trash file mappings from trash-list
   local trash_mappings, mapping_err = get_trash_file_mappings()
@@ -1299,7 +1391,9 @@ local function cmd_restore_selection(config)
   local restore_items = {}
   local trash_files_dir = get_trash_files_dir(config)
   local normalized_trash_files_dir = trash_files_dir
-  if not normalized_trash_files_dir:match("/$") then normalized_trash_files_dir = normalized_trash_files_dir .. "/" end
+  if not normalized_trash_files_dir:match("/$") then
+    normalized_trash_files_dir = normalized_trash_files_dir .. "/"
+  end
 
   for _, path in ipairs(selected_paths) do
     local filename = path:match(PATTERNS.filename) or path
@@ -1338,7 +1432,9 @@ local function cmd_restore_selection(config)
   restore_items = filtered_items
 
   -- Confirm restoration
-  if not confirm_batch_operation("restore", restore_items, nil) then return end
+  if not confirm_batch_operation("restore", restore_items, nil) then
+    return
+  end
 
   -- Create operation function for restore using original paths
   local function restore_operation(item)
@@ -1367,7 +1463,9 @@ local function cmd_restore_selection(config)
   local success_count, failed_count = execute_batch_operation(restore_items, "restoring", restore_operation)
 
   -- Clear selection after successful restore to prevent stale selections
-  if success_count > 0 then clear_selection() end
+  if success_count > 0 then
+    clear_selection()
+  end
 
   -- Report results
   report_operation_results("restoring", success_count, failed_count)
@@ -1415,7 +1513,9 @@ end
 local function init()
   local initialized = get_state("is_initialized")
   if not initialized then
-    if not check_dependencies() then return false end
+    if not check_dependencies() then
+      return false
+    end
     initialized = true
     set_state("is_initialized", true)
   end
@@ -1443,7 +1543,9 @@ end
 
 ---Entry
 function M:entry(job)
-  if not init() then return end
+  if not init() then
+    return
+  end
 
   -- Cache config to avoid multiple state access calls
   local config = get_state(STATE_KEY.CONFIG)

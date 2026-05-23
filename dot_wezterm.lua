@@ -11,7 +11,7 @@ config.adjust_window_size_when_changing_font_size = false
 
 do
   local scheme = wezterm.color.get_builtin_schemes()["Catppuccin Mocha"]
-  scheme.ansi[5] = "#fab387"   -- blue → peach
+  scheme.ansi[5] = "#fab387" -- blue → peach
   scheme.brights[5] = "#fab387"
 
   scheme.tab_bar = {
@@ -61,45 +61,45 @@ config.use_fancy_tab_bar = false
 
 config.keys = {
   -- { key = 'p', mods = 'ALT', action = wezterm.action.ActivateCommandPalette, },
-	{ key = 'v', mods = 'ALT', action = act.ActivateCopyMode },
+  { key = "v", mods = "ALT", action = act.ActivateCopyMode },
 
-	{ key = 'h', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Left', 5 } },
-  { key = 'l', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Right', 5 } },
-  { key = 'k', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Up', 5 } },
-  { key = 'j', mods = 'ALT|CTRL', action = wezterm.action.AdjustPaneSize { 'Down', 5 } },
+  { key = "h", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Left", 5 }) },
+  { key = "l", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Right", 5 }) },
+  { key = "k", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Up", 5 }) },
+  { key = "j", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Down", 5 }) },
 
-  { key = 'c', mods = 'ALT', action = wezterm.action.CharSelect },
+  { key = "c", mods = "ALT", action = wezterm.action.CharSelect },
 
-	-- General 
-	{ key = "f", mods = "ALT", action = act.TogglePaneZoomState },
-	{ key = "q", mods = "ALT", action = act.CloseCurrentPane({ confirm = false }) },
-  { key = ' ', mods = 'ALT', action = wezterm.action.QuickSelect },
+  -- General
+  { key = "f", mods = "ALT", action = act.TogglePaneZoomState },
+  { key = "q", mods = "ALT", action = act.CloseCurrentPane({ confirm = false }) },
+  { key = " ", mods = "ALT", action = wezterm.action.QuickSelect },
 
-	-- Search
-	{ key = "/", mods = "ALT", action = act.Search { CaseInSensitiveString = "" } },
-	
-	-- Copy / Paste
-	{ key = "c", mods = "SHIFT|CTRL", action = act.CopyTo("Clipboard") },
-	{ key = "v", mods = "SHIFT|CTRL", action = act.PasteFrom("Clipboard") },
+  -- Search
+  { key = "/", mods = "ALT", action = act.Search({ CaseInSensitiveString = "" }) },
 
-	-- Focus / Move 
-	{ key = "h", mods = "ALT", action = act.ActivatePaneDirection("Left") },
-	{ key = "l", mods = "ALT", action = act.ActivatePaneDirection("Right") },
-	{ key = "j", mods = "ALT", action = act.ActivatePaneDirection("Down") },
-	{ key = "k", mods = "ALT", action = act.ActivatePaneDirection("Up") },
+  -- Copy / Paste
+  { key = "c", mods = "SHIFT|CTRL", action = act.CopyTo("Clipboard") },
+  { key = "v", mods = "SHIFT|CTRL", action = act.PasteFrom("Clipboard") },
 
-	-- Splits 
-	{ key = "-", mods = "ALT", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-	{ key = "=", mods = "ALT", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+  -- Focus / Move
+  { key = "h", mods = "ALT", action = act.ActivatePaneDirection("Left") },
+  { key = "l", mods = "ALT", action = act.ActivatePaneDirection("Right") },
+  { key = "j", mods = "ALT", action = act.ActivatePaneDirection("Down") },
+  { key = "k", mods = "ALT", action = act.ActivatePaneDirection("Up") },
 
-	{ key = 'UpArrow', mods = 'ALT', action = act.ScrollByLine(-1) },
-  { key = 'DownArrow', mods = 'ALT', action = act.ScrollByLine(1) },
-  { key = 'PageUp', mods = 'ALT', action = act.ScrollByPage(-1) },
-  { key = 'PageDown', mods = 'ALT', action = act.ScrollByPage(1) },
+  -- Splits
+  { key = "-", mods = "ALT", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
+  { key = "=", mods = "ALT", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 
-	-- Resize
+  { key = "UpArrow", mods = "ALT", action = act.ScrollByLine(-1) },
+  { key = "DownArrow", mods = "ALT", action = act.ScrollByLine(1) },
+  { key = "PageUp", mods = "ALT", action = act.ScrollByPage(-1) },
+  { key = "PageDown", mods = "ALT", action = act.ScrollByPage(1) },
 
-	-- Copy mode
+  -- Resize
+
+  -- Copy mode
 }
 
 for i = 1, 9 do

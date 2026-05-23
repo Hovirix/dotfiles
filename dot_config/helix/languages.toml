@@ -39,7 +39,7 @@ formatter = { command = "ruff", args = ["format", "-"] }
 [[language]]
 name = "hcl"
 auto-format = true
-language-servers = [ "tofu-ls" ]
+language-servers = ["tofu-ls"]
 
 [[language]]
 name = "nix"
@@ -52,31 +52,53 @@ formatter = { command = "nixpkgs-fmt" }
 
 [[language]]
 name = "html"
-language-servers = [ { name = "vscode-html-language-server", except-features = [ "format" ] }, "tailwindcss-ls", "biome" ]
+language-servers = [
+  { name = "vscode-html-language-server", except-features = [
+    "format",
+  ] },
+  "tailwindcss-ls",
+  "biome",
+]
 
 [[language]]
 name = "css"
-language-servers = [ { name = "vscode-css-language-server", except-features = [ "format" ] }, "tailwindcss-ls", "biome" ]
+language-servers = [
+  { name = "vscode-css-language-server", except-features = [
+    "format",
+  ] },
+  "tailwindcss-ls",
+  "biome",
+]
 
 [[language]]
 name = "javascript"
 auto-format = true
-language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
+language-servers = [
+  { name = "typescript-language-server", except-features = [
+    "format",
+  ] },
+  "biome",
+]
 
 [[language]]
 name = "typescript"
 auto-format = true
-language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
+language-servers = [
+  { name = "typescript-language-server", except-features = [
+    "format",
+  ] },
+  "biome",
+]
 
 [[language]]
 name = "astro"
 auto-format = true
-language-servers = [ "astro-ls", "tailwindcss-ls", "biome" ]
+language-servers = ["astro-ls", "tailwindcss-ls", "biome"]
 
 [[language]]
 name = "svelte"
 auto-format = true
-language-servers = [ "svelteserver", "tailwindcss-ls", "biome" ]
+language-servers = ["svelteserver", "tailwindcss-ls", "biome"]
 
 # ----------------------------------------------------
 # Configs
@@ -84,7 +106,12 @@ language-servers = [ "svelteserver", "tailwindcss-ls", "biome" ]
 
 [[language]]
 name = "json"
-language-servers = [ { name = "vscode-json-language-server", except-features = [ "format" ] }, "biome" ]
+language-servers = [
+  { name = "vscode-json-language-server", except-features = [
+    "format",
+  ] },
+  "biome",
+]
 
 # ----------------------------------------------------
 # LSP

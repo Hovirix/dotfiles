@@ -4,13 +4,9 @@
   "position": "top",
   "spacing": 8,
 
-  "modules-left": [
-    "hyprland/workspaces"
-  ],
+  "modules-left": ["hyprland/workspaces"],
 
-  "modules-center": [
-    "clock"
-  ],
+  "modules-center": ["clock"],
 
   "modules-right": [
     "network",
@@ -21,7 +17,7 @@
     "custom/sep",
     "cpu",
     "custom/sep",
-    "battery"
+    "battery",
   ],
 
   "hyprland/workspaces": {
@@ -36,17 +32,17 @@
       "7": "VII",
       "8": "VIII",
       "9": "IX",
-      "10": "X"
-    }
+      "10": "X",
+    },
   },
 
   "clock": {
-    "format": " {:%a %d %b %H:%M}"
+    "format": " {:%a %d %b %H:%M}",
   },
 
   "custom/sep": {
     "format": "│",
-    "tooltip": false
+    "tooltip": false,
   },
 
   "network": {
@@ -55,13 +51,7 @@
     "format-linked": "󰈀",
     "format-disconnected": "󰖪",
     "format-disabled": "󰖪",
-    "format-icons": [
-      "󰤯",
-      "󰤟",
-      "󰤢",
-      "󰤥",
-      "󰤨"
-    ]
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
   },
 
   "pulseaudio": {
@@ -75,52 +65,30 @@
       "phone": "󰏲",
       "portable": "󰏲",
       "car": "󰄋",
-      "default": [
-        "󰕿",
-        "󰕿",
-        "󰖀",
-        "󰖀",
-        "󰖀",
-        "󰕾",
-        "󰕾",
-        "󰕾",
-        "󰕾"
-      ]
-    }
+      "default": ["󰕿", "󰕿", "󰖀", "󰖀", "󰖀", "󰕾", "󰕾", "󰕾", "󰕾"],
+    },
   },
 
   "memory": {
     "interval": 5,
-    "format": " {used}"
+    "format": " {used}",
   },
 
   "cpu": {
     "interval": 1,
-    "format": " {usage}%"
+    "format": " {usage}%",
   },
 
   "battery": {
     "interval": 60,
     "states": {
       "warning": 30,
-      "critical": 15
+      "critical": 15,
     },
     "format": "{icon} {capacity}%",
     "format-icons": {
-      "default": [
-        "",
-        "",
-        "",
-        "",
-        ""
-      ],
-      "charging": [
-        " ",
-        " ",
-        " ",
-        " ",
-        " "
-      ]
-    }
-  }
+      "default": ["", "", "", "", ""],
+      "charging": [" ", " ", " ", " ", " "],
+    },
+  },
 }
