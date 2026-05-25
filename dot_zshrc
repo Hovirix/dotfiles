@@ -85,34 +85,38 @@ eval "$(direnv hook zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
-zstyle ':completion:*:git-checkout:*' sort false
-zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' menu no
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*:git-checkout:*' sort false
 
-zstyle ':fzf-tab:complete:cd:*' \
-  fzf-preview 'eza -1 --color=always $realpath'
+export FZF_DEFAULT_OPTS='
+  --style=default
+  --layout=reverse
+  --highlight-line
+  --info=hidden
+  --separator=─
 
-zstyle ':fzf-tab:*' fzf-flags \
-  --color=fg:#CDD6F4,fg+:#CDD6F4,bg:#1E1E2E,bg+:#313244 \
-  --color=hl:#FAB387,hl+:#FAB387,info:#F9E2AF,marker:#F5C2E7 \
-  --color=prompt:#FAB387,pointer:#FAB387,spinner:#FAB387 \
-  --color=border:#6C7086,header:#FAB387,label:#CDD6F4 \
-  --bind=tab:down,btab:up
+  --no-border
+  --no-input-border
+  --no-list-border
+  --no-preview-border
+
+  --color=bg:#1E1E2E,bg+:#313244
+  --color=fg:#CDD6F4,fg+:#CDD6F4
+  --color=selected-bg:#45475A
+
+  --color=separator:#BAC2DE
+  --color=hl:#FAB387,hl+:#FAB387
+  --color=prompt:#FAB387,pointer:#FAB387,spinner:#FAB387
+  --color=marker:#F5C2E7
+  --color=header:#FAB387,info:#F9E2AF
+'
 
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' switch-group '<' '>'
-
-export FZF_DEFAULT_OPTS='
-  --color=fg:#CDD6F4,fg+:#CDD6F4
-  --color=bg:#1E1E2E,bg+:#313244
-  --color=hl:#FAB387,hl+:#FAB387
-  --color=info:#F9E2AF,marker:#F5C2E7
-  --color=prompt:#FAB387,pointer:#FAB387
-  --color=spinner:#FAB387,header:#FAB387
-  --color=border:#6C7086,label:#CDD6F4
-  --color=selected-bg:#45475A
-'
+zstyle ':fzf-tab:*' fzf-flags --bind=tab:down,btab:up
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 
 # -----------------------------------------------------
 # ALIASES
