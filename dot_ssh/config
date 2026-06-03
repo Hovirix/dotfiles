@@ -1,23 +1,15 @@
-Host compute-01
-  HostName compute-01.home.hovirix.dev
+Host pve1
+  HostName pve1.home.hovirix.dev
   User root
 
-Host infra-01
-  HostName infra-01.home.hovirix.dev
+Host pve2
+  HostName pve2.home.hovirix.dev
   User root
 
-Host prod-data-01
-  HostName prod-data-01.home.hovirix.dev
-  User fedora
+Host pve3
+  HostName pve3.home.hovirix.dev
+  User root
 
-Host prod-apps-01
-  HostName prod-apps-01.home.hovirix.dev
-  User fedora
-
-Host prod-edge-01
-  HostName prod-edge-01.home.hovirix.dev
-  User fedora
-
-Host prod-idp-01
-  HostName prod-idp-01.home.hovirix.dev
-  User fedora
+Host openwrt
+  HostName 10.10.0.1
+  User root
