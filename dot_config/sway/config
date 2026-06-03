@@ -159,16 +159,16 @@ bindcode $mod+18            workspace $ws9
 bindcode $mod+19            workspace $ws10
 
 bindcode $mod+Shift+9       move scratchpad
-bindcode $mod+Shift+10      move container to workspace $ws1
-bindcode $mod+Shift+11      move container to workspace $ws2
-bindcode $mod+Shift+12      move container to workspace $ws3
-bindcode $mod+Shift+13      move container to workspace $ws4
-bindcode $mod+Shift+14      move container to workspace $ws5
-bindcode $mod+Shift+15      move container to workspace $ws6
-bindcode $mod+Shift+16      move container to workspace $ws7
-bindcode $mod+Shift+17      move container to workspace $ws8
-bindcode $mod+Shift+18      move container to workspace $ws9
-bindcode $mod+Shift+19      move container to workspace $ws10
+bindcode $mod+Shift+10      move container to workspace $ws1, workspace $ws1
+bindcode $mod+Shift+11      move container to workspace $ws2, workspace $ws2
+bindcode $mod+Shift+12      move container to workspace $ws3, workspace $ws3
+bindcode $mod+Shift+13      move container to workspace $ws4, workspace $ws4
+bindcode $mod+Shift+14      move container to workspace $ws5, workspace $ws5
+bindcode $mod+Shift+15      move container to workspace $ws6, workspace $ws6
+bindcode $mod+Shift+16      move container to workspace $ws7, workspace $ws7
+bindcode $mod+Shift+17      move container to workspace $ws8, workspace $ws8
+bindcode $mod+Shift+18      move container to workspace $ws9, workspace $ws9
+bindcode $mod+Shift+19      move container to workspace $ws10, workspace $ws10
 
 # Apps
 bindsym $mod+R                 exec fuzzel
