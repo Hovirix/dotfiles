@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+action="${1:-}"
+
+notify() {
+    command -v fyi >/dev/null && fyi "$1" && return
+    command -v notify-send >/dev/null && notify-send "$1"
+}
+
+copy() {
+    printf '%s' "$1" | wl-copy
+}
+
+ask() {
+    printf '\n' | fuzzel --dmenu --anchor center --lines 1 --prompt "$1"
+}
+
+entries() {
+    pass git ls-files --cached --others --exclude-standard '*.gpg' 2>/dev/null |
+        sed 's|\.gpg$||' |
+        sort
+}
+
+pick() {
+    local prompt="$1" icon="$2"
+
+    entries |
+        sed "s|^|$icon |" |
+        fuzzel --dmenu --prompt "$prompt" |
+        sed "s|^$icon ||"
+}
+
+pass ls >/dev/null 2>&1 || {
+    notify "Password store not found"
+    exit 1
+}
+
+case "$action" in
+    username)
+        entry="$(pick 'Username:' '👤')"
+        [[ -n "$entry" ]] || exit 1
+
+        username="$(pass show "$entry" | awk '/^login: / { sub(/^login: /, ""); print; exit }')"
+        [[ -n "$username" ]] || {
+            notify "No login found"
+            exit 1
+        }
+
+        copy "$username"
+        notify "Copied username"
+        ;;
+
+    password)
+        entry="$(pick 'Password:' '🔐')"
+        [[ -n "$entry" ]] || exit 1
+
+        pass show --clip=1 "$entry" >/dev/null
+        notify "Copied password"
+        ;;
+
+    otp)
+        entry="$(pick 'OTP:' '🔢')"
+        [[ -n "$entry" ]] || exit 1
+
+        otp="$(pass otp "$entry")"
+        [[ -n "$otp" ]] || exit 1
+
+        copy "$otp"
+        notify "Copied OTP"
+        ;;
+
+    new-login)
+        entry="$(ask 'New Login:')"
+        [[ -n "$entry" ]] || exit 1
+
+        username="$(ask 'Username:')"
+        [[ -n "$username" ]] || exit 1
+
+        ! pass ls "$entry" >/dev/null 2>&1 || {
+            notify "Password already exists"
+            exit 1
+        }
+
+        pass generate --no-symbols --clip --force "$entry" 24 >/dev/null
+
+        {
+            pass show "$entry"
+            printf 'login: %s\n' "$username"
+        } | pass insert -m -f "$entry" >/dev/null
+
+        notify "Created new login"
+        ;;
+
+    *)
+        printf 'usage: %s {username|password|otp|new-login}\n' "$(basename "$0")" >&2
+        exit 2
+        ;;
+esac
