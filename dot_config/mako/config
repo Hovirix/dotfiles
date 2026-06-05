@@ -1,6 +1,14 @@
 default-timeout=1000
 anchor=top-right
 layer=overlay
+font=JetBrainsMono 12
+width=360
+height=90
+margin=10
+padding=12
+border-size=2
+border-radius=0
+icons=0
 
 # Colors
 background-color=#1e1e2e
