@@ -1,7 +1,7 @@
 # HX dots
 
 A fast, keyboard-driven Wayland environment built for deep focus. Minimal surface, maximal efficiency.
-Powered by Sway, Hyprland, and modern Rust/C tools.
+Powered by Sway and modern Rust/C tools.
 
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![Sway](https://img.shields.io/badge/Sway-68751C?style=for-the-badge&logo=sway&logoColor=white)
@@ -32,23 +32,12 @@ Powered by Sway, Hyprland, and modern Rust/C tools.
 | Status bar         | [swaybar](https://github.com/swaywm/sway)      |  ![][c]  |
 | Status generator   | [i3status](https://github.com/i3/i3status)     |  ![][c]  |
 
-### <img src="./.github/assets/hyprland.svg" width="18" style="vertical-align: middle;" /> Hyprland Ecosystem
-
-| Description        | Tool                                           | Language |
-| :----------------- | :--------------------------------------------- | :------: |
-| Wayland compositor | [Hyprland](https://github.com/hyprwm/Hyprland) | ![][cpp] |
-| Idle daemon        | [hypridle](https://github.com/hyprwm/hypridle) | ![][cpp] |
-| Screen locker      | [hyprlock](https://github.com/hyprwm/hyprlock) | ![][cpp] |
-
 ### Wayland Utilities
 
-| Description              | Tool                                        | Language |
-| :----------------------- | :------------------------------------------ | :------: |
-| Notification daemon      | [mako](https://github.com/emersion/mako)    |  ![][c]  |
-| Application launcher     | [fuzzel](https://codeberg.org/dnkl/fuzzel)  |  ![][c]  |
-| Minimal Wayland launcher | [tofi](https://github.com/philj56/tofi)     |  ![][c]  |
-| GTK-based launcher       | [wofi](https://hg.sr.ht/~scoopta/wofi)      |  ![][c]  |
-| Status bar               | [waybar](https://github.com/Alexays/Waybar) | ![][cpp] |
+| Description          | Tool                                       | Language |
+| :------------------- | :----------------------------------------- | :------: |
+| Notification daemon  | [mako](https://github.com/emersion/mako)   |  ![][c]  |
+| Application launcher | [fuzzel](https://codeberg.org/dnkl/fuzzel) |  ![][c]  |
 
 <br>
 
