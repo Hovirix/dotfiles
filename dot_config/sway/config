@@ -181,6 +181,7 @@ bindsym Control+5              exec flatpak run io.freetubeapp.FreeTube
 # Scripts
 bindsym $mod+c                 exec toggle-swayidle
 bindsym $mod+i                 exec fuzzel-pass new-login
+bindsym $mod+Shift+i           exec fuzzel-pass add-otp
 bindsym $mod+p                 exec fuzzel-pass password
 bindsym $mod+u                 exec fuzzel-pass username
 bindsym $mod+o                 exec fuzzel-pass otp

@@ -1,20 +1,71 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# -----------------------------------------------------------------------------
+# Globals
+# -----------------------------------------------------------------------------
+
 action="${1:-}"
+notified=0
+
+# -----------------------------------------------------------------------------
+# Notifications
+# -----------------------------------------------------------------------------
 
 notify() {
-    command -v fyi >/dev/null && fyi "$1" && return
-    command -v notify-send >/dev/null && notify-send "$1"
+    notified=1
+
+    if command -v fyi >/dev/null; then
+        fyi "$1" || true
+    elif command -v notify-send >/dev/null; then
+        notify-send "$1" || true
+    fi
 }
+
+notify_failure() {
+    local status=$?
+
+    [[ $status -eq 0 || $notified -eq 1 ]] && return
+
+    case "$action" in
+        username)  notify "Username not copied" ;;
+        password)  notify "Password not copied" ;;
+        otp)       notify "OTP not copied" ;;
+        add-otp)   notify "OTP not added" ;;
+        new-login) notify "Login not created" ;;
+    esac
+}
+
+trap notify_failure EXIT
+
+# -----------------------------------------------------------------------------
+# Generic Helpers
+# -----------------------------------------------------------------------------
 
 copy() {
     printf '%s' "$1" | wl-copy
 }
 
-ask() {
-    printf '\n' | fuzzel --dmenu --anchor center --lines 1 --prompt "$1"
+input() {
+    fuzzel --dmenu --prompt-only="$1" --placeholder="${2:-}"
 }
+
+url_encode() {
+    local text="$1" char i
+
+    for ((i = 0; i < ${#text}; i++)); do
+        char="${text:i:1}"
+
+        case "$char" in
+            [a-zA-Z0-9.~_-]) printf '%s' "$char" ;;
+            *) printf '%%%02X' "'$char" ;;
+        esac
+    done
+}
+
+# -----------------------------------------------------------------------------
+# Password Store Helpers
+# -----------------------------------------------------------------------------
 
 entries() {
     pass git ls-files --cached --others --exclude-standard '*.gpg' 2>/dev/null |
@@ -23,7 +74,8 @@ entries() {
 }
 
 pick() {
-    local prompt="$1" icon="$2"
+    local prompt="$1"
+    local icon="$2"
 
     entries |
         sed "s|^|$icon |" |
@@ -31,69 +83,141 @@ pick() {
         sed "s|^$icon ||"
 }
 
+login_field() {
+    pass show "$1" |
+        awk '/^login: / { sub(/^login: /, ""); print; exit }'
+}
+
+otp_issuer() {
+    local entry="$1"
+    local part
+    local -a parts
+
+    IFS=/ read -ra parts <<< "$entry"
+
+    for part in "${parts[@]}"; do
+        [[ "$part" == *.* ]] && {
+            printf '%s' "$part"
+            return
+        }
+    done
+
+    printf '%s' "${parts[0]}"
+}
+
+# -----------------------------------------------------------------------------
+# Actions
+# -----------------------------------------------------------------------------
+
+copy_username() {
+    local entry username
+
+    entry="$(pick 'Username:' '')"
+    [[ -n "$entry" ]] || exit 1
+
+    username="$(login_field "$entry")"
+
+    [[ -n "$username" ]] || {
+        notify "No login found"
+        exit 1
+    }
+
+    copy "$username"
+    notify "Copied username"
+}
+
+copy_password() {
+    local entry
+
+    entry="$(pick 'Password:' '')"
+    [[ -n "$entry" ]] || exit 1
+
+    pass show --clip=1 "$entry" >/dev/null
+    notify "Copied password"
+}
+
+copy_otp() {
+    local entry
+
+    entry="$(pick 'OTP:' '')"
+    [[ -n "$entry" ]] || exit 1
+
+    pass otp --clip "$entry" >/dev/null
+    notify "Copied OTP"
+}
+
+add_otp() {
+    local entry otp_key issuer account otp_uri
+
+    entry="$(pick 'Add OTP:' '')"
+    [[ -n "$entry" ]] || exit 1
+
+    otp_key="$(input 'OTP Key: ')"
+
+    otp_key="${otp_key^^}"
+    otp_key="${otp_key//[[:space:]-]/}"
+
+    [[ "$otp_key" =~ ^[A-Z2-7]+=*$ ]] || {
+        notify "Invalid OTP key"
+        exit 1
+    }
+
+    issuer="$(otp_issuer "$entry")"
+    account="${entry##*/}"
+
+    otp_uri="otpauth://totp/$(url_encode "$issuer"):$(url_encode "$account")?secret=$otp_key&issuer=$(url_encode "$issuer")"
+
+    pass otp validate "$otp_uri" >/dev/null
+
+    pass otp append --force "$entry" <<< "$otp_uri" >/dev/null
+    pass otp --clip "$entry" >/dev/null
+
+    notify "Added OTP and copied code"
+}
+
+new_login() {
+    local name username entry
+
+    name="$(input 'New Login: ')"
+
+    username="$(input 'Username: ')"
+    [[ -n "$username" ]] || exit 1
+
+    entry="${name:-$username}"
+
+    ! pass ls "$entry" >/dev/null 2>&1 || {
+        notify "Password already exists"
+        exit 1
+    }
+
+    pass generate --no-symbols --clip --force "$entry" 24 >/dev/null
+
+    {
+        pass show "$entry"
+        printf 'login: %s\n' "$username"
+    } | pass insert -m -f "$entry" >/dev/null
+
+    notify "Created login"
+}
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
+
 pass ls >/dev/null 2>&1 || {
     notify "Password store not found"
     exit 1
 }
 
 case "$action" in
-    username)
-        entry="$(pick 'Username:' '👤')"
-        [[ -n "$entry" ]] || exit 1
-
-        username="$(pass show "$entry" | awk '/^login: / { sub(/^login: /, ""); print; exit }')"
-        [[ -n "$username" ]] || {
-            notify "No login found"
-            exit 1
-        }
-
-        copy "$username"
-        notify "Copied username"
-        ;;
-
-    password)
-        entry="$(pick 'Password:' '🔐')"
-        [[ -n "$entry" ]] || exit 1
-
-        pass show --clip=1 "$entry" >/dev/null
-        notify "Copied password"
-        ;;
-
-    otp)
-        entry="$(pick 'OTP:' '🔢')"
-        [[ -n "$entry" ]] || exit 1
-
-        otp="$(pass otp "$entry")"
-        [[ -n "$otp" ]] || exit 1
-
-        copy "$otp"
-        notify "Copied OTP"
-        ;;
-
-    new-login)
-        entry="$(ask 'New Login:')"
-        [[ -n "$entry" ]] || exit 1
-
-        username="$(ask 'Username:')"
-        [[ -n "$username" ]] || exit 1
-
-        ! pass ls "$entry" >/dev/null 2>&1 || {
-            notify "Password already exists"
-            exit 1
-        }
-
-        pass generate --no-symbols --clip --force "$entry" 24 >/dev/null
-
-        {
-            pass show "$entry"
-            printf 'login: %s\n' "$username"
-        } | pass insert -m -f "$entry" >/dev/null
-
-        notify "Created new login"
-        ;;
-
+    username)  copy_username ;;
+    password)  copy_password ;;
+    otp)       copy_otp ;;
+    add-otp)   add_otp ;;
+    new-login) new_login ;;
     *)
-        printf 'usage: %s {username|password|otp|new-login}\n' "$(basename "$0")" >&2
+        printf 'usage: %s {username|password|otp|add-otp|new-login}\n' \
+            "$(basename "$0")" >&2
         exit 2
         ;;
 esac
