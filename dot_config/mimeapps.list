@@ -1,0 +1,11 @@
+[Default Applications]
+application/pdf=org.pwmt.zathura-pdf-mupdf.desktop
+application/epub+zip=org.pwmt.zathura-pdf-mupdf.desktop
+application/postscript=org.pwmt.zathura-ps.desktop
+application/vnd.djvu=org.pwmt.zathura-djvu.desktop
+
+[Added Associations]
+application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;
+application/epub+zip=org.pwmt.zathura-pdf-mupdf.desktop;
+application/postscript=org.pwmt.zathura-ps.desktop;
+application/vnd.djvu=org.pwmt.zathura-djvu.desktop;

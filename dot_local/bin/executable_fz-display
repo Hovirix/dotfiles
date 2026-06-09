@@ -1,0 +1,474 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Display' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+menu_lines() {
+  max="$1"
+
+  awk -v max="$max" '
+    END {
+      lines = NR < 1 ? 1 : NR
+      if (lines > max) {
+        print max
+      } else {
+        print lines
+      }
+    }
+  '
+}
+
+outputs() {
+  swaymsg -t get_outputs --raw | awk '
+    function value(line) {
+      sub(/^.*: /, "", line)
+      sub(/,$/, "", line)
+      gsub(/"/, "", line)
+      return line
+    }
+
+    function hz(refresh) {
+      return int((refresh + 500) / 1000) "Hz"
+    }
+
+    /"name":/ {
+      name = value($0)
+    }
+
+    /"active":/ {
+      active = value($0)
+    }
+
+    /"scale":/ {
+      scale = value($0)
+    }
+
+    /"current_mode": null/ {
+      icon = active == "true" ? "" : ""
+      printf "%s  %s  ·  disabled  ·  scale %s\n", icon, name, scale
+      next
+    }
+
+    /"current_mode":/ {
+      in_current = 1
+      width = ""
+      height = ""
+      refresh = ""
+      next
+    }
+
+    in_current && /"width":/ {
+      width = value($0)
+    }
+
+    in_current && /"height":/ {
+      height = value($0)
+    }
+
+    in_current && /"refresh":/ {
+      refresh = value($0)
+    }
+
+    in_current && /^    }/ {
+      icon = active == "true" ? "" : ""
+      mode = width && height && refresh ? width "x" height "@" hz(refresh) : "disabled"
+      printf "%s  %s  ·  %s  ·  scale %s\n", icon, name, mode, scale
+      in_current = 0
+    }
+  '
+}
+
+current_mode() {
+  output="$1"
+
+  swaymsg -t get_outputs --raw | awk -v output="$output" '
+    function value(line) {
+      sub(/^.*: /, "", line)
+      sub(/,$/, "", line)
+      gsub(/"/, "", line)
+      return line
+    }
+
+    function hz(refresh) {
+      return int((refresh + 500) / 1000) "Hz"
+    }
+
+    /"name":/ {
+      target = value($0) == output
+    }
+
+    target && /"current_mode":/ {
+      in_current = 1
+      width = ""
+      height = ""
+      refresh = ""
+      next
+    }
+
+    in_current && /"width":/ {
+      width = value($0)
+    }
+
+    in_current && /"height":/ {
+      height = value($0)
+    }
+
+    in_current && /"refresh":/ {
+      refresh = value($0)
+    }
+
+    in_current && /^    }/ {
+      if (width && height && refresh) {
+        print width "x" height "@" hz(refresh)
+      }
+      exit
+    }
+  '
+}
+
+modes() {
+  output="$1"
+  current="$2"
+
+  swaymsg -t get_outputs --raw | awk -v output="$output" -v current="$current" '
+    function value(line) {
+      sub(/^.*: /, "", line)
+      sub(/,$/, "", line)
+      gsub(/"/, "", line)
+      return line
+    }
+
+    function hz(refresh) {
+      return int((refresh + 500) / 1000) "Hz"
+    }
+
+    /"name":/ {
+      target = value($0) == output
+    }
+
+    target && /"modes":/ {
+      in_modes = 1
+      next
+    }
+
+    in_modes && /^    ]/ {
+      exit
+    }
+
+    in_modes && /"width":/ {
+      width = value($0)
+    }
+
+    in_modes && /"height":/ {
+      height = value($0)
+    }
+
+    in_modes && /"refresh":/ {
+      refresh = value($0)
+    }
+
+    in_modes && /^      }/ {
+      mode = width "x" height "@" hz(refresh)
+      icon = mode == current ? "" : ""
+      printf "%s  %s\n", icon, mode
+    }
+  '
+}
+
+all_outputs() {
+  swaymsg -t get_outputs --raw | awk '
+    function value(line) {
+      sub(/^.*: /, "", line)
+      sub(/,$/, "", line)
+      gsub(/"/, "", line)
+      return line
+    }
+
+    /"name":/ {
+      print value($0)
+    }
+  '
+}
+
+laptop_output() {
+  all_outputs | awk '
+    /^(eDP|LVDS|DSI)-/ {
+      print
+      found = 1
+      exit
+    }
+
+    NR == 1 {
+      first = $0
+    }
+
+    END {
+      if (!found && first) {
+        print first
+      }
+    }
+  '
+}
+
+external_outputs() {
+  laptop="$1"
+
+  all_outputs | awk -v laptop="$laptop" '$0 != laptop'
+}
+
+output_width() {
+  output="$1"
+
+  swaymsg -t get_outputs --raw | awk -v output="$output" '
+    function value(line) {
+      sub(/^.*: /, "", line)
+      sub(/,$/, "", line)
+      gsub(/"/, "", line)
+      return line
+    }
+
+    /"name":/ {
+      target = value($0) == output
+    }
+
+    target && /"rect":/ {
+      in_rect = 1
+      next
+    }
+
+    in_rect && /"width":/ {
+      width = value($0)
+      if (width > 0) {
+        print width
+      } else {
+        print 1920
+      }
+      exit
+    }
+  '
+}
+
+outputs_width() {
+  total=0
+
+  while IFS= read -r output; do
+    [ -n "$output" ] || continue
+    width="$(output_width "$output")"
+    total=$((total + ${width:-1920}))
+  done
+
+  printf '%s\n' "$total"
+}
+
+pick_main() {
+  printf '%s\n' \
+    '󰍹  Configure display' \
+    '󰌢  Laptop only' \
+    '󰍺  External only' \
+    '󰹑  Mirror laptop' \
+    '󰹑  Extend right' \
+    '󰹑  Extend left' |
+    fuzzel --dmenu --width 34 --lines 6 --hide-prompt
+}
+
+pick_output() {
+  list="$(outputs)"
+
+  [ -n "$list" ] || {
+    notify 'Display' 'No displays found' video-display critical
+    exit 1
+  }
+
+  lines="$(printf '%s\n' "$list" | menu_lines 6)"
+  selection="$(printf '%s\n' "$list" | fuzzel --dmenu --width 56 --lines "$lines" --hide-prompt)"
+
+  [ -n "$selection" ] || exit 0
+
+  printf '%s' "$selection" | sed 's/^[^ ]*  //; s/  ·.*$//'
+}
+
+pick_action() {
+  printf '%s\n' \
+    '󰍹  Choose mode' \
+    '󰍹  Scale' |
+    fuzzel --dmenu --width 34 --lines 2 --hide-prompt
+}
+
+set_mode() {
+  output="$1"
+  current="$(current_mode "$output")"
+  list="$(modes "$output" "$current")"
+
+  [ -n "$list" ] || {
+    notify 'Display' "No modes found for $output" video-display critical
+    exit 1
+  }
+
+  lines="$(printf '%s\n' "$list" | menu_lines 10)"
+  mode="$(printf '%s\n' "$list" | fuzzel --dmenu --width 34 --lines "$lines" --prompt 'Mode: ' | sed 's/^[^ ]*  //')"
+
+  [ -n "$mode" ] || exit 0
+
+  swaymsg output "$output" mode "$mode" >/dev/null
+  notify 'Display' "Set $output to $mode" video-display normal
+}
+
+set_scale() {
+  output="$1"
+
+  scale="$(printf '%s\n' \
+    '  1' \
+    '  1.25' \
+    '  1.5' \
+    '  2' |
+    fuzzel --dmenu --width 24 --lines 4 --hide-prompt |
+    sed 's/^[^ ]*  //')"
+
+  [ -n "$scale" ] || exit 0
+
+  swaymsg output "$output" scale "$scale" >/dev/null
+  notify 'Display' "Set $output scale to $scale" video-display normal
+}
+
+laptop_only() {
+  laptop="$(laptop_output)"
+
+  [ -n "$laptop" ] || {
+    notify 'Display' 'No laptop display found' video-display critical
+    exit 1
+  }
+
+  swaymsg output "$laptop" enable pos 0 0 >/dev/null
+
+  external_outputs "$laptop" | while IFS= read -r output; do
+    [ -n "$output" ] || continue
+    swaymsg output "$output" disable >/dev/null || true
+  done
+
+  notify 'Display' 'Laptop display only' video-display normal
+}
+
+external_only() {
+  laptop="$(laptop_output)"
+  externals="$(external_outputs "$laptop")"
+  x=0
+
+  [ -n "$externals" ] || {
+    notify 'Display' 'No external displays found' video-display critical
+    exit 1
+  }
+
+  printf '%s\n' "$externals" | while IFS= read -r output; do
+    [ -n "$output" ] || continue
+    swaymsg output "$output" enable pos "$x" 0 >/dev/null
+    width="$(output_width "$output")"
+    x=$((x + ${width:-1920}))
+  done
+
+  swaymsg output "$laptop" disable >/dev/null || true
+  notify 'Display' 'External display only' video-display normal
+}
+
+mirror_laptop() {
+  laptop="$(laptop_output)"
+  externals="$(external_outputs "$laptop")"
+
+  [ -n "$laptop" ] || {
+    notify 'Display' 'No laptop display found' video-display critical
+    exit 1
+  }
+
+  [ -n "$externals" ] || {
+    notify 'Display' 'No external displays found' video-display critical
+    exit 1
+  }
+
+  swaymsg output "$laptop" enable pos 0 0 >/dev/null
+
+  printf '%s\n' "$externals" | while IFS= read -r output; do
+    [ -n "$output" ] || continue
+    swaymsg output "$output" enable pos 0 0 >/dev/null
+  done
+
+  notify 'Display' 'Mirrored laptop display' video-display normal
+}
+
+extend_right() {
+  laptop="$(laptop_output)"
+  externals="$(external_outputs "$laptop")"
+
+  [ -n "$externals" ] || {
+    notify 'Display' 'No external displays found' video-display critical
+    exit 1
+  }
+
+  swaymsg output "$laptop" enable pos 0 0 >/dev/null
+  x="$(output_width "$laptop")"
+
+  printf '%s\n' "$externals" | while IFS= read -r output; do
+    [ -n "$output" ] || continue
+    swaymsg output "$output" enable pos "$x" 0 >/dev/null
+    width="$(output_width "$output")"
+    x=$((x + ${width:-1920}))
+  done
+
+  notify 'Display' 'Extended right from laptop' video-display normal
+}
+
+extend_left() {
+  laptop="$(laptop_output)"
+  externals="$(external_outputs "$laptop")"
+  x=0
+
+  [ -n "$externals" ] || {
+    notify 'Display' 'No external displays found' video-display critical
+    exit 1
+  }
+
+  printf '%s\n' "$externals" | while IFS= read -r output; do
+    [ -n "$output" ] || continue
+    swaymsg output "$output" enable pos "$x" 0 >/dev/null
+    width="$(output_width "$output")"
+    x=$((x + ${width:-1920}))
+  done
+
+  x="$(printf '%s\n' "$externals" | outputs_width)"
+
+  swaymsg output "$laptop" enable pos "$x" 0 >/dev/null
+  notify 'Display' 'Extended left from laptop' video-display normal
+}
+
+configure_display() {
+  output="$(pick_output)"
+  action="$(pick_action)"
+
+  case "$action" in
+    '󰍹  Choose mode')
+      set_mode "$output"
+      ;;
+    '󰍹  Scale')
+      set_scale "$output"
+      ;;
+    '') exit 0 ;;
+  esac
+}
+
+require fuzzel
+require swaymsg
+
+action="$(pick_main)"
+
+case "$action" in
+  '󰍹  Configure display') configure_display ;;
+  '󰌢  Laptop only') laptop_only ;;
+  '󰍺  External only') external_only ;;
+  '󰹑  Mirror laptop') mirror_laptop ;;
+  '󰹑  Extend right') extend_right ;;
+  '󰹑  Extend left') extend_left ;;
+  '') exit 0 ;;
+esac

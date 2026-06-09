@@ -1,0 +1,314 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Wi-Fi' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+menu_lines() {
+  max="$1"
+
+  awk -v max="$max" '
+    END {
+      lines = NR < 1 ? 1 : NR
+      if (lines > max) {
+        print max
+      } else {
+        print lines
+      }
+    }
+  '
+}
+
+station() {
+  station="$(iwctl station list | awk '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    /^  [^[:space:]]/ && $1 != "Name" {
+      print $1
+      exit
+    }
+  ')"
+
+  if [ -n "$station" ]; then
+    printf '%s\n' "$station"
+    return
+  fi
+
+  iwctl device list | awk '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    /^  [^[:space:]]/ && $1 != "Name" {
+      print $1
+      exit
+    }
+  '
+}
+
+current_network() {
+  station="$1"
+
+  iwctl station "$station" show | awk '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    /Connected network/ {
+      sub(/^.*Connected network[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      print
+      exit
+    }
+  '
+}
+
+known_networks() {
+  current="$1"
+
+  iwctl known-networks list | awk -v current="$current" '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    /^  / && $0 !~ /^  Name/ && $0 !~ /Known Networks/ {
+      name = substr($0, 3, 34)
+      sub(/^[[:space:]]+/, "", name)
+      sub(/[[:space:]]+$/, "", name)
+
+      if (name == "" || name == "Known Networks") {
+        next
+      }
+
+      icon = name == current ? "" : ""
+      printf "%s  %s\n", icon, name
+    }
+  '
+}
+
+visible_networks() {
+  current="$1"
+
+  iwctl station "$station" get-networks | awk -v current="$current" '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    /^  / && $0 !~ /Network name/ && $0 !~ /Available networks/ {
+      line = $0
+      sub(/^[[:space:]]*>?[[:space:]]*/, "", line)
+
+      security = ""
+      signal = ""
+
+      if (match(line, /[[:space:]]+(open|psk|8021x)[[:space:]]+[*]+[[:space:]]*$/)) {
+        tail = substr(line, RSTART)
+        name = substr(line, 1, RSTART - 1)
+
+        sub(/^[[:space:]]+/, "", tail)
+        split(tail, parts, /[[:space:]]+/)
+        security = parts[1]
+        signal = parts[2]
+      } else {
+        next
+      }
+
+      sub(/[[:space:]]+$/, "", name)
+
+      if (name == "") {
+        next
+      }
+
+      icon = name == current ? "" : ""
+      printf "%s  %s  ·  %s  ·  %s\n", icon, name, security, signal
+    }
+  '
+}
+
+device_power() {
+  station="$1"
+
+  iwctl device list | awk -v station="$station" '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    $1 == station {
+      print $3
+      exit
+    }
+  '
+}
+
+connect_visible() {
+  station="$1"
+  current="$(current_network "$station")"
+
+  iwctl station "$station" scan >/dev/null 2>&1 || true
+  list="$(visible_networks "$current")"
+
+  [ -n "$list" ] || {
+    notify 'Wi-Fi' 'No visible networks' network-wireless critical
+    exit 1
+  }
+
+  lines="$(printf '%s\n' "$list" | menu_lines 12)"
+  selection="$(printf '%s\n' "$list" |
+    fuzzel --dmenu --width 58 --lines "$lines" --prompt 'Network: ')"
+
+  [ -n "$selection" ] || exit 0
+
+  network="$(printf '%s' "$selection" | sed 's/^[^ ]*  //; s/  ·.*//')"
+  security="$(printf '%s' "$selection" | awk -F '  ·  ' '{ print $2 }')"
+
+  if iwctl --dont-ask station "$station" connect "$network" >/dev/null 2>&1; then
+    notify 'Wi-Fi' "Connected to $network" network-wireless normal
+    return
+  fi
+
+  if [ "$security" != open ]; then
+    passphrase="$(fuzzel --dmenu --width 44 --password --prompt-only='Passphrase: ')"
+    [ -n "$passphrase" ] || exit 0
+    iwctl --passphrase "$passphrase" station "$station" connect "$network"
+    notify 'Wi-Fi' "Connected to $network" network-wireless normal
+    return
+  fi
+
+  notify 'Wi-Fi' "Could not connect to $network" dialog-error critical
+  exit 1
+}
+
+forget_network() {
+  current="$(current_network "$1")"
+  list="$(known_networks "$current")"
+
+  [ -n "$list" ] || {
+    notify 'Wi-Fi' 'No known networks' network-wireless critical
+    exit 1
+  }
+
+  lines="$(printf '%s\n' "$list" | menu_lines 12)"
+  network="$(printf '%s\n' "$list" |
+    fuzzel --dmenu --width 48 --lines "$lines" --prompt 'Forget: ' |
+    sed 's/^[^ ]*  //')"
+
+  [ -n "$network" ] || exit 0
+
+  iwctl known-networks "$network" forget
+  notify 'Wi-Fi' "Forgot $network" network-wireless normal
+}
+
+toggle_power() {
+  station="$1"
+  power="$(device_power "$station")"
+
+  if [ "$power" = on ]; then
+    iwctl device "$station" set-property Powered off
+    notify 'Wi-Fi' 'Disabled Wi-Fi' network-wireless low
+  else
+    iwctl device "$station" set-property Powered on
+    notify 'Wi-Fi' 'Enabled Wi-Fi' network-wireless normal
+  fi
+}
+
+power_action() {
+  station="$1"
+  power="$(device_power "$station")"
+
+  if [ "$power" = on ]; then
+    printf '󰤭  Disable Wi-Fi\n'
+  else
+    printf '󰤨  Enable Wi-Fi\n'
+  fi
+}
+
+status_entries() {
+  station="$1"
+
+  iwctl station "$station" show | awk '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    /State/ {
+      sub(/^.*State[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      print "󰤨  State  ·  " $0
+    }
+
+    /Connected network/ {
+      sub(/^.*Connected network[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      print "  Network  ·  " $0
+    }
+
+    /IPv4 address/ {
+      sub(/^.*IPv4 address[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      print "󰩟  IPv4  ·  " $0
+    }
+
+    /RSSI/ && !/AverageRSSI/ {
+      sub(/^.*RSSI[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      print "󰤨  Signal  ·  " $0
+    }
+
+    /TxBitrate/ {
+      sub(/^.*TxBitrate[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      print "󰓅  TX  ·  " $0
+    }
+
+    /RxBitrate/ {
+      sub(/^.*RxBitrate[[:space:]]+/, "")
+      sub(/[[:space:]]+$/, "")
+      print "󰓅  RX  ·  " $0
+    }
+  '
+}
+
+show_status() {
+  station="$1"
+  list="$(status_entries "$station")"
+
+  [ -n "$list" ] || {
+    notify 'Wi-Fi' 'No status available' dialog-error critical
+    exit 1
+  }
+
+  lines="$(printf '%s\n' "$list" | menu_lines 8)"
+  printf '%s\n' "$list" | fuzzel --dmenu --width 54 --lines "$lines" --hide-prompt >/dev/null
+}
+
+require fuzzel
+require iwctl
+
+station="$(station)"
+
+[ -n "$station" ] || {
+  notify 'Wi-Fi' 'No iwd station found' dialog-error critical
+  exit 1
+}
+
+action="$(printf '%s\n' \
+  '󰖩  Connect network' \
+  "$(power_action "$station")" \
+  '󰤮  Forget known network' \
+  '󰤨  Status' |
+  fuzzel --dmenu --width 40 --lines 4 --hide-prompt)"
+
+case "$action" in
+  '󰤭  Disable Wi-Fi') toggle_power "$station" ;;
+  '󰤨  Enable Wi-Fi') toggle_power "$station" ;;
+  '󰖩  Connect network') connect_visible "$station" ;;
+  '󰤮  Forget known network') forget_network "$station" ;;
+  '󰤨  Status') show_status "$station" ;;
+  '') exit 0 ;;
+esac

@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Screenshot' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+require fuzzel
+require grimlite
+
+choice="$(printf '%s\n' \
+  '󰹑  Copy selection' \
+  '󰹑  Save selection' \
+  '󰍹  Copy screen' \
+  '󰍹  Save screen' |
+  fuzzel --dmenu --width 34 --lines 4 --hide-prompt)"
+
+case "$choice" in
+  '󰹑  Copy selection') grimlite --notify copy anything ;;
+  '󰹑  Save selection') grimlite --notify save anything ;;
+  '󰍹  Copy screen') grimlite --notify copy screen ;;
+  '󰍹  Save screen') grimlite --notify save screen ;;
+  '') exit 0 ;;
+esac

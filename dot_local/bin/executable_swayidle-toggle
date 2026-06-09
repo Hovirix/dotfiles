@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if pgrep -x swayidle >/dev/null 2>&1; then
+  pkill -x swayidle
+  notify 'Idle' 'swayidle stopped' system-lock-screen low
+else
+  swaymsg exec "swayidle -w -C ~/.config/sway/swayidle.conf"
+  notify 'Idle' 'swayidle started' system-lock-screen normal
+fi

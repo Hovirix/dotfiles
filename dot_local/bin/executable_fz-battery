@@ -1,0 +1,120 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Battery' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+run_if() {
+  command -v "$1" >/dev/null 2>&1 || return 0
+  "$@" >/dev/null 2>&1 || true
+}
+
+wifi_device() {
+  command -v iwctl >/dev/null 2>&1 || return 0
+
+  iwctl device list | awk '
+    {
+      gsub(/\033\[[0-9;]*m/, "")
+    }
+
+    /^  [^[:space:]]/ && $1 != "Name" {
+      print $1
+      exit
+    }
+  '
+}
+
+wifi_power() {
+  state="$1"
+  device="$(wifi_device)"
+
+  [ -n "$device" ] || return 0
+  iwctl device "$device" set-property Powered "$state" >/dev/null 2>&1 || true
+}
+
+bluetooth_power() {
+  state="$1"
+
+  command -v bluetoothctl >/dev/null 2>&1 || return 0
+  bluetoothctl power "$state" >/dev/null 2>&1 || true
+}
+
+swayidle_on() {
+  pgrep -x swayidle >/dev/null 2>&1 && return 0
+  command -v swaymsg >/dev/null 2>&1 || return 0
+
+  swaymsg exec "swayidle -w -C ~/.config/sway/swayidle.conf" >/dev/null 2>&1 || true
+}
+
+swayidle_off() {
+  pgrep -x swayidle >/dev/null 2>&1 || return 0
+  pkill -x swayidle >/dev/null 2>&1 || true
+}
+
+set_brightness() {
+  level="$1"
+
+  run_if brightnessctl --quiet --save set "$level"
+}
+
+set_tlp() {
+  profile="$1"
+
+  tlp "$profile" >/dev/null || {
+    notify 'Battery' "Could not apply TLP $profile profile" dialog-error critical
+    exit 1
+  }
+}
+
+performance() {
+  set_tlp performance
+  set_brightness 100%
+  wifi_power on
+  bluetooth_power on
+  swayidle_off
+  notify 'Battery' 'Performance profile applied' battery-good normal
+}
+
+balanced() {
+  set_tlp balanced
+  set_brightness 60%
+  wifi_power on
+  swayidle_on
+  notify 'Battery' 'Balanced profile applied' battery-good normal
+}
+
+power_saver() {
+  choice="$(printf '%s\n' \
+    '󰌪  Disable radios and save power' \
+    '  Cancel' |
+    fuzzel --dmenu --width 40 --lines 2 --hide-prompt)"
+
+  [ "$choice" = '󰌪  Disable radios and save power' ] || exit 0
+
+  set_tlp power-saver
+  set_brightness 30%
+  wifi_power off
+  bluetooth_power off
+  swayidle_on
+  notify 'Battery' 'Power-saving profile applied' battery-good normal
+}
+
+require fuzzel
+require tlp
+
+choice="$(printf '%s\n' \
+  '󰓅  Performance' \
+  '󰾅  Balanced' \
+  '󰌪  Power saving offline' |
+  fuzzel --dmenu --width 34 --lines 3 --hide-prompt)"
+
+case "$choice" in
+  '󰓅  Performance') performance ;;
+  '󰾅  Balanced') balanced ;;
+  '󰌪  Power saving offline') power_saver ;;
+  '') exit 0 ;;
+esac

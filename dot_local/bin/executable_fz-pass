@@ -7,6 +7,7 @@ set -euo pipefail
 
 action="${1:-}"
 notified=0
+fz=(fuzzel --namespace=fz-pass --dmenu)
 
 # -----------------------------------------------------------------------------
 # Notifications
@@ -15,11 +16,7 @@ notified=0
 notify() {
     notified=1
 
-    if command -v fyi >/dev/null; then
-        fyi "$1" || true
-    elif command -v notify-send >/dev/null; then
-        notify-send "$1" || true
-    fi
+    command notify 'Password' "$1" dialog-password normal || true
 }
 
 notify_failure() {
@@ -42,12 +39,12 @@ trap notify_failure EXIT
 # Generic Helpers
 # -----------------------------------------------------------------------------
 
-copy() {
-    printf '%s' "$1" | wl-copy
+input() {
+    "${fz[@]}" --width 44 --prompt-only="$1" --placeholder="${2:-}"
 }
 
-input() {
-    fuzzel --dmenu --prompt-only="$1" --placeholder="${2:-}"
+password_input() {
+    "${fz[@]}" --width 44 --password --prompt-only="$1" --placeholder="${2:-}"
 }
 
 url_encode() {
@@ -76,10 +73,17 @@ entries() {
 pick() {
     local prompt="$1"
     local icon="$2"
+    local list
 
-    entries |
-        sed "s|^|$icon |" |
-        fuzzel --dmenu --prompt "$prompt" |
+    list="$(entries | sed "s|^|$icon |")"
+
+    [[ -n "$list" ]] || {
+        notify "No password entries found"
+        exit 1
+    }
+
+    printf '%s\n' "$list" |
+        "${fz[@]}" --width 56 --lines 12 --prompt "$prompt" |
         sed "s|^$icon ||"
 }
 
@@ -122,7 +126,7 @@ copy_username() {
         exit 1
     }
 
-    copy "$username"
+    printf '%s' "$username" | wl-copy
     notify "Copied username"
 }
 
@@ -152,7 +156,7 @@ add_otp() {
     entry="$(pick 'Add OTP:' '')"
     [[ -n "$entry" ]] || exit 1
 
-    otp_key="$(input 'OTP Key: ')"
+    otp_key="$(password_input 'OTP Key: ')"
 
     otp_key="${otp_key^^}"
     otp_key="${otp_key//[[:space:]-]/}"
@@ -168,7 +172,6 @@ add_otp() {
     otp_uri="otpauth://totp/$(url_encode "$issuer"):$(url_encode "$account")?secret=$otp_key&issuer=$(url_encode "$issuer")"
 
     pass otp validate "$otp_uri" >/dev/null
-
     pass otp append --force "$entry" <<< "$otp_uri" >/dev/null
     pass otp --clip "$entry" >/dev/null
 
@@ -176,7 +179,7 @@ add_otp() {
 }
 
 new_login() {
-    local name username entry
+    local name username entry password
 
     name="$(input 'New Login: ')"
 
@@ -190,14 +193,26 @@ new_login() {
         exit 1
     }
 
-    pass generate --no-symbols --clip --force "$entry" 24 >/dev/null
+    password="$(pass generate --no-symbols --force "$entry" 24)"
+    password="${password##*$'\n'}"
 
     {
-        pass show "$entry"
+        printf '%s\n' "$password"
         printf 'login: %s\n' "$username"
     } | pass insert -m -f "$entry" >/dev/null
 
+    pass show --clip=1 "$entry" >/dev/null
     notify "Created login"
+}
+
+pick_action() {
+    "${fz[@]}" --width 32 --lines 5 --hide-prompt <<'MENU'
+  Username
+  Password
+  OTP
+  Add OTP
+  New login
+MENU
 }
 
 # -----------------------------------------------------------------------------
@@ -209,6 +224,17 @@ pass ls >/dev/null 2>&1 || {
     exit 1
 }
 
+if [[ -z "$action" ]]; then
+    case "$(pick_action)" in
+        '  Password')  action=password ;;
+        '  Username')  action=username ;;
+        '  OTP')       action=otp ;;
+        '  Add OTP')   action=add-otp ;;
+        '  New login') action=new-login ;;
+        '') exit 0 ;;
+    esac
+fi
+
 case "$action" in
     username)  copy_username ;;
     password)  copy_password ;;
@@ -216,7 +242,7 @@ case "$action" in
     add-otp)   add_otp ;;
     new-login) new_login ;;
     *)
-        printf 'usage: %s {username|password|otp|add-otp|new-login}\n' \
+        printf 'usage: %s [username|password|otp|add-otp|new-login]\n' \
             "$(basename "$0")" >&2
         exit 2
         ;;

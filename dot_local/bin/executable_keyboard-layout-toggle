@@ -1,0 +1,31 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Keyboard' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+active_layout() {
+  swaymsg -t get_inputs --raw | awk '
+    /"type": "keyboard"/ {
+      keyboard = 1
+    }
+
+    keyboard && /"xkb_active_layout_name":/ {
+      sub(/^.*"xkb_active_layout_name": "/, "")
+      sub(/".*$/, "")
+      print
+      exit
+    }
+  '
+}
+
+require swaymsg
+
+swaymsg input type:keyboard xkb_switch_layout next >/dev/null
+layout="$(active_layout)"
+
+notify 'Keyboard' "${layout:-Layout switched}" input-keyboard normal

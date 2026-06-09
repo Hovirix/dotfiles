@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+app="${1:-System}"
+message="${2:-}"
+icon="${3:-dialog-information}"
+urgency="${4:-normal}"
+
+[ -n "$message" ] || exit 0
+
+if command -v notify-send >/dev/null 2>&1; then
+  notify-send -a "$app" -i "$icon" -u "$urgency" "$app" "$message"
+elif command -v fyi >/dev/null 2>&1; then
+  fyi "$app: $message"
+fi

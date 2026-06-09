@@ -14,7 +14,7 @@ outdir="${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}"
 mkdir -p "$outdir"
 outfile="$outdir/screenshot-$ts.png"
 
-notify_msg() { $notify && command -v notify-send >/dev/null && notify-send "screenshot" "$1" || true; }
+notify_msg() { $notify && command -v notify >/dev/null && notify 'Screenshot' "$1" camera-photo normal || true; }
 
 case "$action:$target" in
   copy:anything)

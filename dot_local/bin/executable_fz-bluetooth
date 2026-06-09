@@ -1,0 +1,201 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Bluetooth' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+menu_lines() {
+  max="$1"
+
+  awk -v max="$max" '
+    END {
+      lines = NR < 1 ? 1 : NR
+      if (lines > max) {
+        print max
+      } else {
+        print lines
+      }
+    }
+  '
+}
+
+power_state() {
+  bluetoothctl show | awk '/^[[:space:]]*Powered:/ { print $2; exit }'
+}
+
+power_action() {
+  if [ "$(power_state)" = yes ]; then
+    printf '󰂲  Disable Bluetooth\n'
+  else
+    printf '󰂯  Enable Bluetooth\n'
+  fi
+}
+
+device_name() {
+  mac="$1"
+
+  bluetoothctl info "$mac" | awk '
+    /^[[:space:]]*Alias:/ {
+      sub(/^[[:space:]]*Alias:[[:space:]]+/, "")
+      print
+      exit
+    }
+
+    /^[[:space:]]*Name:/ {
+      sub(/^[[:space:]]*Name:[[:space:]]+/, "")
+      name = $0
+    }
+
+    END {
+      if (name) {
+        print name
+      }
+    }
+  '
+}
+
+device_connected() {
+  mac="$1"
+
+  bluetoothctl info "$mac" | awk '/^[[:space:]]*Connected:/ { print $2; exit }'
+}
+
+devices() {
+  filter="${1:-}"
+
+  if [ -n "$filter" ]; then
+    bluetoothctl devices "$filter"
+  else
+    bluetoothctl devices
+  fi | while IFS= read -r line; do
+    set -- $line
+    [ "${1:-}" = Device ] || continue
+
+    mac="$2"
+    name="$(device_name "$mac")"
+    connected="$(device_connected "$mac")"
+
+    [ -n "$name" ] || name="$mac"
+
+    if [ "$connected" = yes ]; then
+      icon=''
+    else
+      icon=''
+    fi
+
+    printf '%s\t%s  %s\n' "$mac" "$icon" "$name"
+  done
+}
+
+pick_device() {
+  filter="$1"
+  prompt="$2"
+  list="$(devices "$filter")"
+
+  [ -n "$list" ] || {
+    notify 'Bluetooth' 'No devices found' bluetooth critical
+    exit 1
+  }
+
+  lines="$(printf '%s\n' "$list" | menu_lines 10)"
+  printf '%s\n' "$list" |
+    fuzzel --dmenu --width 52 --lines "$lines" --prompt "$prompt" --with-nth=2 --accept-nth=1
+}
+
+toggle_power() {
+  if [ "$(power_state)" = yes ]; then
+    bluetoothctl power off >/dev/null
+    notify 'Bluetooth' 'Disabled Bluetooth' bluetooth low
+  else
+    bluetoothctl power on >/dev/null
+    notify 'Bluetooth' 'Enabled Bluetooth' bluetooth normal
+  fi
+}
+
+scan_devices() {
+  bluetoothctl power on >/dev/null 2>&1 || true
+  bluetoothctl --timeout 6 scan on >/dev/null 2>&1 || true
+}
+
+scan_and_pick() {
+  scan_devices
+  pick_device '' 'Device: '
+}
+
+connect_device() {
+  mac="$(pick_device Paired 'Device: ')"
+  [ -n "$mac" ] || exit 0
+
+  bluetoothctl connect "$mac" >/dev/null
+  notify 'Bluetooth' "Connected $(device_name "$mac")" bluetooth normal
+}
+
+disconnect_device() {
+  mac="$(pick_device Connected 'Device: ')"
+  [ -n "$mac" ] || exit 0
+
+  bluetoothctl disconnect "$mac" >/dev/null
+  notify 'Bluetooth' "Disconnected $(device_name "$mac")" bluetooth low
+}
+
+pair_device() {
+  mac="$(scan_and_pick)"
+  [ -n "$mac" ] || exit 0
+
+  bluetoothctl agent KeyboardDisplay >/dev/null 2>&1 || true
+  bluetoothctl default-agent >/dev/null 2>&1 || true
+  bluetoothctl pair "$mac" >/dev/null
+  bluetoothctl trust "$mac" >/dev/null 2>&1 || true
+  bluetoothctl connect "$mac" >/dev/null 2>&1 || true
+  notify 'Bluetooth' "Paired $(device_name "$mac")" bluetooth normal
+}
+
+remove_device() {
+  mac="$(pick_device Paired 'Remove: ')"
+  [ -n "$mac" ] || exit 0
+
+  name="$(device_name "$mac")"
+  bluetoothctl remove "$mac" >/dev/null
+  notify 'Bluetooth' "Removed $name" bluetooth normal
+}
+
+status() {
+  state="$(power_state)"
+  connected="$(bluetoothctl devices Connected | awk 'END { print NR }')"
+  paired="$(bluetoothctl devices Paired | awk 'END { print NR }')"
+
+  printf '%s\n' \
+    "󰂯  Power  ·  $state" \
+    "  Connected  ·  $connected" \
+    "  Paired  ·  $paired" |
+    fuzzel --dmenu --width 34 --lines 3 --hide-prompt >/dev/null
+}
+
+require bluetoothctl
+require fuzzel
+
+action="$(printf '%s\n' \
+  "$(power_action)" \
+  '󰂱  Connect paired device' \
+  '󰂲  Disconnect device' \
+  '󰂰  Pair visible device' \
+  '󰩺  Remove paired device' \
+  '󰑐  Scan visible devices' \
+  '󰤨  Status' |
+  fuzzel --dmenu --width 40 --lines 7 --hide-prompt)"
+
+case "$action" in
+  '󰂲  Disable Bluetooth') toggle_power ;;
+  '󰂯  Enable Bluetooth') toggle_power ;;
+  '󰂱  Connect paired device') connect_device ;;
+  '󰂲  Disconnect device') disconnect_device ;;
+  '󰂰  Pair visible device') pair_device ;;
+  '󰩺  Remove paired device') remove_device ;;
+  '󰑐  Scan visible devices') scan_and_pick >/dev/null ;;
+  '󰤨  Status') status ;;
+  '') exit 0 ;;
+esac

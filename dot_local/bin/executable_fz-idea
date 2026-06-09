@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+idea_file="$HOME/Documents/notes/idea.md"
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Ideas' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+require fuzzel
+
+idea="$(fuzzel --dmenu --width 64 --prompt-only='Idea: ')"
+
+[ -n "$idea" ] || exit 0
+
+mkdir -p "$(dirname "$idea_file")"
+
+if [ ! -s "$idea_file" ]; then
+  printf '# Ideas\n\n' > "$idea_file"
+fi
+
+printf -- '- %s %s\n' "$(date '+%Y-%m-%d %H:%M')" "$idea" >> "$idea_file"
+notify 'Ideas' 'Idea captured' accessories-text-editor normal

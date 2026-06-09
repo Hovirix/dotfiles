@@ -1,0 +1,158 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Audio' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+devices() {
+  section="$1"
+
+  wpctl status | awk -v section="$section" '
+    /^Audio$/ {
+      in_audio = 1
+      next
+    }
+
+    /^Video$/ {
+      in_audio = 0
+      in_section = 0
+    }
+
+    in_audio && index($0, section) {
+      in_section = 1
+      next
+    }
+
+    in_section && (index($0, "Sources:") || index($0, "Filters:") || index($0, "Streams:")) {
+      if (section != "Sources:" || !index($0, "Sources:")) {
+        in_section = 0
+      }
+    }
+
+    in_section && match($0, /[0-9]+\./) {
+      line = $0
+      marker = line ~ /\*[[:space:]]*[0-9]+\./ ? "" : ""
+
+      sub(/^.*[0-9]+\. /, "", line)
+      sub(/[[:space:]]*\[vol:.*$/, "", line)
+
+      printf "%s  %s\n", marker, line
+    }
+  '
+}
+
+device_id() {
+  section="$1"
+  label="$2"
+
+  wpctl status | awk -v section="$section" -v label="$label" '
+    /^Audio$/ {
+      in_audio = 1
+      next
+    }
+
+    /^Video$/ {
+      in_audio = 0
+      in_section = 0
+    }
+
+    in_audio && index($0, section) {
+      in_section = 1
+      next
+    }
+
+    in_section && (index($0, "Sources:") || index($0, "Filters:") || index($0, "Streams:")) {
+      if (section != "Sources:" || !index($0, "Sources:")) {
+        in_section = 0
+      }
+    }
+
+    in_section && match($0, /[0-9]+\./) {
+      line = $0
+      id = substr(line, RSTART, RLENGTH - 1)
+
+      sub(/^.*[0-9]+\. /, "", line)
+      sub(/[[:space:]]*\[vol:.*$/, "", line)
+
+      if (line == label) {
+        print id
+        exit
+      }
+    }
+  '
+}
+
+menu_lines() {
+  max="$1"
+
+  awk -v max="$max" '
+    END {
+      lines = NR < 1 ? 1 : NR
+      if (lines > max) {
+        print max
+      } else {
+        print lines
+      }
+    }
+  '
+}
+
+pick_device() {
+  section="$1"
+  list="$(devices "$section")"
+  selection=""
+  label=""
+
+  [ -n "$list" ] || {
+    notify 'Audio' 'No audio devices found' audio-volume-high critical
+    exit 1
+  }
+
+  lines="$(printf '%s\n' "$list" | menu_lines 6)"
+
+  selection="$(printf '%s\n' "$list" | fuzzel --dmenu --width 56 --lines "$lines" --hide-prompt)"
+  [ -n "$selection" ] || exit 0
+
+  label="$(printf '%s' "$selection" | sed 's/^[^ ]*  //')"
+  device_id "$section" "$label"
+}
+
+set_output() {
+  sink="$(pick_device 'Sinks:')"
+
+  [ -n "$sink" ] || exit 0
+
+  wpctl set-default "$sink"
+  notify 'Audio' 'Default output changed' audio-volume-high normal
+}
+
+set_input() {
+  source="$(pick_device 'Sources:')"
+
+  [ -n "$source" ] || exit 0
+
+  wpctl set-default "$source"
+  notify 'Audio' 'Default input changed' audio-volume-high normal
+}
+
+require fuzzel
+require wpctl
+
+choice="$(printf '%s\n' \
+  ' Output device' \
+  '  Input device' |
+  fuzzel --dmenu --width 32 --lines 2 --hide-prompt)"
+
+case "$choice" in
+  ' Output device')
+    set_output
+    ;;
+  '  Input device')
+    set_input
+    ;;
+  '') exit 0 ;;
+esac

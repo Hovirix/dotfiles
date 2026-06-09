@@ -1,0 +1,67 @@
+#!/bin/sh
+set -eu
+
+uri="${LIBVIRT_DEFAULT_URI:-qemu:///system}"
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Virtual Machines' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+domains() {
+  virsh --connect "$uri" list --all --name | while IFS= read -r domain; do
+    [ -n "$domain" ] || continue
+
+    state="$(virsh --connect "$uri" domstate "$domain" 2>/dev/null || printf unknown)"
+
+    case "$state" in
+      running) icon='' ;;
+      *) icon='' ;;
+    esac
+
+    printf '%s  %s\n' "$icon" "$domain"
+  done
+}
+
+menu_lines() {
+  max="$1"
+
+  awk -v max="$max" '
+    END {
+      lines = NR < 1 ? 1 : NR
+      if (lines > max) {
+        print max
+      } else {
+        print lines
+      }
+    }
+  '
+}
+
+require fuzzel
+require virsh
+require virt-manager
+
+list="$(domains)"
+
+[ -n "$list" ] || {
+  notify 'Virtual Machines' 'No VMs found' computer critical
+  exit 1
+}
+
+lines="$(printf '%s\n' "$list" | menu_lines 8)"
+vm="$(printf '%s\n' "$list" | fuzzel --dmenu --width 36 --lines "$lines" --hide-prompt | sed 's/^[^ ]*  //')"
+
+[ -n "$vm" ] || exit 0
+
+state="$(virsh --connect "$uri" domstate "$vm")"
+
+if [ "$state" != running ]; then
+  virsh --connect "$uri" start "$vm" >/dev/null
+  notify 'Virtual Machines' "Started $vm" computer normal
+fi
+
+virt-manager --connect "$uri" --show-domain-console "$vm" >/dev/null 2>&1 &
+notify 'Virtual Machines' "Opened $vm" computer normal

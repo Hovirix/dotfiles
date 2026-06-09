@@ -1,0 +1,70 @@
+#!/bin/sh
+set -eu
+
+require() {
+  command -v "$1" >/dev/null 2>&1 || {
+    notify 'Power' "$1 not found" dialog-error critical
+    exit 1
+  }
+}
+
+confirm() {
+  action="$1"
+
+  choice="$(printf '%s\n' \
+    "  Confirm $action" \
+    '  Cancel' |
+    fuzzel --dmenu --width 34 --lines 2 --hide-prompt)"
+
+  [ "$choice" = "  Confirm $action" ]
+}
+
+lock() {
+  require swaylock
+
+  if [ -f "$HOME/.config/sway/swaylock.conf" ]; then
+    swaylock -C "$HOME/.config/sway/swaylock.conf"
+  else
+    swaylock
+  fi
+}
+
+poweroff_system() {
+  confirm poweroff || exit 0
+  systemctl poweroff
+}
+
+reboot_system() {
+  confirm reboot || exit 0
+  systemctl reboot
+}
+
+reboot_uefi() {
+  confirm 'reboot to UEFI' || exit 0
+  systemctl reboot --firmware-setup
+}
+
+hard_reboot() {
+  confirm 'hard reboot' || exit 0
+  systemctl reboot --force --force
+}
+
+require fuzzel
+require systemctl
+
+choice="$(printf '%s\n' \
+  '  Lock' \
+  '  Power off' \
+  '  Reboot' \
+  '󰘳  Reboot to UEFI' \
+  '  Hard reboot' |
+  fuzzel --dmenu --width 34 --lines 5 --hide-prompt)"
+
+case "$choice" in
+  '  Lock') lock ;;
+  '  Power off') poweroff_system ;;
+  '  Reboot') reboot_system ;;
+  '󰘳  Reboot to UEFI') reboot_uefi ;;
+  '  Hard reboot') hard_reboot ;;
+  '') exit 0 ;;
+esac

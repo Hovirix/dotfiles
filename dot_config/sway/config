@@ -89,7 +89,11 @@ output HDMI-A-1 {
 # Inputs
 # ------------------------------------------------
 
-input * xkb_options ctrl:nocaps
+input type:keyboard {
+  xkb_layout us,us
+  xkb_variant ,intl
+  xkb_options ctrl:nocaps
+}
 
 input type:touchpad {
   dwt enabled
@@ -179,21 +183,22 @@ bindsym Control+4              exec flatpak run md.obsidian.Obsidian
 bindsym Control+5              exec flatpak run io.freetubeapp.FreeTube
 
 # Scripts
-bindsym $mod+c                 exec toggle-swayidle
-bindsym $mod+i                 exec fuzzel-pass new-login
-bindsym $mod+Shift+i           exec fuzzel-pass add-otp
-bindsym $mod+p                 exec fuzzel-pass password
-bindsym $mod+u                 exec fuzzel-pass username
-bindsym $mod+o                 exec fuzzel-pass otp
-bindsym $mod+w                 exec toggle-tailscale
+bindsym $mod+c                 exec swayidle-toggle
+bindsym $mod+p                 exec fz-pass
+bindsym $mod+a                 exec fz-audio
+bindsym $mod+v                 exec fz-vm
+bindsym $mod+d                 exec fz-display
+bindsym $mod+w                 exec fz-wifi
+bindsym $mod+Shift+w           exec fz-bluetooth
+bindsym $mod+n                 exec fz-documents
+bindsym $mod+m                 exec fz-idea
+bindsym $mod+space             exec keyboard-layout-toggle
 
 # Screenshots
-bindsym $mod+s                 exec grimlite --notify copy anything
-bindsym $mod+Ctrl+s            exec grimlite --notify save anything
-bindsym $mod+Ctrl+Mod1+s       exec grimlite --notify save screen
+bindsym $mod+s                 exec fz-screenshot
 
 # Brightness
-bindsym $mod+b                exec brightnessctl --quiet --save set 100%
+bindsym $mod+b                exec fz-battery
 bindsym $mod+Shift+b          exec brightnessctl --quiet --save set 0%
 bindsym XF86MonBrightnessUp   exec brightness-osd up
 bindsym XF86MonBrightnessDown exec brightness-osd down
@@ -209,12 +214,10 @@ bindsym $mod+t               floating toggle
 bindsym $mod+f               fullscreen toggle
 
 # Sway
-bindsym $mod+Shift+e         exec swaymsg exit
+bindsym $mod+Shift+e         exec fz-power
 bindsym $mod+Shift+r         exec swaymsg reload
 
 # Sys
-bindsym $mod+Shift+Ctrl+r    exec reboot
-bindsym $mod+Shift+Ctrl+p    exec poweroff
 bindsym $mod+Shift+Ctrl+s    exec loginctl suspend
 
 # Focus / move
