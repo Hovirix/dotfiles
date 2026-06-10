@@ -12,16 +12,16 @@ require fuzzel
 require grimlite
 
 choice="$(printf '%s\n' \
-  '󰹑  Copy selection' \
+  '󰆏  Copy selection' \
   '󰹑  Save selection' \
-  '󰍹  Copy screen' \
+  '  Copy screen' \
   '󰍹  Save screen' |
   fuzzel --dmenu --width 34 --lines 4 --hide-prompt)"
 
 case "$choice" in
-  '󰹑  Copy selection') grimlite --notify copy anything ;;
+  '󰆏  Copy selection') grimlite --notify copy anything ;;
   '󰹑  Save selection') grimlite --notify save anything ;;
-  '󰍹  Copy screen') grimlite --notify copy screen ;;
+  '  Copy screen') grimlite --notify copy screen ;;
   '󰍹  Save screen') grimlite --notify save screen ;;
   '') exit 0 ;;
 esac
