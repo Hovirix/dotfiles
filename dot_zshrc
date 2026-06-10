@@ -173,6 +173,7 @@ alias ncg='nix-collect-garbage -d && nix-store --gc && nix-store --repair --veri
 # Global aliases
 alias -g G='| rg'
 alias -g B='| bat'
+alias -g F='| fzf'
 alias -g C='| wl-copy'
 
 # -----------------------------------------------------
