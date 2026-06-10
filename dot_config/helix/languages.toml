@@ -113,6 +113,11 @@ language-servers = [
   "biome",
 ]
 
+[[language]]
+name = "markdown"
+roots = [".zk"]
+language-servers = ["zk"]
+
 # ----------------------------------------------------
 # LSP
 # ----------------------------------------------------
@@ -127,6 +132,10 @@ args = ["--stdio"]
 [language-server.tofu-ls]
 command = "tofu-ls"
 args = ["serve"]
+
+[language-server.zk]
+command = "zk"
+args = ["lsp"]
 
 # [language-server.clangd]
 # command = "clangd"
