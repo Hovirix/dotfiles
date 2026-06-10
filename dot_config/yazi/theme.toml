@@ -121,6 +121,7 @@ dirs = [
   { name = "Pictures", text = "", fg = "#cba6f7" },
   { name = "Public", text = "", fg = "#a6e3a1" },
   { name = "Videos", text = "", fg = "#fab387" },
+  { name = "VM", text = "", fg = "#89b4fa" },
   { name = "Projects", text = "", fg = "#89d185" },
 ]
 
