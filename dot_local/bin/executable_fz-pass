@@ -65,7 +65,7 @@ url_encode() {
 # -----------------------------------------------------------------------------
 
 entries() {
-    pass git ls-files --cached --others --exclude-standard '*.gpg' 2>/dev/null |
+    pass git ls-files '*.gpg' 2>/dev/null |
         sed 's|\.gpg$||' |
         sort
 }
