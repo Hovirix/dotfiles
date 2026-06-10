@@ -11,7 +11,7 @@ config.adjust_window_size_when_changing_font_size = false
 
 do
   local scheme = wezterm.color.get_builtin_schemes()["Catppuccin Mocha"]
-  scheme.ansi[5] = "#fab387" -- blue → peach
+  scheme.ansi[5] = "#fab387"
   scheme.brights[5] = "#fab387"
 
   scheme.tab_bar = {
@@ -49,57 +49,72 @@ end
 config.font = wezterm.font("JetBrains Mono")
 config.font_size = 12
 config.hide_tab_bar_if_only_one_tab = true
--- config.line_height = 1.1
 config.prefer_to_spawn_tabs = true
 config.show_new_tab_button_in_tab_bar = false
-config.tab_max_width = 1000
+config.tab_max_width = 32
 config.use_fancy_tab_bar = false
 
 ------------------------------------------------------
---  KeyAssignment enumeration
+-- Tab Helpers
+------------------------------------------------------
+
+local function activate_or_spawn_slot(window, _pane, slot)
+  local mux_window = window:mux_window()
+  local target_index = slot - 1
+
+  for _, tab_info in ipairs(mux_window:tabs_with_info()) do
+    if tab_info.index == target_index then
+      tab_info.tab:activate()
+      return
+    end
+  end
+
+  local tab
+  repeat
+    tab = mux_window:spawn_tab({})
+  until #mux_window:tabs_with_info() > target_index
+
+  tab:activate()
+end
+
+------------------------------------------------------
+-- Key Assignments
 ------------------------------------------------------
 
 config.keys = {
-  -- { key = 'p', mods = 'ALT', action = wezterm.action.ActivateCommandPalette, },
+  -- Utility
+  { key = " ", mods = "ALT", action = act.QuickSelect },
+  { key = "/", mods = "ALT", action = act.Search({ CaseInSensitiveString = "" }) },
+  { key = "c", mods = "ALT", action = act.CharSelect },
   { key = "v", mods = "ALT", action = act.ActivateCopyMode },
 
-  { key = "h", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Left", 5 }) },
-  { key = "l", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Right", 5 }) },
-  { key = "k", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Up", 5 }) },
-  { key = "j", mods = "ALT|CTRL", action = wezterm.action.AdjustPaneSize({ "Down", 5 }) },
-
-  { key = "c", mods = "ALT", action = wezterm.action.CharSelect },
-
-  -- General
-  { key = "f", mods = "ALT", action = act.TogglePaneZoomState },
-  { key = "q", mods = "ALT", action = act.CloseCurrentPane({ confirm = false }) },
-  { key = " ", mods = "ALT", action = wezterm.action.QuickSelect },
-
-  -- Search
-  { key = "/", mods = "ALT", action = act.Search({ CaseInSensitiveString = "" }) },
-
-  -- Copy / Paste
+  -- Clipboard
   { key = "c", mods = "SHIFT|CTRL", action = act.CopyTo("Clipboard") },
   { key = "v", mods = "SHIFT|CTRL", action = act.PasteFrom("Clipboard") },
 
-  -- Focus / Move
+  -- Panes
+  { key = "f", mods = "ALT", action = act.TogglePaneZoomState },
   { key = "h", mods = "ALT", action = act.ActivatePaneDirection("Left") },
-  { key = "l", mods = "ALT", action = act.ActivatePaneDirection("Right") },
   { key = "j", mods = "ALT", action = act.ActivatePaneDirection("Down") },
   { key = "k", mods = "ALT", action = act.ActivatePaneDirection("Up") },
+  { key = "l", mods = "ALT", action = act.ActivatePaneDirection("Right") },
+  { key = "q", mods = "ALT", action = act.CloseCurrentPane({ confirm = false }) },
+
+  -- Pane resize
+  { key = "h", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Left", 5 }) },
+  { key = "j", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Down", 5 }) },
+  { key = "k", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Up", 5 }) },
+  { key = "l", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Right", 5 }) },
 
   -- Splits
   { key = "-", mods = "ALT", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
   { key = "=", mods = "ALT", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 
+  -- Scrollback
   { key = "UpArrow", mods = "ALT", action = act.ScrollByLine(-1) },
   { key = "DownArrow", mods = "ALT", action = act.ScrollByLine(1) },
   { key = "PageUp", mods = "ALT", action = act.ScrollByPage(-1) },
   { key = "PageDown", mods = "ALT", action = act.ScrollByPage(1) },
-
-  -- Resize
-
-  -- Copy mode
 }
 
 for i = 1, 9 do
@@ -107,24 +122,15 @@ for i = 1, 9 do
     key = tostring(i),
     mods = "ALT",
     action = wezterm.action_callback(function(window, pane)
-      local tab = window:mux_window():tabs()[i]
-
-      if tab then
-        tab:activate()
-      else
-        window:perform_action(act.SpawnTab("CurrentPaneDomain"), pane)
-      end
+      activate_or_spawn_slot(window, pane, i)
     end),
   })
 
   table.insert(config.keys, {
     key = tostring(i),
     mods = "CTRL|ALT",
-    action = act.MoveTab(i),
+    action = act.MoveTab(i - 1),
   })
 end
-return config
 
-------------------------------------------------------
---  CopyModeAssignment enumeration
-------------------------------------------------------
+return config
