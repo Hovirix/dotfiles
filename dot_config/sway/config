@@ -126,10 +126,11 @@ focus_on_window_activation focus
 
 for_window [app_id="(?i).*librewolf.*"]    move to workspace $ws1, focus
 for_window [app_id="(?i).*virt-manager.*"] move to workspace $ws2, focus
+for_window [app_id="(?i).*qemu.*"]         move to workspace $ws2, focus
 for_window [app_id="(?i).*wezterm.*"]      move to workspace $ws3, focus
 for_window [app_id="(?i).*obsidian.*"]     move to workspace $ws4, focus
 for_window [app_id="(?i).*freetube.*"]     move to workspace $ws5, focus
-for_window [title="(?i).*bitwarden.*"]     floating enable
+for_window [app_id="notes-scratch"]        floating enable, move scratchpad, scratchpad show, focus
 
 # -------------------------------
 # Workspace
@@ -190,8 +191,8 @@ bindsym $mod+v                 exec fz-vm
 bindsym $mod+d                 exec fz-display
 bindsym $mod+w                 exec fz-wifi
 bindsym $mod+Shift+w           exec fz-bluetooth
-bindsym $mod+n                 exec fz-documents
-bindsym $mod+m                 exec fz-idea
+bindsym $mod+n                 exec fz-notes
+bindsym $mod+o                 exec fz-open
 bindsym $mod+space             exec keyboard-layout-toggle
 
 # Screenshots
