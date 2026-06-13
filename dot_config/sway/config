@@ -200,7 +200,6 @@ bindsym $mod+s                 exec fz-screenshot
 
 # Brightness
 bindsym $mod+b                exec fz-battery
-bindsym $mod+Shift+b          exec brightnessctl --quiet --save set 0%
 bindsym XF86MonBrightnessUp   exec brightness-osd up
 bindsym XF86MonBrightnessDown exec brightness-osd down
 

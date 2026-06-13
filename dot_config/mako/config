@@ -3,7 +3,7 @@ max-visible=4
 max-history=20
 group-by=app-name,summary
 
-default-timeout=3500
+default-timeout=3000
 ignore-timeout=0
 
 anchor=top-right
@@ -42,6 +42,15 @@ format=(%g) <b>%s</b>\n%b
 [urgency=low]
 default-timeout=2000
 border-color=#fab387
+
+[app-name=Brightness]
+width=320
+height=56
+padding=10,12
+format=<b>%s</b>
+default-timeout=700
+border-color=#7f849c
+progress-color=over #7f849c
 
 [urgency=normal]
 default-timeout=3500

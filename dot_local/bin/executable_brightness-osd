@@ -1,24 +1,55 @@
 #!/bin/sh
-# Adjust brightness and show a notification (progress-bar with mako)
+set -eu
 
-dir=${1:-up}
-step=${2:-5%}
+action="${1:-up}"
+step="${2:-5%}"
+min_pct=5
 
-if [ "$dir" = "up" ]; then
-  brightnessctl set "+$step"
-else
-  brightnessctl set "${step}-"
-fi
+require() {
+  command -v "$1" >/dev/null 2>&1 || exit 1
+}
 
-cur=$(brightnessctl g)
-max=$(brightnessctl m)
-pct=$((100 * cur / max))
+current_pct() {
+  cur="$(brightnessctl g)"
+  max="$(brightnessctl m)"
+  printf '%s\n' "$((100 * cur / max))"
+}
 
-notify-send -p \
-  -a "Brightness" \
-  -h int:value:"$pct" \
-  -h string:x-canonical-private-synchronous:brightness \
-  -h string:category:device \
-  -u low \
-  -t 900 \
-  "Brightness: ${pct}%"
+show_osd() {
+  pct="$1"
+
+  notify-send \
+    -a 'Brightness' \
+    -i display-brightness \
+    -h int:value:"$pct" \
+    -h string:x-canonical-private-synchronous:brightness \
+    -h string:category:device \
+    -u normal \
+    -t 700 \
+    'Brightness' \
+    ''
+}
+
+require brightnessctl
+require notify-send
+
+case "$action" in
+  up)
+    brightnessctl --quiet --save set "+$step"
+    ;;
+  down)
+    brightnessctl --quiet --save set "${step}-"
+    pct="$(current_pct)"
+    if [ "$pct" -lt "$min_pct" ]; then
+      brightnessctl --quiet --save set "${min_pct}%"
+    fi
+    ;;
+  set)
+    brightnessctl --quiet --save set "${step}"
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+
+show_osd "$(current_pct)"
