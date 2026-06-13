@@ -268,12 +268,12 @@ outputs_width() {
 pick_main() {
   printf '%s\n' \
     '󰍹  Configure display' \
-    '󰌢  Laptop only' \
-    '󰍺  External only' \
-    '󰹑  Mirror laptop' \
-    '󰹑  Extend right' \
-    '󰹑  Extend left' |
-    fuzzel --dmenu --width 34 --lines 6 --hide-prompt
+    '  Laptop only' \
+    '󰍹  External only' \
+    '󱞠  Mirror laptop' \
+    '󰜴  Extend right' \
+    '󰜱  Extend left' |
+    fuzzel --namespace=fz-display --dmenu --width 34 --lines 6 --hide-prompt
 }
 
 pick_output() {
@@ -285,7 +285,7 @@ pick_output() {
   }
 
   lines="$(printf '%s\n' "$list" | menu_lines 6)"
-  selection="$(printf '%s\n' "$list" | fuzzel --dmenu --width 56 --lines "$lines" --hide-prompt)"
+  selection="$(printf '%s\n' "$list" | fuzzel --namespace=fz-display --dmenu --width 56 --lines "$lines" --hide-prompt)"
 
   [ -n "$selection" ] || exit 0
 
@@ -296,7 +296,7 @@ pick_action() {
   printf '%s\n' \
     '󰍹  Choose mode' \
     '󰍹  Scale' |
-    fuzzel --dmenu --width 34 --lines 2 --hide-prompt
+    fuzzel --namespace=fz-display --dmenu --width 34 --lines 2 --hide-prompt
 }
 
 set_mode() {
@@ -310,7 +310,7 @@ set_mode() {
   }
 
   lines="$(printf '%s\n' "$list" | menu_lines 10)"
-  mode="$(printf '%s\n' "$list" | fuzzel --dmenu --width 34 --lines "$lines" --prompt 'Mode: ' | sed 's/^[^ ]*  //')"
+  mode="$(printf '%s\n' "$list" | fuzzel --namespace=fz-display --dmenu --width 34 --lines "$lines" --prompt 'Mode: ' | sed 's/^[^ ]*  //')"
 
   [ -n "$mode" ] || exit 0
 
@@ -326,7 +326,7 @@ set_scale() {
     '  1.25' \
     '  1.5' \
     '  2' |
-    fuzzel --dmenu --width 24 --lines 4 --hide-prompt |
+    fuzzel --namespace=fz-display --dmenu --width 24 --lines 4 --hide-prompt |
     sed 's/^[^ ]*  //')"
 
   [ -n "$scale" ] || exit 0
@@ -465,10 +465,10 @@ action="$(pick_main)"
 
 case "$action" in
   '󰍹  Configure display') configure_display ;;
-  '󰌢  Laptop only') laptop_only ;;
-  '󰍺  External only') external_only ;;
-  '󰹑  Mirror laptop') mirror_laptop ;;
-  '󰹑  Extend right') extend_right ;;
-  '󰹑  Extend left') extend_left ;;
+  '  Laptop only') laptop_only ;;
+  '󰍹  External only') external_only ;;
+  '󱞠  Mirror laptop') mirror_laptop ;;
+  '󰜴  Extend right') extend_right ;;
+  '󰜱  Extend left') extend_left ;;
   '') exit 0 ;;
 esac

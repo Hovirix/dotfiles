@@ -114,7 +114,7 @@ pick_device() {
 
   lines="$(printf '%s\n' "$list" | menu_lines 6)"
 
-  selection="$(printf '%s\n' "$list" | fuzzel --dmenu --width 56 --lines "$lines" --hide-prompt)"
+  selection="$(printf '%s\n' "$list" | fuzzel --namespace=fz-audio --dmenu --width 56 --lines "$lines" --hide-prompt)"
   [ -n "$selection" ] || exit 0
 
   label="$(printf '%s' "$selection" | sed 's/^[^ ]*  //')"
@@ -145,7 +145,7 @@ require wpctl
 choice="$(printf '%s\n' \
   ' Output device' \
   '  Input device' |
-  fuzzel --dmenu --width 32 --lines 2 --hide-prompt)"
+  fuzzel --namespace=fz-audio --dmenu --width 32 --lines 2 --hide-prompt)"
 
 case "$choice" in
   ' Output device')

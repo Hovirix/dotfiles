@@ -52,7 +52,7 @@ list="$(domains)"
 }
 
 lines="$(printf '%s\n' "$list" | menu_lines 8)"
-vm="$(printf '%s\n' "$list" | fuzzel --dmenu --width 36 --lines "$lines" --hide-prompt | sed 's/^[^ ]*  //')"
+vm="$(printf '%s\n' "$list" | fuzzel --namespace=fz-vm --dmenu --width 36 --lines "$lines" --hide-prompt | sed 's/^[^ ]*  //')"
 
 [ -n "$vm" ] || exit 0
 

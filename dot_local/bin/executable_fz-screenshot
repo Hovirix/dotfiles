@@ -16,7 +16,7 @@ choice="$(printf '%s\n' \
   '󰹑  Save selection' \
   '  Copy screen' \
   '󰍹  Save screen' |
-  fuzzel --dmenu --width 34 --lines 4 --hide-prompt)"
+  fuzzel --namespace=fz-screenshot --dmenu --width 34 --lines 4 --hide-prompt)"
 
 case "$choice" in
   '󰆏  Copy selection') grimlite --notify copy anything ;;

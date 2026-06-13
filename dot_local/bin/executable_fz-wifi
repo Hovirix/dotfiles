@@ -160,7 +160,7 @@ connect_visible() {
 
   lines="$(printf '%s\n' "$list" | menu_lines 12)"
   selection="$(printf '%s\n' "$list" |
-    fuzzel --dmenu --width 58 --lines "$lines" --prompt 'Network: ')"
+    fuzzel --namespace=fz-wifi --dmenu --width 58 --lines "$lines" --prompt 'Network: ')"
 
   [ -n "$selection" ] || exit 0
 
@@ -173,7 +173,7 @@ connect_visible() {
   fi
 
   if [ "$security" != open ]; then
-    passphrase="$(fuzzel --dmenu --width 44 --password --prompt-only='Passphrase: ')"
+    passphrase="$(fuzzel --namespace=fz-wifi --dmenu --width 44 --password --prompt-only='Passphrase: ')"
     [ -n "$passphrase" ] || exit 0
     iwctl --passphrase "$passphrase" station "$station" connect "$network"
     notify 'Wi-Fi' "Connected to $network" network-wireless normal
@@ -195,7 +195,7 @@ forget_network() {
 
   lines="$(printf '%s\n' "$list" | menu_lines 12)"
   network="$(printf '%s\n' "$list" |
-    fuzzel --dmenu --width 48 --lines "$lines" --prompt 'Forget: ' |
+    fuzzel --namespace=fz-wifi --dmenu --width 48 --lines "$lines" --prompt 'Forget: ' |
     sed 's/^[^ ]*  //')"
 
   [ -n "$network" ] || exit 0
@@ -284,7 +284,7 @@ show_status() {
   }
 
   lines="$(printf '%s\n' "$list" | menu_lines 8)"
-  printf '%s\n' "$list" | fuzzel --dmenu --width 54 --lines "$lines" --hide-prompt >/dev/null
+  printf '%s\n' "$list" | fuzzel --namespace=fz-wifi --dmenu --width 54 --lines "$lines" --hide-prompt >/dev/null
 }
 
 require fuzzel
@@ -302,7 +302,7 @@ action="$(printf '%s\n' \
   "$(power_action "$station")" \
   '󰤮  Forget known network' \
   '󰤨  Status' |
-  fuzzel --dmenu --width 40 --lines 4 --hide-prompt)"
+  fuzzel --namespace=fz-wifi --dmenu --width 40 --lines 4 --hide-prompt)"
 
 case "$action" in
   '󰤭  Disable Wi-Fi') toggle_power "$station" ;;

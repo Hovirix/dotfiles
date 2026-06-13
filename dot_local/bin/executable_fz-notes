@@ -12,59 +12,12 @@ require() {
   }
 }
 
-menu_lines() {
-  max="$1"
-
-  awk -v max="$max" '
-    END {
-      lines = NR < 1 ? 1 : NR
-      if (lines > max) {
-        print max
-      } else {
-        print lines
-      }
-    }
-  '
-}
-
 launch_note_window() {
   wezterm-gui start --always-new-process --class notes-scratch "$@" >/dev/null 2>&1 &
 }
 
-open_note() {
-  note="$1"
-
-  [ -n "$note" ] || exit 0
-
-  launch_note_window zk edit "$note"
-}
-
-open_file() {
-  file="$1"
-
-  [ -n "$file" ] || exit 0
-
-  launch_note_window hx "$file"
-}
-
-note_picker() {
-  title="$1"
-  shift
-
-  list="$(zk list --quiet --format '{{path}}	{{path}}' "$@")"
-
-  [ -n "$list" ] || {
-    notify 'Notes' 'No notes found' accessories-text-editor normal
-    exit 0
-  }
-
-  lines="$(printf '%s\n' "$list" | menu_lines 12)"
-  printf '%s\n' "$list" |
-    fuzzel --dmenu --width 70 --lines "$lines" --prompt "$title: " --with-nth=2 --accept-nth=1
-}
-
 new_note() {
-  title="$(fuzzel --dmenu --width 56 --prompt-only='New note: ')"
+  title="$(fuzzel --namespace=fz-notes --dmenu --width 56 --prompt-only='New note: ')"
   [ -n "$title" ] || exit 0
 
   launch_note_window zk new --title "$title"
@@ -72,7 +25,7 @@ new_note() {
 }
 
 append_idea() {
-  idea="$(fuzzel --dmenu --width 64 --prompt-only='Idea: ')"
+  idea="$(fuzzel --namespace=fz-notes --dmenu --width 64 --prompt-only='Idea: ')"
   [ -n "$idea" ] || exit 0
 
   mkdir -p "$notes_dir"
@@ -85,7 +38,7 @@ append_idea() {
 }
 
 append_todo() {
-  item="$(fuzzel --dmenu --width 64 --prompt-only='Todo: ')"
+  item="$(fuzzel --namespace=fz-notes --dmenu --width 64 --prompt-only='Todo: ')"
   [ -n "$item" ] || exit 0
 
   mkdir -p "$notes_dir"
@@ -97,29 +50,7 @@ append_todo() {
   notify 'Notes' 'Todo added' checkbox normal
 }
 
-open_recent() {
-  note="$(note_picker 'Recent' --sort modified-)"
-  open_note "$note"
-}
-
-open_tagged() {
-  tags="$(zk tag list --quiet --format name --sort name)"
-
-  [ -n "$tags" ] || {
-    notify 'Notes' 'No tags found' tag normal
-    exit 0
-  }
-
-  lines="$(printf '%s\n' "$tags" | menu_lines 12)"
-  tag="$(printf '%s\n' "$tags" | fuzzel --dmenu --width 34 --lines "$lines" --prompt 'Tag: ')"
-  [ -n "$tag" ] || exit 0
-
-  note="$(note_picker "#$tag" --tag "$tag" --sort modified-)"
-  open_note "$note"
-}
-
 require fuzzel
-require hx
 require notify
 require wezterm-gui
 require zk
@@ -127,30 +58,18 @@ require zk
 case "${1:-menu}" in
   new) new_note ;;
   add-idea) append_idea ;;
-  open-ideas) open_file "$idea_file" ;;
   add-todo) append_todo ;;
-  open-todo) open_file "$todo_file" ;;
-  recent) open_recent ;;
-  tags) open_tagged ;;
   menu)
     choice="$(printf '%s\n' \
-      '󰎔  New note' \
-      '  Add idea' \
-      '󰛨  Open ideas' \
-      '󰄱  Add todo' \
-      '󰐕  Open todo' \
-      '󰧮  Recent notes' \
-      '󰡷  Tags' |
-      fuzzel --dmenu --width 36 --lines 7 --hide-prompt)"
+      '  Idea' \
+      '󰄱  Todo' \
+      '󰎔  New note' |
+      fuzzel --namespace=fz-notes --dmenu --width 32 --lines 3 --hide-prompt)"
 
     case "$choice" in
+      '  Idea') append_idea ;;
+      '󰄱  Todo') append_todo ;;
       '󰎔  New note') new_note ;;
-      '  Add idea') append_idea ;;
-      '󰛨  Open ideas') open_file "$idea_file" ;;
-      '󰄱  Add todo') append_todo ;;
-      '󰐕  Open todo') open_file "$todo_file" ;;
-      '󰧮  Recent notes') open_recent ;;
-      '󰡷  Tags') open_tagged ;;
       '') exit 0 ;;
     esac
     ;;

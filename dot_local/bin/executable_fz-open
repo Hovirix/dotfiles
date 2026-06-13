@@ -48,9 +48,16 @@ recent_files() {
     "${XDG_MUSIC_DIR:-$HOME/Music}" \
     "${XDG_DESKTOP_DIR:-$HOME/Desktop}"; do
     [ -d "$dir" ] || continue
-    fd --type f . "$dir" --exec stat --format '%Y	%n' {}
+    fd \
+      --type f \
+      --exclude .git \
+      --exclude .obsidian \
+      --exclude .trash \
+      --exclude '00 - Attachements' \
+      . "$dir" --exec stat --format '%Y	%n' {}
   done |
     sort -rn |
+    sed 100q |
     cut -f2- |
     while IFS= read -r file; do
       icon="$(icon_for "$file")"
@@ -73,9 +80,8 @@ list="$(recent_files)"
 
 lines="$(printf '%s\n' "$list" | menu_lines 14)"
 file="$(printf '%s\n' "$list" |
-  fuzzel --dmenu --width 74 --lines "$lines" --prompt 'Open: ' --with-nth=2 --accept-nth=1)"
+  fuzzel --namespace=fz-open --dmenu --width 74 --lines "$lines" --prompt 'Open: ' --with-nth=2 --accept-nth=1)"
 
 [ -n "$file" ] || exit 0
 
 xdg-open "$file" >/dev/null 2>&1 &
-notify 'Open' "Opened ${file##*/}" folder-open normal

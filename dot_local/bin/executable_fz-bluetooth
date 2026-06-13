@@ -103,7 +103,7 @@ pick_device() {
 
   lines="$(printf '%s\n' "$list" | menu_lines 10)"
   printf '%s\n' "$list" |
-    fuzzel --dmenu --width 52 --lines "$lines" --prompt "$prompt" --with-nth=2 --accept-nth=1
+    fuzzel --namespace=fz-bluetooth --dmenu --width 52 --lines "$lines" --prompt "$prompt" --with-nth=2 --accept-nth=1
 }
 
 toggle_power() {
@@ -172,7 +172,7 @@ status() {
     "󰂯  Power  ·  $state" \
     "  Connected  ·  $connected" \
     "  Paired  ·  $paired" |
-    fuzzel --dmenu --width 34 --lines 3 --hide-prompt >/dev/null
+    fuzzel --namespace=fz-bluetooth --dmenu --width 34 --lines 3 --hide-prompt >/dev/null
 }
 
 require bluetoothctl
@@ -184,9 +184,8 @@ action="$(printf '%s\n' \
   '󰂲  Disconnect device' \
   '󰂰  Pair visible device' \
   '󰩺  Remove paired device' \
-  '󰑐  Scan visible devices' \
   '󰤨  Status' |
-  fuzzel --dmenu --width 40 --lines 7 --hide-prompt)"
+  fuzzel --namespace=fz-bluetooth --dmenu --width 40 --lines 6 --hide-prompt)"
 
 case "$action" in
   '󰂲  Disable Bluetooth') toggle_power ;;
@@ -195,7 +194,6 @@ case "$action" in
   '󰂲  Disconnect device') disconnect_device ;;
   '󰂰  Pair visible device') pair_device ;;
   '󰩺  Remove paired device') remove_device ;;
-  '󰑐  Scan visible devices') scan_and_pick >/dev/null ;;
   '󰤨  Status') status ;;
   '') exit 0 ;;
 esac

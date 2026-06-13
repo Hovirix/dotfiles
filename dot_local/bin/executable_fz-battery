@@ -91,7 +91,7 @@ power_saver() {
   choice="$(printf '%s\n' \
     '󰌪  Disable radios and save power' \
     '  Cancel' |
-    fuzzel --dmenu --width 40 --lines 2 --hide-prompt)"
+    fuzzel --namespace=fz-battery --dmenu --width 40 --lines 2 --hide-prompt)"
 
   [ "$choice" = '󰌪  Disable radios and save power' ] || exit 0
 
@@ -110,7 +110,7 @@ choice="$(printf '%s\n' \
   '󰓅  Performance' \
   '󰾅  Balanced' \
   '󰌪  Power saving offline' |
-  fuzzel --dmenu --width 34 --lines 3 --hide-prompt)"
+  fuzzel --namespace=fz-battery --dmenu --width 34 --lines 3 --hide-prompt)"
 
 case "$choice" in
   '󰓅  Performance') performance ;;

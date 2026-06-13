@@ -14,7 +14,7 @@ confirm() {
   choice="$(printf '%s\n' \
     "  Confirm $action" \
     '  Cancel' |
-    fuzzel --dmenu --width 34 --lines 2 --hide-prompt)"
+    fuzzel --namespace=fz-power --dmenu --width 34 --lines 2 --hide-prompt)"
 
   [ "$choice" = "  Confirm $action" ]
 }
@@ -58,7 +58,7 @@ choice="$(printf '%s\n' \
   '  Reboot' \
   '󰘳  Reboot to UEFI' \
   '  Hard reboot' |
-  fuzzel --dmenu --width 34 --lines 5 --hide-prompt)"
+  fuzzel --namespace=fz-power --dmenu --width 34 --lines 5 --hide-prompt)"
 
 case "$choice" in
   '  Lock') lock ;;
