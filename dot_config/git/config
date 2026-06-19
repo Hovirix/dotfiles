@@ -1,3 +1,9 @@
+[branch]
+    sort = -committerdate
+
+[column]
+    ui = auto
+
 [commit]
     cleanup = whitespace
     gpgSign = true
@@ -13,6 +19,15 @@
     navigate = true
     features = catppuccin-mocha
 
+[diff]
+    algorithm = histogram
+    colorMoved = default
+    renames = true
+
+[fetch]
+    prune = true
+    pruneTags = true
+
 [include]
     path = ~/.config/delta/catppuccin.gitconfig
 
@@ -25,21 +40,32 @@
 [merge]
     conflictStyle = zdiff3
 
-[gpg]
-    format = ssh
-
-[gpg "ssh"]
-    program = ssh-keygen
+[pull]
+    ff = only
 
 [push]
     autoSetupRemote = true
-    default = simple
+
+[rebase]
+    autoSquash = true
+    autoStash = true
+    updateRefs = true
+
+[rerere]
+    enabled = true
+
+[tag]
+    gpgSign = true
+    sort = -version:refname
+
+[transfer]
+    credentialsInUrl = die
+
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
 
 [user]
     email = 184756415+Hovirix@users.noreply.github.com
     name = Hovirix
-    signingKey = ~/.ssh/id_ed25519.pub
+    signingKey = 80C893688DADB629
     useConfigOnly = true
-
-[url "ssh://git@github.com/"]
-    insteadOf = https://github.com/
