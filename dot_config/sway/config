@@ -148,6 +148,12 @@ workspace $ws9  output HDMI-A-1
 workspace $ws10 output HDMI-A-1
 
 # -------------------------------
+# Switches
+# -------------------------------
+
+bindswitch --locked lid:on exec sh -c 'swaylock -f -C ~/.config/sway/swaylock.conf && systemctl suspend'
+
+# -------------------------------
 # Keybindings
 # -------------------------------
 
@@ -179,7 +185,6 @@ bindcode $mod+Shift+19      move container to workspace $ws10, workspace $ws10
 bindsym $mod+R                 exec fuzzel
 bindsym $mod+Return            exec wezterm-gui
 bindsym Control+1              exec flatpak run io.gitlab.librewolf-community
-bindsym Control+2              exec virt-manager
 bindsym Control+4              exec flatpak run md.obsidian.Obsidian
 bindsym Control+5              exec flatpak run io.freetubeapp.FreeTube
 
@@ -216,9 +221,6 @@ bindsym $mod+f               fullscreen toggle
 # Sway
 bindsym $mod+Shift+e         exec fz-power
 bindsym $mod+Shift+r         exec swaymsg reload
-
-# Sys
-bindsym $mod+Shift+Ctrl+s    exec loginctl suspend
 
 # Focus / move
 bindsym $mod+h               focus left
