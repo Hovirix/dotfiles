@@ -61,9 +61,6 @@
 [transfer]
     credentialsInUrl = die
 
-[url "ssh://git@github.com/"]
-    insteadOf = https://github.com/
-
 [user]
     email = 184756415+Hovirix@users.noreply.github.com
     name = Hovirix
