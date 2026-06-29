@@ -1,6 +1,6 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:full-border"
-rev = "be524fb"
+rev = "39aaf6d"
 hash = "7b625412411be411153886894d9acaf"
 
 [[plugin.deps]]
@@ -15,10 +15,13 @@ hash = "2e744ac2938468fd4244beca1e022c4f"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:no-auto-layout"
-rev = "be524fb"
+rev = "39aaf6d"
 hash = "99aa06d3014798d86001c324468d497f"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:no-status"
-rev = "be524fb"
+rev = "39aaf6d"
 hash = "3e023d31f29201efdac2a6ae35fedb78"
+
+[flavor]
+deps = []
