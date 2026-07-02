@@ -1,41 +1,8 @@
-# Global zk configuration.
-# Notebook-local `.zk/config.toml` files can override these defaults.
-
 [notebook]
 dir = "~/Documents/notes"
 
 [note]
-language = "en"
-default-title = "Untitled"
 filename = "{{id}}-{{slug title}}"
-extension = "md"
-id-charset = "alphanum"
-id-length = 4
-id-case = "lower"
 
-[format.markdown]
-hashtags = true
-colon-tags = true
 
-[tool]
-editor = "hx"
-shell = "/run/current-system/sw/bin/zsh"
-pager = "less -FIRX"
-fzf-preview = "bat -p --color always {-1}"
-fzf-options = "--tiebreak begin --exact --tabstop 4 --height 100% --layout reverse --no-hscroll --color hl:-1,hl+:-1 --preview-window wrap"
 
-[filter]
-recents = "--sort created- --created-after 'last two weeks'"
-modified = "--sort modified-"
-
-[alias]
-edlast = "zk edit --limit 1 --sort modified- $@"
-recent = "zk edit --sort created- --created-after 'last two weeks' --interactive"
-lucky = "zk list --quiet --format full --sort random --limit 1"
-
-[lsp]
-
-[lsp.diagnostics]
-wiki-title = "hint"
-dead-link = "error"
-missing-backlink = { level = "warning", position = "bottom" }
