@@ -198,6 +198,7 @@ bindsym Control+5              exec flatpak run io.freetubeapp.FreeTube
 
 # Scripts
 bindsym $mod+c                 exec swayidle-toggle
+bindsym $mod+e                 exec fz-emoji
 bindsym $mod+p                 exec fz-pass
 bindsym $mod+a                 exec fz-audio
 bindsym $mod+v                 exec fz-vm
