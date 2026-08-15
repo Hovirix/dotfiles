@@ -10,6 +10,19 @@ Host pve3
   HostName pve3.home.hovirix.dev
   User root
 
+Host swarm-01
+  HostName swarm-01.home.hovirix.dev
+  User admin
+
+Host swarm-02
+  HostName swarm-02.home.hovirix.dev
+  User admin
+
+Host swarm-03
+  HostName swarm-03.home.hovirix.dev
+  User admin
+
 Host openwrt
   HostName 10.10.0.1
   User root
+

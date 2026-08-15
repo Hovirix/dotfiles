@@ -64,7 +64,7 @@ exec {
 }
 
 exec {
-  flatpak run io.gitlab.librewolf-community
+  flatpak run io.github.ungoogled_software.ungoogled_chromium 
 }
 
 # ------------------------------------------------
@@ -79,10 +79,17 @@ output eDP-1 {
   render_bit_depth 10
 }
 
+# output HDMI-A-1 {
+#   scale 1.25
+#   pos 0 0
+#   mode 2560x1440
+# }
+
 output HDMI-A-1 {
-  scale 1.25
-  pos 0 0
-  mode 2560x1440
+    enable
+    scale 1
+    pos 1 0
+    mode 1920x1080@144Hz
 }
 
 # ------------------------------------------------
@@ -128,6 +135,7 @@ for_window [app_id="(?i).*librewolf.*"]    move to workspace $ws1, focus
 for_window [app_id="(?i).*virt-manager.*"] move to workspace $ws2, focus
 for_window [app_id="(?i).*qemu.*"]         move to workspace $ws2, focus
 for_window [app_id="(?i).*wezterm.*"]      move to workspace $ws3, focus
+for_window [app_id="(?i).*appflowy.*"]     move to workspace $ws4, focus
 for_window [app_id="(?i).*obsidian.*"]     move to workspace $ws4, focus
 for_window [app_id="(?i).*freetube.*"]     move to workspace $ws5, focus
 for_window [app_id="notes-scratch"]        floating enable, move scratchpad, scratchpad show, focus

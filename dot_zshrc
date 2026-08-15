@@ -135,15 +135,12 @@ alias cat='bat'
 alias grep='grep --color=auto'
 alias cze='chezmoi edit --apply'
 alias oc='opencode'
+alias y='yazi'
 
 # Git
 alias g='git'
 alias gd='gh-dash'
 alias lg='lazygit'
-
-# Nixos
-alias rebuild='nh os switch'
-alias update='nh os switch --update'
 
 # Systemd
 alias sc='systemctl'
@@ -169,10 +166,13 @@ alias pnl='podman network list'
 alias psl='podman secret list'
 
 # Nix
-alias nd='nix develop --command zsh'
 alias nfc='nix flake check'
 alias nfu='nix flake update'
 alias ncg='nix-collect-garbage -d && nix-store --gc && nix-store --repair --verify --check-contents && nix-store --optimise -vvv'
+
+# NixOS
+alias nrs='sudo nixos-rebuild switch --flake'
+alias nrr='sudo nixos-rebuild switch --rollback'
 
 # Global aliases
 alias -g G='| rg'

@@ -16,7 +16,7 @@ fz=(fuzzel --namespace=fz-pass --dmenu)
 notify() {
     notified=1
 
-    command notify 'Password' "$1" dialog-password normal || true
+    command notify 'Pass' "$1" dialog-password normal || true
 }
 
 notify_failure() {

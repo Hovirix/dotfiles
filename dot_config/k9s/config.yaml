@@ -1,0 +1,7 @@
+k9s:
+  readOnly: true
+  ui:
+    logoless: true
+    crumbsless: true
+    skin: catppuccin-mocha
+

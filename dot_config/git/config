@@ -62,7 +62,7 @@
     credentialsInUrl = die
 
 [user]
-    email = 184756415+Hovirix@users.noreply.github.com
-    name = Hovirix
+    email = contact@hovirix.dev
+    name = hovirix
     signingKey = 80C893688DADB629
     useConfigOnly = true
