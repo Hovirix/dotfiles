@@ -65,6 +65,7 @@ exec {
 
 exec {
   flatpak run io.github.ungoogled_software.ungoogled_chromium 
+  flatpak run io.appflowy.AppFlowy
 }
 
 # ------------------------------------------------
