@@ -1,0 +1,18 @@
+onboarding = false
+
+[theme]
+name = "catppuccin"
+
+[theme.custom]
+accent = "#fab387"
+
+[update]
+version_check = false
+
+[ui]
+pane_gaps = false
+pane_scrollbars = false
+accent = "#fab387"
+
+[keys]
+focus_agent = "prefix+a"
