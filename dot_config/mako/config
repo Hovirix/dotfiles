@@ -3,7 +3,7 @@ max-visible=4
 max-history=20
 group-by=app-name,summary
 
-default-timeout=3000
+default-timeout=300
 ignore-timeout=0
 
 anchor=top-right
