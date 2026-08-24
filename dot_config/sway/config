@@ -59,7 +59,7 @@ set $crust #11111b
 exec {
   dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_DATA_DIRS
   autotiling-rs
-  wlsunset -t 3000 -T 6500 -s 21:00 -S 07:00
+  wlsunset -t 3000 -T 6500 -s 20:00 -S 07:00
   swayidle -w -C ~/.config/sway/swayidle.conf
 }
 
@@ -132,14 +132,13 @@ focus_on_window_activation focus
 # Window Rules
 # -------------------------------
 
-for_window [app_id="(?i).*librewolf.*"]    move to workspace $ws1, focus
 for_window [app_id="(?i).*virt-manager.*"] move to workspace $ws2, focus
 for_window [app_id="(?i).*qemu.*"]         move to workspace $ws2, focus
 for_window [app_id="(?i).*wezterm.*"]      move to workspace $ws3, focus
-for_window [app_id="(?i).*appflowy.*"]     move to workspace $ws4, focus
-for_window [app_id="(?i).*obsidian.*"]     move to workspace $ws4, focus
 for_window [app_id="(?i).*freetube.*"]     move to workspace $ws5, focus
 for_window [app_id="notes-scratch"]        floating enable, move scratchpad, scratchpad show, focus
+for_window [app_id="^chrome-cadlkienfkclaiaibeoongdcgmdikeeg-Default$"]  floating enable, resize set 80 ppt 80 ppt, move scratchpad, scratchpad show, focus
+for_window [app_id="^chrome-nngceckbapebfimnlniiiahkandclblb-Default$"]  floating enable, resize set 400 px 600 px
 
 # -------------------------------
 # Workspace
@@ -192,8 +191,8 @@ bindcode $mod+Shift+19      move container to workspace $ws10, workspace $ws10
 
 # Apps
 bindsym $mod+R                 exec fuzzel
-bindsym $mod+Return            exec wezterm-gui
-bindsym Control+1              exec flatpak run io.gitlab.librewolf-community
+bindsym $mod+Return            exec wezterm
+bind     sym Control+1              exec flatpak run io.gitlab.librewolf-community
 bindsym Control+4              exec flatpak run md.obsidian.Obsidian
 bindsym Control+5              exec flatpak run io.freetubeapp.FreeTube
 
