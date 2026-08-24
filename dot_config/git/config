@@ -39,6 +39,11 @@
 
 [merge]
     conflictStyle = zdiff3
+    tool = helix
+
+[mergetool "helix"]
+    cmd = hx "$MERGED"
+    trustExitCode = true
 
 [pull]
     ff = only
