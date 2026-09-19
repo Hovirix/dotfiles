@@ -1,13 +1,5 @@
-Host pve1
-  HostName pve1.home.hovirix.dev
-  User root
-
-Host pve2
-  HostName pve2.home.hovirix.dev
-  User root
-
-Host pve3
-  HostName pve3.home.hovirix.dev
+Host pve
+  HostName pve.home.hovirix.dev
   User root
 
 Host swarm-01

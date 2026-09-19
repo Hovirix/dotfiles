@@ -11,17 +11,32 @@ on = ["g", "o"]
 run = "cd ~/Documents/notes"
 
 [[mgr.prepend_keymap]]
-on = ["g", "t"]
-run = "plugin recycle-bin"
-desc = "Open Recycle Bin menu"
-
-[[mgr.prepend_keymap]]
 on = "!"
 for = "unix"
 run = 'shell "$SHELL" --block'
 desc = "Open $SHELL here"
 
 [[mgr.prepend_keymap]]
-on = ["g", "r"]
-run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"'
-desc = "cd back to the root of the current Git repository"
+on = "l"
+run = "plugin smart-enter"
+desc = "Enter child directory, or open hovered file"
+
+[[mgr.prepend_keymap]]
+on = "p"
+run = "plugin smart-paste"
+desc = "Paste into hovered directory or CWD"
+
+[[mgr.prepend_keymap]]
+on = "f"
+run = "plugin jump-to-char"
+desc = "Jump to file starting with char"
+
+[[mgr.prepend_keymap]]
+on = "F"
+run = "plugin smart-filter"
+desc = "Smart filter"
+
+[[mgr.prepend_keymap]]
+on = "<C-d>"
+run = "plugin diff"
+desc = "Diff selected with hovered file"

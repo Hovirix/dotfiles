@@ -63,10 +63,10 @@ exec {
   swayidle -w -C ~/.config/sway/swayidle.conf
 }
 
-exec {
-  flatpak run io.github.ungoogled_software.ungoogled_chromium 
-  flatpak run io.appflowy.AppFlowy
-}
+exec chatgpt
+exec chromium
+exec appflowy
+exec sway-ipc-handler
 
 # ------------------------------------------------
 # Outputs
@@ -80,18 +80,18 @@ output eDP-1 {
   render_bit_depth 10
 }
 
-# output HDMI-A-1 {
-#   scale 1.25
-#   pos 0 0
-#   mode 2560x1440
-# }
-
 output HDMI-A-1 {
-    enable
-    scale 1
-    pos 1 0
-    mode 1920x1080@144Hz
+  scale 1.25
+  pos 0 0
+  mode 2560x1440
 }
+
+# output HDMI-A-1 {
+#     enable
+#     scale 1
+#     pos 1 0
+#     mode 1920x1080@144Hz
+# }
 
 # ------------------------------------------------
 # Inputs
@@ -132,13 +132,26 @@ focus_on_window_activation focus
 # Window Rules
 # -------------------------------
 
-for_window [app_id="(?i).*virt-manager.*"] move to workspace $ws2, focus
-for_window [app_id="(?i).*qemu.*"]         move to workspace $ws2, focus
-for_window [app_id="(?i).*wezterm.*"]      move to workspace $ws3, focus
-for_window [app_id="(?i).*freetube.*"]     move to workspace $ws5, focus
-for_window [app_id="notes-scratch"]        floating enable, move scratchpad, scratchpad show, focus
-for_window [app_id="^chrome-cadlkienfkclaiaibeoongdcgmdikeeg-Default$"]  floating enable, resize set 80 ppt 80 ppt, move scratchpad, scratchpad show, focus
-for_window [app_id="^chrome-nngceckbapebfimnlniiiahkandclblb-Default$"]  floating enable, resize set 400 px 600 px
+for_window [app_id="(?i).*chromium.*"]      move to workspace $ws1
+for_window [app_id="(?i).*virt-manager.*"]  move to workspace $ws2, focus
+for_window [app_id="(?i).*qemu.*"]          move to workspace $ws2, focus
+for_window [app_id="(?i).*wezterm.*"]       move to workspace $ws3, focus
+for_window [app_id="(?i).*appflowy.*"]      move to workspace $ws4
+for_window [app_id="(?i).*freetube.*"]      move to workspace $ws5, focus
+
+for_window [app_id="^impala$"]   floating enable
+for_window [app_id="^bluetui$"]  floating enable 
+
+for_window [app_id="(?i).*chatgpt.*"] \
+    floating enable, \
+    move scratchpad
+
+for_window [title="(?i).*bitwarden.*"] \
+    floating enable, \
+    resize set width 50 ppt height 50 ppt, \
+    move position center
+
+for_window [title="(?i).*localsend.*"] floating enable
 
 # -------------------------------
 # Workspace
@@ -165,7 +178,9 @@ bindswitch --locked lid:on exec sh -c 'swaylock -f -C ~/.config/sway/swaylock.co
 # Keybindings
 # -------------------------------
 
-bindcode $mod+9             scratchpad show
+# Resize on scratchpad show because of swaywm/sway#8927:
+# https://github.com/swaywm/sway/pull/8927
+bindcode $mod+9             [app_id="(?i).*chatgpt.*"] scratchpad show, resize set width 95 ppt height 95 ppt, move position center
 bindcode $mod+10            workspace $ws1
 bindcode $mod+11            workspace $ws2
 bindcode $mod+12            workspace $ws3
@@ -192,20 +207,14 @@ bindcode $mod+Shift+19      move container to workspace $ws10, workspace $ws10
 # Apps
 bindsym $mod+R                 exec fuzzel
 bindsym $mod+Return            exec wezterm
-bind     sym Control+1              exec flatpak run io.gitlab.librewolf-community
-bindsym Control+4              exec flatpak run md.obsidian.Obsidian
-bindsym Control+5              exec flatpak run io.freetubeapp.FreeTube
 
 # Scripts
 bindsym $mod+c                 exec swayidle-toggle
 bindsym $mod+e                 exec fz-emoji
-bindsym $mod+p                 exec fz-pass
 bindsym $mod+a                 exec fz-audio
-bindsym $mod+v                 exec fz-vm
 bindsym $mod+d                 exec fz-display
-bindsym $mod+w                 exec fz-wifi
-bindsym $mod+Shift+w           exec fz-bluetooth
-bindsym $mod+n                 exec fz-notes
+bindsym $mod+w                 exec wezterm start --class impala -- impala
+bindsym $mod+b                 exec wezterm start --class bluetui -- bluetui
 bindsym $mod+o                 exec fz-open
 bindsym $mod+space             exec keyboard-layout-toggle
 
@@ -213,7 +222,6 @@ bindsym $mod+space             exec keyboard-layout-toggle
 bindsym $mod+s                 exec fz-screenshot
 
 # Brightness
-bindsym $mod+b                exec fz-battery
 bindsym XF86MonBrightnessUp   exec brightness-osd up
 bindsym XF86MonBrightnessDown exec brightness-osd down
 
@@ -228,7 +236,6 @@ bindsym $mod+t               floating toggle
 bindsym $mod+f               fullscreen toggle
 
 # Sway
-bindsym $mod+Shift+e         exec fz-power
 bindsym $mod+Shift+r         exec swaymsg reload
 
 # Focus / move
@@ -269,7 +276,7 @@ client.background        $base
 # Bar
 # -------------------------------
 
-bar {
+bar statusbar {
   bindsym button1  nop
   bindsym button2  nop
   bindsym button3  nop

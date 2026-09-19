@@ -19,20 +19,21 @@ gui:
       - "#cdd6f4"
     searchingActiveBorderColor:
       - "#f9e2af"
-
+      
   authorColors:
     "*": "#b4befe"
-
+    
   nerdFontsVersion: "3"
   showRandomTip: false
   showBottomLine: true
   showCommandLog: false
   showListFooter: false
-
+  
 git:
+  autoFetch: true
   overrideGpg: true
-  pagers:
-    - pager: "delta --dark --paging=never"
+  diffRenderers:
+    - command: "delta --dark --paging=never"
       colorArg: always
 
 notARepository: skip

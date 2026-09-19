@@ -5,25 +5,25 @@ show_symlink = true
 sort_by = "extension"
 title_format = ""
 
-[opener]
-imv = [{ run = 'imv "$@"', orphan = true, for = "linux" }]
-zip = [{ run = 'unzip "$@"', orphan = true, for = "linux" }]
-pdf = [{ run = 'zathura "$@"', orphan = true, for = "linux" }]
+# [opener]
+# imv = [{ run = 'imv "$@"', orphan = true, for = "linux" }]
+# zip = [{ run = 'unzip "$@"', orphan = true, for = "linux" }]
+# pdf = [{ run = 'zathura "$@"', orphan = true, for = "linux" }]
 
-[open]
-prepend_rules = [
-  { url = "*.7z", use = "zip" },
-  { url = "*.zip", use = "zip" },
-  { url = "*.pdf", use = "pdf" },
+# [open]
+# prepend_rules = [
+#   { url = "*.7z", use = "zip" },
+#   { url = "*.zip", use = "zip" },
+#   { url = "*.pdf", use = "pdf" },
 
-  { url = "*.jpg", use = "imv" },
-  { url = "*.png", use = "imv" },
-  { url = "*.gif", use = "imv" },
-  { url = "*.bmp", use = "imv" },
-  { url = "*.svg", use = "imv" },
-  { url = "*.ico", use = "imv" },
-  { url = "*.heic", use = "imv" },
-  { url = "*.jpeg", use = "imv" },
-  { url = "*.tiff", use = "imv" },
-  { url = "*.webp", use = "imv" },
-]
+#   { url = "*.jpg", use = "imv" },
+#   { url = "*.png", use = "imv" },
+#   { url = "*.gif", use = "imv" },
+#   { url = "*.bmp", use = "imv" },
+#   { url = "*.svg", use = "imv" },
+#   { url = "*.ico", use = "imv" },
+#   { url = "*.heic", use = "imv" },
+#   { url = "*.jpeg", use = "imv" },
+#   { url = "*.tiff", use = "imv" },
+#   { url = "*.webp", use = "imv" },
+# ]

@@ -4,8 +4,7 @@ application/epub+zip=org.pwmt.zathura-pdf-mupdf.desktop
 application/postscript=org.pwmt.zathura-ps.desktop
 application/vnd.djvu=org.pwmt.zathura-djvu.desktop
 
-[Added Associations]
-application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;
-application/epub+zip=org.pwmt.zathura-pdf-mupdf.desktop;
-application/postscript=org.pwmt.zathura-ps.desktop;
-application/vnd.djvu=org.pwmt.zathura-djvu.desktop;
+text/html=chromium-browser.desktop
+application/xhtml+xml=chromium-browser.desktop
+x-scheme-handler/http=chromium-browser.desktop
+x-scheme-handler/https=chromium-browser.desktop

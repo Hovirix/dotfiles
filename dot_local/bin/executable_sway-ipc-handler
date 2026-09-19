@@ -1,0 +1,33 @@
+#!/bin/sh
+set -eu
+
+update_bar() {
+    case $1 in
+        3:III|5:V) mode=invisible ;;
+        *)          mode=dock ;;
+    esac
+
+    swaymsg "bar statusbar mode $mode" >/dev/null
+}
+
+update_bar "$(
+    swaymsg -r -t get_workspaces |
+        jq -r '.[] | select(.focused).name'
+)"
+
+swaymsg -m -t subscribe '["workspace", "window"]' |
+    jq --unbuffered -r '
+        if .change == "focus" and .current.name then
+            "workspace\t" + .current.name
+        elif .change == "urgent" and .container.urgent == true then
+            "urgent\t" + (.container.id | tostring)
+        else
+            empty
+        end
+    ' |
+    while IFS="$(printf '\t')" read -r event value; do
+        case "$event" in
+            workspace) update_bar "$value" ;;
+            urgent)    swaymsg "[con_id=$value] focus" >/dev/null ;;
+        esac
+    done
