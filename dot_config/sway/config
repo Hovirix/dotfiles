@@ -141,6 +141,7 @@ for_window [app_id="(?i).*freetube.*"]      move to workspace $ws5, focus
 
 for_window [app_id="^impala$"]   floating enable
 for_window [app_id="^bluetui$"]  floating enable 
+for_window [app_id="^btop$"]     floating enable, resize set width 75 ppt height 75 ppt, move position center
 
 for_window [app_id="(?i).*chatgpt.*"] \
     floating enable, \
@@ -215,6 +216,7 @@ bindsym $mod+a                 exec fz-audio
 bindsym $mod+d                 exec fz-display
 bindsym $mod+w                 exec wezterm start --class impala -- impala
 bindsym $mod+b                 exec wezterm start --class bluetui -- bluetui
+bindsym $mod+m                 exec wezterm start --class btop -- btop
 bindsym $mod+o                 exec fz-open
 bindsym $mod+space             exec keyboard-layout-toggle
 
