@@ -1,0 +1,3 @@
+timeout 150 'mango-monitor-power sleep' resume 'mango-monitor-power wake'
+timeout 160 'swaylock --ignore-empty-password --daemonize'
+timeout 300 'systemctl suspend'
