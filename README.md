@@ -1,10 +1,10 @@
 # HX dots
 
 A fast, keyboard-driven Wayland environment built for deep focus. Minimal surface, maximal efficiency.
-Powered by Sway and modern Rust/C tools.
+Powered by Mango and modern Rust/C tools.
 
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![Sway](https://img.shields.io/badge/Sway-68751C?style=for-the-badge&logo=sway&logoColor=white)
+![Mango](https://img.shields.io/badge/Mango-fab387?style=for-the-badge)
 ![Zsh](https://img.shields.io/badge/Zsh-F15A24?style=for-the-badge&logo=zsh&logoColor=white)
 ![Helix](https://img.shields.io/badge/Helix-281733?style=for-the-badge&logo=helix&logoColor=white)
 ![Wayland](https://img.shields.io/badge/Wayland-FFBC00?style=for-the-badge&logo=wayland&logoColor=black)
@@ -22,15 +22,13 @@ Powered by Sway and modern Rust/C tools.
   Desktop
 </h2>
 
-### <img src="./.github/assets/sway.svg" width="18" style="vertical-align: middle;" /> Sway Ecosystem
+### Mango Ecosystem
 
 | Description        | Tool                                           | Language |
 | :----------------- | :--------------------------------------------- | :------: |
-| Wayland compositor | [Sway](https://github.com/swaywm/sway)         |  ![][c]  |
+| Wayland compositor | [Mango](https://github.com/mangowm/mango)      |  ![][c]  |
 | Idle daemon        | [swayidle](https://github.com/swaywm/swayidle) |  ![][c]  |
 | Screen locker      | [swaylock](https://github.com/swaywm/swaylock) |  ![][c]  |
-| Status bar         | [swaybar](https://github.com/swaywm/sway)      |  ![][c]  |
-| Status generator   | [i3status](https://github.com/i3/i3status)     |  ![][c]  |
 
 ### Wayland Utilities
 
