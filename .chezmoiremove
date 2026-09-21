@@ -1,0 +1,4 @@
+.config/sway
+.config/i3status
+.local/bin/sway-ipc-handler
+.local/bin/swayidle-toggle
