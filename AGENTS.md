@@ -18,7 +18,7 @@
 ## Desktop UI Direction
 
 - The desktop UI is a native Quickshell implementation under `dot_config/quickshell/`. Keep it cohesive rather than introducing separate launchers or unrelated UI toolkits.
-- The desired visual language is shadcn/ui Lyra with square geometry, Catppuccin Mocha semantic colors, and `JetBrainsMono Nerd Font Mono` for text and icons. Preserve this style when adding or changing surfaces.
+- The desired visual language is shadcn/ui Lyra with square geometry, Catppuccin Mocha semantic colors, and `JetBrains Mono` for text and icons. Preserve this style when adding or changing surfaces.
 - `dot_config/quickshell/Appearance/Appearance.qml` is the only design-token source. Put reusable colors, typography, spacing, dimensions, borders, and animation values there; overlays must not grow one-off visual constants.
 - `dot_config/quickshell/Ui/` contains reusable presentation and input primitives. Extend those primitives when behavior or chrome is shared. Keep device and command integration in `Services/`, and compose services plus UI primitives in `Overlays/`.
 - Use semantic popup widths from `Appearance.qml`: compact for small pickers, standard for single-column menus, wide for browsers/calendars, and workspace for multi-column controls. Do not invent a width for each overlay.

@@ -422,7 +422,7 @@ Item {
 
   function outputIcon(volume) {
     // Match the old Waybar pulseaudio glyph set. The Material Design speaker
-    // icons render visually smaller in JetBrainsMono Nerd Font Mono.
+    // icons render visually smaller in JetBrains Mono.
     if (!sink || !sink.audio) return ""
     if (isHeadphones(sink)) return "󰋋"
     if (outputMuted) return ""

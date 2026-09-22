@@ -23,7 +23,7 @@ config.disable_default_key_bindings = true
 
 config.adjust_window_size_when_changing_font_size = false
 
-config.font = wezterm.font("JetBrainsMono Nerd Font Mono", { weight = "Light" })
+config.font = wezterm.font("JetBrains Mono", { weight = "Light" })
 config.font_size = 12
 
 config.window_padding = {

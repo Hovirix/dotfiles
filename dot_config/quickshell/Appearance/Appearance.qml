@@ -4,7 +4,7 @@ import QtQuick
 
 // The only place where the design system exists.
 //
-// shadcn/ui Lyra component style, JetBrainsMono Nerd Font Mono (single family
+// shadcn/ui Lyra component style, JetBrains Mono (single family
 // for text and icons), Catppuccin Mocha mapped onto shadcn semantic tokens.
 //
 // Panels never hardcode visual values; shared Ui primitives in this folder
@@ -17,7 +17,7 @@ QtObject {
     // ================================================================
 
     // Single family for everything, text and Nerd Font icons alike.
-    readonly property string fontFamily: "JetBrainsMono Nerd Font Mono"
+    readonly property string fontFamily: "JetBrains Mono"
 
     // Slightly above Lyra's default xs/sm scale for comfortable desktop
     // legibility while keeping menu density compact.
