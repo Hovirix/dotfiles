@@ -16,7 +16,7 @@ padding=14,16
 border-size=1
 border-radius=0
 
-font=JetBrainsMono 12
+font=JetBrainsMono Nerd Font Mono 12
 markup=1
 format=<b>%s</b>\n%b
 text-alignment=left
