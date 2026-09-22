@@ -30,7 +30,7 @@ gui:
   showListFooter: false
   
 git:
-  autoFetch: true
+  autoFetch: false
   overrideGpg: true
   diffRenderers:
     - command: "delta --dark --paging=never"
