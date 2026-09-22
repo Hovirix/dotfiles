@@ -115,39 +115,34 @@ Item {
         editingSetting = false
     }
 
-    component SettingRow: Item {
+    component SettingRow: Ui.SelectRow {
+        id: settingRow
         required property string icon
         required property string label
         required property string value
-        property bool hasCursor: false
         property bool editing: false
 
         width: parent.width
-        height: 38
-
-        Rectangle {
-            anchors.fill: parent
-            color: parent.hasCursor ? A.Appearance.accent : "transparent"
-        }
+        height: A.Appearance.rowHeight
 
         Text {
             id: settingIcon
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            text: parent.icon
-            color: A.Appearance.mutedForeground
-            font.family: A.Appearance.fontFamily
+            text: settingRow.icon
+            color: settingRow.editing ? A.Appearance.primary : A.Appearance.mutedForeground
+            font.family: A.Appearance.iconFontFamily
             font.pixelSize: A.Appearance.iconSize
             renderType: Text.NativeRendering
         }
         Text {
             anchors.left: settingIcon.right
-            anchors.leftMargin: A.Appearance.space3
+            anchors.leftMargin: A.Appearance.space2
             anchors.verticalCenter: parent.verticalCenter
-            text: parent.label
-            color: parent.editing ? A.Appearance.primary : A.Appearance.foreground
+            text: settingRow.label
+            color: A.Appearance.foreground
             font.family: A.Appearance.fontFamily
-            font.pixelSize: A.Appearance.fontSizeTitle
+            font.pixelSize: A.Appearance.fontSizeBody
             renderType: Text.NativeRendering
         }
         Text {
@@ -155,12 +150,13 @@ Item {
             anchors.right: settingArrow.left
             anchors.rightMargin: A.Appearance.space3
             anchors.verticalCenter: parent.verticalCenter
-            text: parent.value
-            color: A.Appearance.foreground
-            font.family: A.Appearance.fontFamily
-            font.pixelSize: A.Appearance.fontSizeTitle
-            horizontalAlignment: Text.AlignRight
-            renderType: Text.NativeRendering
+                            text: settingRow.value
+                            color: settingRow.editing ? A.Appearance.primary : A.Appearance.foreground
+                            font.family: A.Appearance.fontFamily
+                            font.pixelSize: A.Appearance.fontSizeBody
+                            font.weight: A.Appearance.fontWeightMedium
+                            horizontalAlignment: Text.AlignRight
+                            renderType: Text.NativeRendering
         }
         Text {
             id: settingArrow
@@ -168,7 +164,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "󰅂"
             color: A.Appearance.mutedForeground
-            font.family: A.Appearance.fontFamily
+            font.family: A.Appearance.iconFontFamily
             font.pixelSize: A.Appearance.iconSize
             renderType: Text.NativeRendering
         }
@@ -185,12 +181,13 @@ Item {
             Math.max(0, options.length - 6)))
         readonly property var shownOptions: options.slice(start, start + 6)
 
-        width: parent.width - A.Appearance.space4 * 2
-        x: A.Appearance.space4
-        height: shownOptions.length * 32 + 34 + A.Appearance.space1 * 2
-        color: A.Appearance.background
+        width: parent.width - A.Appearance.space2 * 2
+        x: A.Appearance.space2
+        height: shownOptions.length * A.Appearance.rowHeight + A.Appearance.rowHeight + A.Appearance.space1 * 2
+        color: A.Appearance.popover
         border.width: A.Appearance.borderWidth
-        border.color: A.Appearance.primary
+        border.color: A.Appearance.subtleRing
+        radius: A.Appearance.radius
 
         Column {
             anchors.fill: parent
@@ -199,7 +196,7 @@ Item {
 
             Item {
                 width: parent.width
-                height: 34
+                height: A.Appearance.rowHeight
 
                 Text {
                     anchors.left: parent.left
@@ -217,7 +214,7 @@ Item {
                     anchors.rightMargin: A.Appearance.space2
                     anchors.verticalCenter: parent.verticalCenter
                     text: `${menu.selected + 1}/${menu.options.length}`
-                    color: A.Appearance.primary
+                    color: A.Appearance.mutedForeground
                     font.family: A.Appearance.fontFamily
                     font.pixelSize: A.Appearance.fontSizeLabel
                     renderType: Text.NativeRendering
@@ -232,20 +229,17 @@ Item {
                     required property int index
                     readonly property int optionNumber: parent.parent.start + index
 
-                        width: parent.width
-                    height: 32
+                    width: parent.width
+                    height: A.Appearance.rowHeight
 
                     Rectangle {
                         anchors.fill: parent
                         color: root.optionIndex === optionNumber
-                            ? Qt.rgba(A.Appearance.primary.r, A.Appearance.primary.g,
-                                A.Appearance.primary.b, 0.18) : "transparent"
-                    }
-                    Rectangle {
-                        visible: root.optionIndex === optionNumber
-                        width: 3
-                        height: parent.height
-                        color: A.Appearance.primary
+                            ? A.Appearance.accent : "transparent"
+
+                        Behavior on color {
+                            ColorAnimation { duration: A.Appearance.durationFast }
+                        }
                     }
                     Text {
                         anchors.left: parent.left
@@ -267,7 +261,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "󰄬"
                         color: A.Appearance.primary
-                        font.family: A.Appearance.fontFamily
+                        font.family: A.Appearance.iconFontFamily
                         font.pixelSize: A.Appearance.iconSize
                         renderType: Text.NativeRendering
                     }
@@ -278,6 +272,100 @@ Item {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    component OutputRow: Ui.SelectRow {
+        id: outputRow
+        required property var output
+        required property int rowIndex
+
+        height: A.Appearance.rowHeightLarge
+        hasCursor: root.cursorActive && root.selectedIndex === rowIndex
+
+        Text {
+            id: outputGlyph
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: "󰍹"
+            color: A.Appearance.foreground
+            font.family: A.Appearance.iconFontFamily
+            font.pixelSize: A.Appearance.fontSizeTitle
+            renderType: Text.NativeRendering
+            opacity: outputRow.output.enabled ? 1.0 : 0.5
+        }
+
+        Column {
+            anchors.left: outputGlyph.right
+            anchors.leftMargin: A.Appearance.space2
+            anchors.right: outputActions.left
+            anchors.rightMargin: A.Appearance.space3
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: A.Appearance.space05
+
+            Text {
+                width: parent.width
+                text: outputRow.output.model || outputRow.output.description || outputRow.output.name
+                color: A.Appearance.foreground
+                font.family: A.Appearance.fontFamily
+                font.pixelSize: A.Appearance.fontSizeBody
+                font.weight: root.selectedIndex === outputRow.rowIndex
+                    ? A.Appearance.fontWeightMedium : A.Appearance.fontWeightNormal
+                elide: Text.ElideRight
+                renderType: Text.NativeRendering
+                opacity: outputRow.output.enabled ? 1.0 : 0.5
+            }
+            Text {
+                width: parent.width
+                text: `${outputRow.output.name} · ${String(outputRow.output.resolution || "").replace("x", " × ")} @ ${outputRow.output.refresh || ""}${outputRow.rowIndex === 0 ? " · Primary" : ""}`
+                color: A.Appearance.mutedForeground
+                font.family: A.Appearance.fontFamily
+                font.pixelSize: A.Appearance.fontSizeBody
+                elide: Text.ElideRight
+                renderType: Text.NativeRendering
+            }
+        }
+
+        Row {
+            id: outputActions
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: A.Appearance.space1
+
+            Ui.Button {
+                text: "On"
+                active: root.editingOutput && root.selectedIndex === outputRow.rowIndex
+                    ? root.actionIndex === 0 : outputRow.output.enabled
+                bordered: true
+                foreground: (root.editingOutput && root.selectedIndex === outputRow.rowIndex
+                    ? root.actionIndex === 0 : outputRow.output.enabled)
+                    ? A.Appearance.primary : A.Appearance.foreground
+                onClicked: root.display.setOutputEnabled(outputRow.output, true)
+            }
+            Ui.Button {
+                text: "Off"
+                active: root.editingOutput && root.selectedIndex === outputRow.rowIndex
+                    ? root.actionIndex === 1 : !outputRow.output.enabled
+                bordered: true
+                foreground: (root.editingOutput && root.selectedIndex === outputRow.rowIndex
+                    ? root.actionIndex === 1 : !outputRow.output.enabled)
+                    ? A.Appearance.primary : A.Appearance.foreground
+                onClicked: root.display.setOutputEnabled(outputRow.output, false)
+            }
+            Ui.Button {
+                text: "Auto"
+                active: root.editingOutput && root.selectedIndex === outputRow.rowIndex
+                    && root.actionIndex === 2
+                bordered: true
+                onClicked: root.display.setOutputEnabled(outputRow.output, true)
+            }
+        }
+
+        HoverHandler {
+            onHoveredChanged: if (hovered) {
+                root.cursorActive = true
+                root.selectedIndex = outputRow.rowIndex
             }
         }
     }
@@ -354,63 +442,104 @@ Item {
             Column {
                 id: panelColumn
                 width: parent.width
-                spacing: A.Appearance.space3
+                spacing: A.Appearance.space4
 
+                // Hero: glyph · bold title · uppercase status, like audio.
                 Item {
                     width: parent.width
-                    height: 58
+                    implicitHeight: Math.max(heroIcon.implicitHeight, heroLabels.implicitHeight)
+                    height: implicitHeight
 
                     Text {
+                        id: heroIcon
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "Displays"
+                        text: "󰍹"
                         color: A.Appearance.foreground
-                        font.family: A.Appearance.fontFamily
-                        font.pixelSize: 28
-                        font.weight: A.Appearance.fontWeightStrong
+                        font.family: A.Appearance.iconFontFamily
+                        font.pixelSize: A.Appearance.heroGlyphSize
                         renderType: Text.NativeRendering
                     }
 
-                    Row {
-                        anchors.right: parent.right
+                    Column {
+                        id: heroLabels
+                        anchors.left: heroIcon.right
+                        anchors.leftMargin: A.Appearance.space3
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: A.Appearance.space3
+                        spacing: A.Appearance.space05
+                        height: implicitHeight
 
                         Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "Brightness"
-                            color: A.Appearance.mutedForeground
+                            text: "Displays"
+                            color: A.Appearance.foreground
                             font.family: A.Appearance.fontFamily
                             font.pixelSize: A.Appearance.fontSizeTitle
                             font.weight: A.Appearance.fontWeightMedium
                             renderType: Text.NativeRendering
                         }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: `${Math.round(root.brightness.value * 100)}%`
-                            color: A.Appearance.foreground
-                            font.family: A.Appearance.fontFamily
-                            font.pixelSize: A.Appearance.fontSizeTitle
-                            renderType: Text.NativeRendering
-                        }
-                        Rectangle {
-                            width: 220
-                            height: 14
-                            anchors.verticalCenter: parent.verticalCenter
-                            color: A.Appearance.muted
-                            border.width: A.Appearance.borderWidth
-                            border.color: A.Appearance.border
 
-                            Rectangle {
-                                width: parent.width * root.brightness.value
-                                height: parent.height
-                                color: A.Appearance.primary
-                            }
+                        Text {
+                            text: (root.display.loading ? "Refreshing…"
+                                : root.display.outputs.length === 0 ? "No outputs"
+                                : `${root.display.enabledCount} of ${root.display.outputs.length} on`).toUpperCase()
+                            color: A.Appearance.mutedForeground
+                            font.family: A.Appearance.fontFamily
+                            font.pixelSize: A.Appearance.fontSizeBody
+                            font.weight: A.Appearance.fontWeightMedium
+                            font.letterSpacing: 1.2
+                            renderType: Text.NativeRendering
                         }
                     }
                 }
 
                 Ui.Separator { width: parent.width }
+
+                // Brightness section: uppercase header + value, h-1 bar.
+                Column {
+                    width: parent.width
+                    spacing: A.Appearance.space15
+                    height: implicitHeight
+
+                    Item {
+                        width: parent.width
+                        implicitHeight: Math.max(brightnessHeader.implicitHeight, brightnessValue.implicitHeight)
+                        height: implicitHeight
+
+                        Ui.SectionHeader {
+                            id: brightnessHeader
+                            text: "BRIGHTNESS"
+                            foreground: A.Appearance.foreground
+                            fontFamily: A.Appearance.fontFamily
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Text {
+                            id: brightnessValue
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: `${Math.round(root.brightness.value * 100)}%`
+                            color: A.Appearance.mutedForeground
+                            font.family: A.Appearance.fontFamily
+                            font.pixelSize: A.Appearance.fontSizeBody
+                            font.weight: A.Appearance.fontWeightMedium
+                            renderType: Text.NativeRendering
+                        }
+                    }
+
+                    Ui.Progress {
+                        width: parent.width
+                        value: root.brightness.value
+                    }
+                }
+
+                Ui.Separator { width: parent.width }
+
+                Ui.SectionHeader {
+                    text: "OUTPUTS"
+                    foreground: A.Appearance.foreground
+                    fontFamily: A.Appearance.fontFamily
+                }
 
                 Text {
                     visible: !root.display.loading && root.display.outputs.length === 0
@@ -426,118 +555,22 @@ Item {
                 Repeater {
                     model: root.display.outputs
 
-                    Item {
+                    OutputRow {
                         required property var modelData
                         required property int index
-                        readonly property int rowIndex: index
-
                         width: parent.width
-                        height: 98
-
-                        Rectangle {
-                            anchors.fill: parent
-                            color: root.cursorActive && root.selectedIndex === rowIndex
-                                ? A.Appearance.accent
-                                : (modelData.enabled ? Qt.rgba(A.Appearance.primary.r, A.Appearance.primary.g, A.Appearance.primary.b, 0.08) : "transparent")
-                            border.width: A.Appearance.borderWidth
-                            border.color: root.selectedIndex === rowIndex
-                                ? A.Appearance.primary : A.Appearance.border
-                        }
-
-                        Rectangle {
-                            width: 36
-                            height: 36
-                            anchors.left: parent.left
-                            anchors.leftMargin: A.Appearance.space3
-                            anchors.verticalCenter: parent.verticalCenter
-                            color: modelData.enabled ? A.Appearance.primary : A.Appearance.secondary
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: rowIndex + 1
-                                color: modelData.enabled ? A.Appearance.primaryForeground : A.Appearance.foreground
-                                font.family: A.Appearance.fontFamily
-                                font.pixelSize: A.Appearance.fontSizeDisplaySmall
-                                font.weight: A.Appearance.fontWeightStrong
-                                renderType: Text.NativeRendering
-                            }
-                        }
-
-                        Column {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 60
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: A.Appearance.space05
-
-                            Text {
-                                text: modelData.model || modelData.description || modelData.name
-                                color: A.Appearance.foreground
-                                font.family: A.Appearance.fontFamily
-                                font.pixelSize: 22
-                                font.weight: A.Appearance.fontWeightStrong
-                                renderType: Text.NativeRendering
-                            }
-                            Text {
-                                text: `${modelData.name}${rowIndex === 0 ? "  (Primary)" : ""}`
-                                color: modelData.enabled ? A.Appearance.primary : A.Appearance.mutedForeground
-                                font.family: A.Appearance.fontFamily
-                                font.pixelSize: A.Appearance.fontSizeBody
-                                font.weight: A.Appearance.fontWeightMedium
-                                renderType: Text.NativeRendering
-                            }
-                        }
-
-                        Row {
-                            anchors.right: parent.right
-                            anchors.rightMargin: A.Appearance.space3
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: A.Appearance.space1
-
-                            Ui.Button {
-                                width: 104
-                                height: 42
-                                text: "On"
-                                active: root.editingOutput && root.selectedIndex === rowIndex
-                                    ? root.actionIndex === 0 : modelData.enabled
-                                bordered: true
-                                foreground: (root.editingOutput && root.selectedIndex === rowIndex
-                                    ? root.actionIndex === 0 : modelData.enabled)
-                                    ? A.Appearance.primary : A.Appearance.foreground
-                                onClicked: root.display.setOutputEnabled(modelData, true)
-                            }
-                            Ui.Button {
-                                width: 104
-                                height: 42
-                                text: "Off"
-                                active: root.editingOutput && root.selectedIndex === rowIndex
-                                    ? root.actionIndex === 1 : !modelData.enabled
-                                bordered: true
-                                foreground: (root.editingOutput && root.selectedIndex === rowIndex
-                                    ? root.actionIndex === 1 : !modelData.enabled)
-                                    ? A.Appearance.primary : A.Appearance.foreground
-                                onClicked: root.display.setOutputEnabled(modelData, false)
-                            }
-                            Ui.Button {
-                                width: 104
-                                height: 42
-                                text: "Auto"
-                                active: root.editingOutput && root.selectedIndex === rowIndex
-                                    && root.actionIndex === 2
-                                bordered: true
-                                onClicked: root.display.setOutputEnabled(modelData, true)
-                            }
-                        }
-
-                        HoverHandler {
-                            onHoveredChanged: if (hovered) {
-                                root.cursorActive = true
-                                root.selectedIndex = rowIndex
-                            }
-                        }
+                        output: modelData
+                        rowIndex: index
                     }
                 }
 
                 Ui.Separator { width: parent.width }
+
+                Ui.SectionHeader {
+                    text: "SETTINGS"
+                    foreground: A.Appearance.foreground
+                    fontFamily: A.Appearance.fontFamily
+                }
 
                 Column {
                     width: parent.width
@@ -582,8 +615,6 @@ Item {
                         }
                     }
                 }
-
-                Ui.Separator { width: parent.width }
 
                 Text {
                     width: parent.width

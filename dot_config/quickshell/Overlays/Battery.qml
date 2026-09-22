@@ -3,6 +3,9 @@ import "../Appearance" as A
 import "../Ui" as Ui
 import "../Services" as Services
 
+// Lyra card: header (title + description, percentage in the action slot),
+// progress block (label row + h-1 track), separator, detail rows.
+// Spacing, type, and geometry come only from Appearance tokens.
 Item {
     id: root
 
@@ -15,6 +18,22 @@ Item {
     readonly property color chargeColor: A.Appearance.batteryColor(
         displayPercent, charging
     )
+    readonly property string timeText: {
+        if (!root.battery.available)
+            return "—"
+        return root.battery.timeShort(root.battery.timeRemaining) || "—"
+    }
+    // Header description: state with time folded in ("Discharging · 49m left").
+    readonly property string headerDescription: {
+        if (!root.battery.available)
+            return "Unavailable"
+        const state = root.battery.state
+        if (root.timeText === "—")
+            return state
+        if (root.battery.discharging)
+            return `${state} · ${root.timeText} left`
+        return `${state} · ${root.timeText} to full`
+    }
 
     function batteryIcon() {
         if (!battery.available)
@@ -40,11 +59,18 @@ Item {
         Column {
             id: panelColumn
             width: parent.width
-            spacing: 14
+            spacing: A.Appearance.space4
 
+            // CardHeader: glyph + title/description on the left,
+            // percentage in the action slot on the right.
             Item {
                 width: parent.width
-                height: 58
+                implicitHeight: Math.max(
+                    batteryGlyph.height,
+                    headerLabels.height,
+                    headerPercent.height
+                )
+                height: implicitHeight
 
                 Text {
                     id: batteryGlyph
@@ -54,16 +80,19 @@ Item {
 
                     text: root.batteryIcon()
                     color: root.chargeColor
-                    font.family: A.Appearance.fontFamily
-                    font.pixelSize: 30
+                    font.family: A.Appearance.iconFontFamily
+                    font.pixelSize: A.Appearance.batteryGlyphSize
                     renderType: Text.NativeRendering
                 }
 
                 Column {
+                    id: headerLabels
+
                     anchors.left: batteryGlyph.right
                     anchors.leftMargin: A.Appearance.space3
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: A.Appearance.space05
+                    spacing: A.Appearance.space1
+                    height: implicitHeight
 
                     Text {
                         text: "Battery"
@@ -75,9 +104,7 @@ Item {
                     }
 
                     Text {
-                        text: root.battery.available
-                            ? root.battery.state
-                            : "Unavailable"
+                        text: root.headerDescription
                         color: A.Appearance.mutedForeground
                         font.family: A.Appearance.fontFamily
                         font.pixelSize: A.Appearance.fontSizeBody
@@ -86,75 +113,28 @@ Item {
                 }
 
                 Text {
+                    id: headerPercent
+
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
 
                     text: root.battery.available
                         ? `${Math.round(root.displayPercent)}%`
-                        : "--"
+                        : "—"
                     color: root.chargeColor
                     font.family: A.Appearance.fontFamily
-                    font.pixelSize: A.Appearance.fontSizeDisplaySmall
-                    font.weight: A.Appearance.fontWeightStrong
+                    font.pixelSize: A.Appearance.fontSizeTitle
+                    font.weight: A.Appearance.fontWeightMedium
                     renderType: Text.NativeRendering
                 }
             }
 
-            Ui.Separator {
+            // Charge and time already live in the header,
+            // so the bar doubles as the section divider.
+            Ui.Progress {
                 width: parent.width
-            }
-
-            Item {
-                width: parent.width
-                height: 18
-
-                Rectangle {
-                    id: chargeTrack
-
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width
-                    height: A.Appearance.progressHeight
-                    color: A.Appearance.muted
-                }
-
-                Rectangle {
-                    anchors.left: chargeTrack.left
-                    anchors.verticalCenter: chargeTrack.verticalCenter
-                    width: chargeTrack.width * root.displayPercent / 100
-                    height: chargeTrack.height
-                    color: root.chargeColor
-
-                    Behavior on width {
-                        NumberAnimation { duration: A.Appearance.durationFast }
-                    }
-                }
-            }
-
-            Ui.DetailRow {
-                width: parent.width
-
-                icon: root.battery.discharging ? "󰌪" : "󰚥"
-                label: "Power source"
-
-                value: root.battery.available
-                    ? (root.battery.discharging ? "Battery" : "AC adapter")
-                    : "Unavailable"
-                valueColor: root.chargeColor
-            }
-
-            Ui.DetailRow {
-                width: parent.width
-
-                icon: "󰥔"
-                label: root.battery.discharging ? "Remaining" : "Until full"
-
-                value: root.battery.available
-                    ? (
-                        root.battery.timeShort(
-                            root.battery.timeRemaining
-                        ) || "Unavailable"
-                    )
-                    : "Unavailable"
+                value: root.displayPercent / 100
+                fillColor: root.chargeColor
             }
 
             Ui.DetailRow {
@@ -175,17 +155,17 @@ Item {
 
                 value: root.battery.available
                     ? `${root.battery.powerUsage.toFixed(1)} W`
-                    : "Unavailable"
+                    : "—"
             }
 
             Ui.DetailRow {
                 width: parent.width
-                visible: root.battery.energyFull > 0
+                visible: root.battery.energyCapacity > 0
 
                 icon: "󰇥"
                 label: "Capacity"
 
-                value: `${root.battery.energy.toFixed(1)} / ${root.battery.energyFull.toFixed(1)} Wh`
+                value: `${root.battery.energy.toFixed(1)} / ${root.battery.energyCapacity.toFixed(1)} Wh`
             }
         }
     }

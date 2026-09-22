@@ -117,7 +117,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "󰅁"
                         color: leftTap.pressed ? A.Appearance.primary : A.Appearance.mutedForeground
-                        font.family: A.Appearance.fontFamily
+                        font.family: A.Appearance.iconFontFamily
                         font.pixelSize: 24
                         renderType: Text.NativeRendering
 
@@ -132,7 +132,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "󰅂"
                         color: rightTap.pressed ? A.Appearance.primary : A.Appearance.mutedForeground
-                        font.family: A.Appearance.fontFamily
+                        font.family: A.Appearance.iconFontFamily
                         font.pixelSize: 24
                         renderType: Text.NativeRendering
 

@@ -32,7 +32,7 @@ Item {
 
             color: root.iconColor
 
-            font.family: A.Appearance.fontFamily
+            font.family: A.Appearance.iconFontFamily
             font.pixelSize: A.Appearance.iconSize
             font.weight: Font.Normal
 

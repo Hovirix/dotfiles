@@ -62,18 +62,10 @@ Rectangle {
                 }
             }
 
-            Rectangle {
+            Progress {
                 width: parent.width
-                height: A.Appearance.osdProgressHeight
-                color: A.Appearance.muted
-                radius: A.Appearance.radius
-
-                Rectangle {
-                    width: parent.width * Math.max(0, Math.min(1, root.value))
-                    height: parent.height
-                    color: A.Appearance.primary
-                    radius: A.Appearance.radius
-                }
+                barHeight: A.Appearance.osdProgressHeight
+                value: root.value
             }
         }
     }

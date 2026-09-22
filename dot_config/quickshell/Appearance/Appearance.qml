@@ -4,8 +4,8 @@ import QtQuick
 
 // The only place where the design system exists.
 //
-// shadcn/ui Lyra component style, JetBrains Mono (single family
-// for text and icons), Catppuccin Mocha mapped onto shadcn semantic tokens.
+// shadcn/ui Lyra component style, JetBrains Mono for text, Symbols Nerd Font
+// Mono for icon glyphs, Catppuccin Mocha mapped onto shadcn semantic tokens.
 //
 // Panels never hardcode visual values; shared Ui primitives in this folder
 // consume these tokens, and overlays compose the primitives.
@@ -16,8 +16,9 @@ QtObject {
     // TYPOGRAPHY
     // ================================================================
 
-    // Single family for everything, text and Nerd Font icons alike.
+    // Keep normal text metrics independent from private-use icon glyphs.
     readonly property string fontFamily: "JetBrains Mono"
+    readonly property string iconFontFamily: "Symbols Nerd Font Mono"
 
     // Slightly above Lyra's default xs/sm scale for comfortable desktop
     // legibility while keeping menu density compact.
@@ -29,7 +30,6 @@ QtObject {
 
     // Display sizes are purpose-driven exceptions to the Lyra xs/sm scale
     // (e.g. clock faces), never body text.
-    readonly property int fontSizeDisplay: 44
     readonly property int fontSizeDisplaySmall: 20
     readonly property int fontSizeHero: 64
 
@@ -71,7 +71,6 @@ QtObject {
 
     readonly property color success: "#a6e3a1"               // green
     readonly property color warning: "#f9e2af"               // yellow
-    readonly property color peach: "#fab387"                 // mocha peach
 
     // Floating popover ring (Lyra ring-foreground/10). Structural
     // separators use the solid `border` token instead.
@@ -115,10 +114,6 @@ QtObject {
     readonly property int separatorSize: 1
 
     // Standard Lyra popover.
-    readonly property int panelPadding: 10
-    readonly property int panelGap: 10
-
-    // Larger dialog-like surfaces if ever required.
     readonly property int dialogPadding: 16
     readonly property int dialogGap: 16
 
@@ -138,23 +133,28 @@ QtObject {
     readonly property int popupWidthWorkspace: 880
     readonly property int popupMaxHeight: 560
 
-    readonly property int headerHeight: 42
-
     readonly property int rowHeight: 32
+    // h-14 two-line list rows (output cards).
+    readonly property int rowHeightLarge: 56
 
     readonly property int iconSize: 16
     readonly property int iconColumnWidth: 20
     readonly property int iconLabelGap: 10
 
-    readonly property int sectionGap: 10
+    // Stat-card hero glyph (battery, power). Rows keep iconSize.
+    readonly property int batteryGlyphSize: 28
+    // Menu hero glyph, matching the audio panel.
+    readonly property int heroGlyphSize: 24
+
+    readonly property int notificationWidth: 400
+    readonly property int notificationIconSize: 36
+    readonly property int notificationGlyphSize: 24
+    readonly property int notificationTimeout: 5000
 
     // Lyra h-1
     readonly property int progressHeight: 4
 
-    readonly property int buttonHeightXs: 24
-    readonly property int buttonHeightSm: 28
     readonly property int buttonHeight: 32
-    readonly property int buttonHeightLg: 36
 
     // ================================================================
     // OSD
@@ -172,9 +172,6 @@ QtObject {
     // Lyra duration-100.
     readonly property int durationFast: 100
 
-    readonly property real enterScale: 0.95
-    readonly property real normalScale: 1.0
-
     // ================================================================
     // SEMANTIC BATTERY COLORS
     // ================================================================
@@ -190,23 +187,5 @@ QtObject {
             return warning
 
         return foreground
-    }
-
-    // ================================================================
-    // SHARED BEHAVIOR
-    // ================================================================
-
-    // Fold touchpad wheel deltas into full 120-unit steps. Returns
-    // { steps, remainder }; carry the remainder between wheel events.
-    function wheelSteps(accumulator, delta) {
-        delta = Math.max(-120, Math.min(120, delta))
-        if (accumulator * delta < 0)
-            accumulator = 0
-        var total = accumulator + delta
-        var steps = total < 0 ? Math.ceil(total / 120) : Math.floor(total / 120)
-        return {
-            steps: steps,
-            remainder: total - steps * 120
-        }
     }
 }

@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
 import "../Appearance" as A
@@ -13,16 +12,10 @@ Item {
   id: root
 
   property bool opened: false
-  property var settings: ({})
 
   function open() { opened = true }
   function close() { opened = false }
   function toggle() { opened ? close() : open() }
-
-  function setting(name, fallback) {
-    var value = settings ? settings[name] : undefined
-    return value === undefined || value === null ? fallback : value
-  }
 
   property var batteryInfo: ({})
   property var systemInfo: ({})
@@ -30,7 +23,6 @@ Item {
   property string activeProfile: ""
   property int profileIndex: 0
   property bool cursorActive: false
-  readonly property bool showPercentage: setting("showPercentage", false) === true
   readonly property bool batteryPresent: {
     var device = UPower.displayDevice
     return !!(device && device.isPresent)
@@ -93,8 +85,6 @@ Item {
     var d = UPower.displayDevice
     return d && d.isPresent && !UPower.onBattery && !root.batteryFlowIdle
   }
-
-  readonly property color batteryFillColor: A.Appearance.foreground
 
   // Cute agent-flavored phrases shown in the hero status line, rotated on a
   // timer so the panel feels alive when current is flowing (either direction).
@@ -172,11 +162,6 @@ Item {
     if (!profile || actionProc.running) return
     actionProc.command = ["omarchy-powerprofiles-set", root.discharging ? "battery" : "ac", profile]
     actionProc.running = true
-  }
-
-  // Percentage preference is kept in memory only (no settings store).
-  function togglePercentage() {
-    root.settings = Object.assign({}, root.settings, { showPercentage: !root.showPercentage })
   }
 
   onOpenedChanged: {
@@ -284,7 +269,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        spacing: 14
+        spacing: A.Appearance.space4
 
         // ---------- Hero: battery icon · title/status · percentage ----------
         Item {
@@ -296,18 +281,18 @@ Item {
             textFormat: Text.PlainText
             text: root.batteryIcon()
             color: A.Appearance.foreground
-            font.family: A.Appearance.fontFamily
-            font.pixelSize: 24
+            font.family: A.Appearance.iconFontFamily
+            font.pixelSize: A.Appearance.heroGlyphSize
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
 
-            Behavior on color { ColorAnimation { duration: 200 } }
+            Behavior on color { ColorAnimation { duration: A.Appearance.durationFast } }
           }
 
           Column {
             id: heroLabels
             anchors.left: heroIcon.right
-            anchors.leftMargin: 14
+            anchors.leftMargin: A.Appearance.space3
             anchors.right: heroPercent.left
             anchors.rightMargin: A.Appearance.space25
             anchors.verticalCenter: parent.verticalCenter
@@ -318,7 +303,7 @@ Item {
               color: A.Appearance.foreground
               font.family: A.Appearance.fontFamily
               font.pixelSize: A.Appearance.fontSizeTitle
-              font.bold: true
+              font.weight: A.Appearance.fontWeightMedium
               elide: Text.ElideRight
               width: parent.width
             }
@@ -327,10 +312,10 @@ Item {
               id: heroStatus
               textFormat: Text.PlainText
               text: root.heroStatusText.toUpperCase()
-              color: Qt.darker(A.Appearance.foreground, 1.4)
+              color: A.Appearance.mutedForeground
               font.family: A.Appearance.fontFamily
               font.pixelSize: A.Appearance.fontSizeBody
-              font.bold: true
+              font.weight: A.Appearance.fontWeightMedium
               font.letterSpacing: 1.2
               elide: Text.ElideRight
               width: parent.width
@@ -343,48 +328,19 @@ Item {
             text: root.batteryInfo.percentage || "—"
             color: A.Appearance.foreground
             font.family: A.Appearance.fontFamily
-            font.pixelSize: 28
-            font.bold: true
+            font.pixelSize: A.Appearance.fontSizeTitle
+            font.weight: A.Appearance.fontWeightMedium
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 
-            Behavior on color { ColorAnimation { duration: 200 } }
+            Behavior on color { ColorAnimation { duration: A.Appearance.durationFast } }
           }
         }
 
-        // ---------- Battery progress bar ----------
-        Item {
+        Ui.Progress {
           width: parent.width
-          implicitHeight: A.Appearance.space2
-
-          Rectangle {
-            id: barTrack
-            anchors.fill: parent
-            radius: height / 2
-            color: Qt.rgba(A.Appearance.foreground.r, A.Appearance.foreground.g, A.Appearance.foreground.b, 0.12)
-          }
-
-          Rectangle {
-            id: barFill
-            anchors.left: barTrack.left
-            anchors.verticalCenter: barTrack.verticalCenter
-            height: barTrack.height
-            radius: barTrack.radius
-            color: root.batteryFillColor
-            width: Math.max(barTrack.height, barTrack.width * root.batteryFraction)
-
-            Behavior on width { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
-            Behavior on color { ColorAnimation { duration: 220 } }
-
-            // Subtle pulse while charging — visible signal that energy is flowing in.
-            SequentialAnimation on opacity {
-              running: root.charging && !root.fullyCharged && root.opened
-              loops: Animation.Infinite
-              alwaysRunToEnd: true
-              NumberAnimation { from: 1.0; to: 0.55; duration: 950; easing.type: Easing.InOutSine }
-              NumberAnimation { from: 0.55; to: 1.0; duration: 950; easing.type: Easing.InOutSine }
-            }
-          }
+          value: root.batteryFraction
+          fillColor: A.Appearance.foreground
         }
 
         // ---------- Stats ----------
@@ -396,7 +352,7 @@ Item {
         Row {
           visible: root.batteryInfo.percentage !== undefined
           width: parent.width
-          spacing: 20
+          spacing: A.Appearance.space4
 
           Column {
             width: (parent.width - parent.spacing) / 2
@@ -481,23 +437,20 @@ Item {
     width: parent.width
     spacing: A.Appearance.space2
 
-    InfoLabel { text: label }
+    Text {
+      textFormat: Text.PlainText
+      text: parent.label
+      color: A.Appearance.mutedForeground
+      font.family: A.Appearance.fontFamily
+      font.pixelSize: A.Appearance.fontSizeBody
+    }
     Item { width: Math.max(0, parent.width - parent.children[0].implicitWidth - parent.children[2].implicitWidth - parent.spacing * 2); height: 1 }
-    InfoValue { text: value }
-  }
-
-  component InfoLabel: Text {
-    textFormat: Text.PlainText
-    color: A.Appearance.foreground
-    opacity: 0.6
-    font.family: A.Appearance.fontFamily
-    font.pixelSize: A.Appearance.fontSizeBody
-  }
-
-  component InfoValue: Text {
-    textFormat: Text.PlainText
-    color: A.Appearance.foreground
-    font.family: A.Appearance.fontFamily
-    font.pixelSize: A.Appearance.fontSizeBody
+    Text {
+      textFormat: Text.PlainText
+      text: parent.value
+      color: A.Appearance.foreground
+      font.family: A.Appearance.fontFamily
+      font.pixelSize: A.Appearance.fontSizeBody
+    }
   }
 }

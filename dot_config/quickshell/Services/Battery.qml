@@ -2,11 +2,37 @@ import QtQuick
 import Quickshell.Services.UPower
 
 // UPower-backed battery service. Feeds Overlays/Battery.qml.
+//
+// Percentage, state, and time come from the aggregate display device.
+// Capacity and health come from the physical laptop battery: the
+// display device does not expose energy-full-design, so health and
+// capacity rows would otherwise stay empty.
 QtObject {
     id: root
 
     readonly property var device: UPower.displayDevice
     readonly property bool available: !!(device && device.isPresent)
+
+    readonly property var laptopBattery: {
+        const list = (UPower.devices && UPower.devices.values) || []
+        for (let i = 0; i < list.length; i++) {
+            const candidate = list[i]
+            if (candidate && candidate.ready && candidate.isLaptopBattery && candidate.isPresent)
+                return candidate
+        }
+        return null
+    }
+
+    // Physical-battery value first, display-device fallback, else 0.
+    function batteryNumber(name: string): real {
+        const physical = root.laptopBattery ? Number(root.laptopBattery[name]) : NaN
+        if (isFinite(physical) && physical > 0)
+            return physical
+        const composite = root.device ? Number(root.device[name]) : NaN
+        if (isFinite(composite) && composite > 0)
+            return composite
+        return 0
+    }
 
     // 0..100 scale (UPower reports 0..1).
     readonly property real percentage: {
@@ -49,40 +75,46 @@ QtObject {
         return isFinite(t) && t > 0 ? t : 0
     }
 
-    // 0..100 design-health; 0 when unknown (overlay shows "Unavailable").
+    // 0..100 design-health; 0 when unknown (overlay hides the row).
     readonly property real healthPercentage: {
         if (!available)
             return 0
-        const full = Number(device.energyFull)
-        const design = Number(device.energyFullDesign)
-        if (!isFinite(full) || !isFinite(design) || design <= 0)
-            return 0
-        return Math.max(0, Math.min(100, full / design * 100))
+        const sources = [root.laptopBattery, device]
+        for (let i = 0; i < sources.length; i++) {
+            const source = sources[i]
+            if (source && source.healthSupported) {
+                const health = Number(source.healthPercentage)
+                if (isFinite(health) && health > 0)
+                    return Math.max(0, Math.min(100, health))
+            }
+        }
+        return 0
     }
 
-    // Current power draw in watts.
+    // Current power draw in watts (absolute rate).
     readonly property real powerUsage: {
         if (!available)
             return 0
-        const rate = Number(device.energyRate)
-        if (isFinite(rate))
-            return Math.max(0, rate)
-        const change = Number(device.changeRate)
-        return isFinite(change) ? Math.max(0, change) : 0
+        const sources = [root.laptopBattery, device]
+        for (let i = 0; i < sources.length; i++) {
+            const rate = sources[i] ? Number(sources[i].changeRate) : NaN
+            if (isFinite(rate))
+                return Math.abs(rate)
+        }
+        return 0
     }
 
     readonly property real energy: {
         if (!available)
             return 0
-        const value = Number(device.energy)
-        return isFinite(value) && value >= 0 ? value : 0
+        return root.batteryNumber("energy")
     }
 
-    readonly property real energyFull: {
+    // Maximum capacity in Wh; 0 when unknown (overlay hides the row).
+    readonly property real energyCapacity: {
         if (!available)
             return 0
-        const value = Number(device.energyFull)
-        return isFinite(value) && value > 0 ? value : 0
+        return root.batteryNumber("energyCapacity")
     }
 
     // "3h 42m" / "42m" / "" when unknown.

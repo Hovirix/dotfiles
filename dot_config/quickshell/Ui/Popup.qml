@@ -48,7 +48,7 @@ PanelWindow {
         height: root.contentHeight
         color: A.Appearance.popover
         border.width: A.Appearance.borderWidth
-        border.color: A.Appearance.peach
+        border.color: A.Appearance.subtleRing
         radius: A.Appearance.radius
 
         // Swallow card clicks so they never reach the dismiss area.

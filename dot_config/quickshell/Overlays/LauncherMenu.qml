@@ -25,10 +25,6 @@ Item {
         "❌  cross mark", "⚡  lightning", "🎉  party popper", "🚀  rocket",
         "💡  light bulb", "☕  hot beverage", "🍕  pizza", "🎵  musical note"
     ]
-    readonly property var screenshotItems: [
-        "󰆏  Copy selection", "󰹑  Save selection",
-        "  Copy screen", "󰍹  Save screen"
-    ]
     readonly property var filteredItems: {
         var needle = query.trim().toLowerCase()
         if (mode === "apps")
@@ -42,6 +38,11 @@ Item {
     readonly property int pageSize: mode === "emoji" ? 16 : 12
     readonly property int pageStart: Math.floor(selectedIndex / pageSize) * pageSize
     readonly property var visibleItems: filteredItems.slice(pageStart, pageStart + pageSize)
+
+    // Apps list keeps one fixed full-page height so the window never
+    // resizes while filtering: uniform two-line rows, padded when short.
+    readonly property int appRowHeight: 48
+    readonly property int appListHeight: pageSize * appRowHeight + (pageSize - 1) * A.Appearance.space1
 
     function applicationText(entry) {
         var keywords = ""
@@ -90,7 +91,7 @@ Item {
         mode = nextMode
         query = ""
         selectedIndex = 0
-        allItems = nextMode === "emoji" ? emojis : nextMode === "screenshot" ? screenshotItems : []
+        allItems = nextMode === "emoji" ? emojis : []
         controller.current = "launcher"
         if (nextMode === "open") {
             recentQuery.exec(["sh", "-c",
@@ -139,11 +140,6 @@ Item {
             openFile.exec(["xdg-open", item])
         } else if (mode === "apps") {
             item.execute()
-        } else {
-            if (selectedIndex === 0) capture.exec(["grimlite", "--notify", "copy", "anything"])
-            if (selectedIndex === 1) capture.exec(["grimlite", "--notify", "save", "anything"])
-            if (selectedIndex === 2) capture.exec(["grimlite", "--notify", "copy", "screen"])
-            if (selectedIndex === 3) capture.exec(["grimlite", "--notify", "save", "screen"])
         }
         controller.close()
     }
@@ -158,7 +154,6 @@ Item {
     }
     property var copy: Process {}
     property var openFile: Process {}
-    property var capture: Process {}
 
     Ui.Popup {
         visible: root.controller.current === "launcher"
@@ -176,13 +171,13 @@ Item {
             id: keys
             anchors.fill: parent
             vimNavigation: false
-            spaceActivates: root.mode === "screenshot"
+            spaceActivates: false
             onMoveRequested: function(dx, dy) { root.move(dx, dy) }
             onActivateRequested: root.activate()
             onCloseRequested: root.controller.close()
             onBackspaceRequested: root.setQuery(root.query.slice(0, -1))
             onTextKey: function(text) {
-                if (root.mode !== "screenshot" && text.length === 1)
+                if (text.length === 1)
                     root.setQuery(root.query + text)
             }
 
@@ -192,7 +187,6 @@ Item {
                 spacing: A.Appearance.space2
 
                 Item {
-                    visible: root.mode !== "screenshot"
                     width: parent.width
                     height: A.Appearance.buttonHeight
 
@@ -220,12 +214,12 @@ Item {
                     }
                 }
 
-                Ui.Separator { visible: root.mode !== "screenshot"; width: parent.width }
+                Ui.Separator { width: parent.width }
 
                 Text {
                     visible: root.filteredItems.length === 0
                     width: parent.width
-                    height: 40
+                    height: root.mode === "apps" ? root.appListHeight : 40
                     text: root.mode === "open" ? "No files"
                         : (root.mode === "apps" ? "No applications" : "No emoji")
                     color: A.Appearance.mutedForeground
@@ -263,9 +257,10 @@ Item {
                 }
 
                 Column {
-                    visible: root.mode !== "emoji"
+                    visible: root.mode !== "emoji" && root.filteredItems.length > 0
                     width: parent.width
                     spacing: A.Appearance.space1
+                    height: root.mode === "apps" ? root.appListHeight : implicitHeight
 
                     Repeater {
                         model: root.mode !== "emoji" ? root.visibleItems : []
@@ -273,7 +268,7 @@ Item {
                             required property var modelData
                             required property int index
                             width: parent.width
-                            height: root.mode === "apps" ? (root.query.length > 0 ? 48 : 42) : 38
+                            height: root.mode === "apps" ? root.appRowHeight : 38
                             hasCursor: root.selectedIndex === root.pageStart + index
                             contentPadding: root.mode === "apps" ? 0 : A.Appearance.space2
 
@@ -285,7 +280,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: root.mode === "open" ? root.fileIcon(modelData) : String(modelData).split("  ")[0]
                                 color: hasCursor ? A.Appearance.primary : A.Appearance.mutedForeground
-                                font.family: A.Appearance.fontFamily
+                                font.family: A.Appearance.iconFontFamily
                                 font.pixelSize: A.Appearance.iconSize
                                 renderType: Text.NativeRendering
                             }
@@ -324,9 +319,11 @@ Item {
                                     renderType: Text.NativeRendering
                                 }
                                 Text {
-                                    visible: root.mode === "apps" && root.query.length > 0 && String(modelData.genericName || "").length > 0
+                                    visible: root.mode === "apps"
                                     width: parent.width
-                                    text: visible ? modelData.genericName : ""
+                                    // A single space keeps the line height for
+                                    // entries without subtitle metadata.
+                                    text: String(modelData.genericName || modelData.comment || " ")
                                     color: A.Appearance.mutedForeground
                                     font.family: A.Appearance.fontFamily
                                     font.pixelSize: A.Appearance.fontSizeLabel

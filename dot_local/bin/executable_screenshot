@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+dir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
+save=false
+file=""
+
+if [[ "${1:-}" == "--save" ]]; then
+    save=true
+    file="${2:-}"
+fi
+
+geometry="$(
+    mmsg get all-clients |
+    jq -r '
+        .clients[]
+        | select(.is_visible and (.is_minimized | not))
+        | "\(.x),\(.y) \(.width)x\(.height)"
+    ' |
+    slurp -o
+)" || exit 0
+
+[[ -n "$geometry" ]] || exit 0
+
+if "$save"; then
+    [[ -n "$file" ]] || file="$dir/screenshot-$(date '+%Y-%m-%d_%H-%M-%S').png"
+    mkdir -p "$(dirname "$file")"
+    grim -g "$geometry" - | tee "$file" | wl-copy --type image/png
+    notify-send -i camera-photo "Screenshot" "$file"
+else
+    grim -g "$geometry" - | wl-copy --type image/png
+    notify-send -i camera-photo "Screenshot" "Copied to clipboard"
+fi

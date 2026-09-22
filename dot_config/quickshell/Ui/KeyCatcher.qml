@@ -16,9 +16,7 @@ Item {
 
     signal moveRequested(int dx, int dy)
     signal activateRequested()
-    signal returnRequested()
     signal closeRequested()
-    signal deleteRequested()
     signal backspaceRequested()
     signal tabRequested(int direction)
     signal textKey(string text)
@@ -65,18 +63,12 @@ Item {
             return
         }
         if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-            returnRequested()
             activateRequested()
             event.accepted = true
             return
         }
         if (event.key === Qt.Key_Space && spaceActivates) {
             activateRequested()
-            event.accepted = true
-            return
-        }
-        if (vimNavigation && (event.text === "x" || event.text === "X")) {
-            deleteRequested()
             event.accepted = true
             return
         }

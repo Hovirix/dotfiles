@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import "../Appearance" as A
 import "../Ui" as Ui
 import "../Services" as Services
 

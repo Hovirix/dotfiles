@@ -22,8 +22,8 @@ Item {
 
     readonly property bool hot: hasCursor || mouseArea.containsMouse
 
-    implicitWidth: Math.max(label.implicitWidth, 48) + horizontalPadding * 2
-    implicitHeight: label.implicitHeight + verticalPadding * 2
+    implicitWidth: Math.max(labelRow.implicitWidth, 48) + horizontalPadding * 2
+    implicitHeight: labelRow.implicitHeight + verticalPadding * 2
 
     Rectangle {
         anchors.fill: parent
@@ -39,18 +39,30 @@ Item {
         }
     }
 
-    Text {
-        id: label
-
+    Row {
+        id: labelRow
         anchors.centerIn: parent
-        textFormat: Text.PlainText
-        text: (root.iconText !== "" ? root.iconText + " " : "") + root.text
-        color: root.foreground
-        font.family: root.fontFamily
-        font.pixelSize: root.fontSize
-        font.weight: root.active ? A.Appearance.fontWeightMedium : A.Appearance.fontWeightNormal
-        elide: Text.ElideRight
-        renderType: Text.NativeRendering
+        spacing: root.iconText !== "" && root.text !== "" ? A.Appearance.space15 : 0
+
+        Text {
+            visible: root.iconText !== ""
+            text: root.iconText
+            color: root.foreground
+            font.family: A.Appearance.iconFontFamily
+            font.pixelSize: root.iconSize
+            renderType: Text.NativeRendering
+        }
+
+        Text {
+            textFormat: Text.PlainText
+            text: root.text
+            color: root.foreground
+            font.family: root.fontFamily
+            font.pixelSize: root.fontSize
+            font.weight: root.active ? A.Appearance.fontWeightMedium : A.Appearance.fontWeightNormal
+            elide: Text.ElideRight
+            renderType: Text.NativeRendering
+        }
     }
 
     MouseArea {

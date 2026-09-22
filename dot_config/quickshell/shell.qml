@@ -1,3 +1,5 @@
+//@ pragma IconTheme Papirus-Dark
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -12,6 +14,7 @@ ShellRoot {
     Services.Brightness { id: brightness }
     Services.Battery { id: battery }
     Services.Display { id: display }
+    Services.Notifications { id: notifications }
 
     Overlays.Battery { id: batteryOverlay; controller: overlays; battery: battery }
     Overlays.Display { id: displayOverlay; controller: overlays; display: display; brightness: brightness }
@@ -21,6 +24,7 @@ ShellRoot {
     Overlays.AudioMenu { id: audioMenu; volumeOsd: volumeOsd }
     Overlays.PowerMenu { id: powerMenu }
     Overlays.LauncherMenu { id: launcherMenu; controller: overlays }
+    Overlays.Notifications { notifications: notifications }
 
     // Minimal overlay controller: which Appearance-based overlay is open.
     QtObject {
@@ -47,7 +51,6 @@ ShellRoot {
         function clock(): void { overlays.toggle("clock") }
         function emoji(): void { launcherMenu.open("emoji") }
         function openRecent(): void { launcherMenu.open("open") }
-        function screenshot(): void { launcherMenu.open("screenshot") }
         function launcher(): void { launcherMenu.open("apps") }
         function close(): void { overlays.close() }
 

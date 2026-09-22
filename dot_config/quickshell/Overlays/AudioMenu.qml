@@ -16,25 +16,15 @@ Item {
 
   property bool opened: false
   property var volumeOsd: null
-  property var settings: ({})
 
   function open() { opened = true }
   function close() { opened = false }
   function toggle() { opened ? close() : open() }
 
-  // Read a single value from this panel's settings dict, with a fallback
-  // for missing/null values.
-  function setting(name, fallback) {
-    var value = settings ? settings[name] : undefined
-    return value === undefined || value === null ? fallback : value
-  }
-
   readonly property var sink: Pipewire.defaultAudioSink
   readonly property var source: Pipewire.defaultAudioSource
   readonly property var nodes: Pipewire.nodes ? Pipewire.nodes.values : []
   readonly property var mprisPlayers: Mpris.players ? Mpris.players.values : []
-  readonly property var mediaService: null
-  readonly property var activeMediaPlayer: mediaService ? mediaService.activePlayer : null
 
   readonly property var candidateSinks: {
     var list = []
@@ -189,7 +179,6 @@ Item {
   readonly property bool hasOutput: !!(volumeSink && volumeSink.audio)
   readonly property bool hasInput: !!(source && source.audio)
   readonly property bool anyAudible: (hasOutput && !outputMuted) || (hasInput && !inputMuted)
-  readonly property string toggleHint: anyAudible ? "Mute" : "Unmute"
 
   function sectionCount(section) {
     if (section === "output") return displayAudioSinks.length
@@ -371,7 +360,7 @@ Item {
   }
 
   // Keep the keyboard-focused row inside the visible viewport of the
-  // ScrollView. Each cursor target (slider rows, SinkRow, SourceRow,
+  // ScrollView. Each cursor target (slider rows, DeviceRow, StreamRow)
   // StreamRow) calls this when it gains hasCursor. Without it, j/k can
   // walk the selection off-screen — wifi uses ListView.positionViewAtIndex
   // for this; we don't have that affordance with a multi-section Column.
@@ -585,10 +574,6 @@ Item {
     return Model.streamLabel(node, mprisPlayers, displayAudioStreams)
   }
 
-  function streamRepresentsPlayer(node, player) {
-    return Model.streamRepresentsPlayer(node, player, mprisPlayers, displayAudioStreams)
-  }
-
   PwObjectTracker { objects: root.candidateSinks }
   PwObjectTracker { objects: root.candidateSources }
   PwObjectTracker { objects: root.audioStreams }
@@ -685,7 +670,7 @@ Item {
         Column {
           id: panelColumn
           width: scrollArea.availableWidth
-          spacing: 14
+          spacing: A.Appearance.space4
 
           // ---------- Hero: speaker icon · title/status ----------
           Item {
@@ -699,7 +684,7 @@ Item {
               textFormat: Text.PlainText
               text: root.outputIcon()
               color: A.Appearance.foreground
-              font.family: A.Appearance.fontFamily
+              font.family: A.Appearance.iconFontFamily
               font.pixelSize: 24
               opacity: root.outputMuted ? 0.5 : 1.0
               anchors.left: parent.left
@@ -718,18 +703,12 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               onHovered: function(on) { if (on) root.setHeaderCursor() }
               onToggled: root.toggleAllMuted()
-
-              Ui.Tooltip {
-                visible: powerSwitch.containsMouse
-                text: root.toggleHint
-                fontFamily: A.Appearance.fontFamily
-              }
             }
 
             Column {
               id: heroLabels
               anchors.left: heroIcon.right
-              anchors.leftMargin: 14
+              anchors.leftMargin: A.Appearance.space4
               anchors.right: parent.right
               anchors.rightMargin: powerSwitch.width + A.Appearance.space3
               anchors.verticalCenter: parent.verticalCenter
@@ -809,7 +788,10 @@ Item {
 
               Ui.Slider {
                 id: outputSlider
-                anchors.fill: parent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: implicitHeight
                 minimum: 0
                 maximum: 1
                 step: 0.05
@@ -833,12 +815,13 @@ Item {
             Repeater {
               model: root.displayAudioSinks
 
-              SinkRow {
+              DeviceRow {
                 required property var modelData
                 required property int index
                 width: panelColumn.width
                 node: modelData
                 rowIndex: index
+                section: "output"
               }
             }
           }
@@ -890,14 +873,17 @@ Item {
               hasCursor: root.cursorActive && root.focusSection === "input" && root.selectedIndex === -1
               onHasCursorChanged: if (hasCursor) root.ensureCursorVisible(inputSliderRow)
 
-              Column {
+              Item {
                 id: inputControls
                 anchors.fill: parent
-                spacing: 5
+                implicitHeight: inputSlider.implicitHeight
 
                 Ui.Slider {
                   id: inputSlider
-                  width: parent.width
+                  anchors.left: parent.left
+                  anchors.right: parent.right
+                  anchors.top: parent.top
+                  height: implicitHeight
                   minimum: 0
                   maximum: 1
                   step: 0.05
@@ -909,14 +895,20 @@ Item {
                   onRightClicked: root.toggleInputMute()
                 }
 
+                // Mic level meter docked under the slider so this row
+                // keeps the exact geometry of the output slider row.
                 Rectangle {
-                  width: parent.width
-                  height: Math.max(5, 3)
+                  anchors.left: parent.left
+                  anchors.right: parent.right
+                  anchors.top: inputSlider.bottom
+                  height: A.Appearance.space05
                   color: Qt.rgba(A.Appearance.foreground.r, A.Appearance.foreground.g, A.Appearance.foreground.b, 0.18)
                   opacity: root.inputMuted ? 0.35 : 1.0
 
                   Rectangle {
-                    height: parent.height
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
                     width: parent.width * Math.max(0, Math.min(1, inputPeakMonitor.peak))
                     color: A.Appearance.foreground
                     Behavior on width { NumberAnimation { duration: 70 } }
@@ -936,12 +928,13 @@ Item {
             Repeater {
               model: root.displayAudioSources
 
-              SourceRow {
+              DeviceRow {
                 required property var modelData
                 required property int index
                 width: panelColumn.width
                 node: modelData
                 rowIndex: index
+                section: "input"
               }
             }
           }
@@ -981,22 +974,24 @@ Item {
 
   // ---- Reusable inline components ----
 
-  // Output device row — cursor target inside the "output" section. Mouse
-  // hover updates the menu cursor at the root; visuals come entirely
-  // from hasCursor/current via SelectRow, never from containsMouse.
-  component SinkRow: Ui.SelectRow {
-    id: sinkRow
+  // Device row — cursor target inside the "output" or "input" section.
+  // Mouse hover updates the menu cursor at the root; visuals come
+  // entirely from hasCursor/current via SelectRow, never from containsMouse.
+  component DeviceRow: Ui.SelectRow {
+    id: deviceRow
     required property var node
     required property int rowIndex
+    required property string section
 
-    readonly property bool isActive: root.sink && node && root.sink.id === node.id
-    hasCursor: root.cursorActive && root.focusSection === "output" && root.selectedIndex === rowIndex
-    onHasCursorChanged: if (hasCursor) root.ensureCursorVisible(sinkRow)
+    readonly property var defaultNode: section === "output" ? root.sink : root.source
+    readonly property bool isActive: defaultNode && node && defaultNode.id === node.id
+    hasCursor: root.cursorActive && root.focusSection === section && root.selectedIndex === rowIndex
+    onHasCursorChanged: if (hasCursor) root.ensureCursorVisible(deviceRow)
     current: isActive
-    implicitHeight: sinkInner.implicitHeight + A.Appearance.space2
+    implicitHeight: deviceInner.implicitHeight + A.Appearance.space2
 
     Row {
-      id: sinkInner
+      id: deviceInner
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
@@ -1006,9 +1001,9 @@ Item {
 
       Text {
         textFormat: Text.PlainText
-        text: root.sinkGlyph(sinkRow.node)
+        text: deviceRow.section === "output" ? root.sinkGlyph(deviceRow.node) : root.sourceGlyph(deviceRow.node)
         color: A.Appearance.foreground
-        font.family: A.Appearance.fontFamily
+        font.family: A.Appearance.iconFontFamily
         font.pixelSize: A.Appearance.fontSizeTitle
         width: A.Appearance.iconColumnWidth
         horizontalAlignment: Text.AlignHCenter
@@ -1017,11 +1012,11 @@ Item {
 
       Text {
         textFormat: Text.PlainText
-        text: root.nodeLabel(sinkRow.node)
+        text: root.nodeLabel(deviceRow.node)
         color: A.Appearance.foreground
         font.family: A.Appearance.fontFamily
         font.pixelSize: A.Appearance.fontSizeBody
-        font.bold: sinkRow.isActive
+        font.bold: deviceRow.isActive
         elide: Text.ElideRight
         width: parent.width - A.Appearance.iconColumnWidth - A.Appearance.space2
         anchors.verticalCenter: parent.verticalCenter
@@ -1034,68 +1029,13 @@ Item {
       cursorShape: Qt.PointingHandCursor
       onContainsMouseChanged: if (containsMouse) {
         root.cursorActive = true
-        root.focusSection = "output"
-        root.selectedIndex = sinkRow.rowIndex
+        root.focusSection = deviceRow.section
+        root.selectedIndex = deviceRow.rowIndex
       }
-      onClicked: root.setDefaultSink(sinkRow.node)
-    }
-  }
-
-  // Input device row — sibling of SinkRow for the "input" section.
-  component SourceRow: Ui.SelectRow {
-    id: sourceRow
-    required property var node
-    required property int rowIndex
-
-    readonly property bool isActive: root.source && node && root.source.id === node.id
-    hasCursor: root.cursorActive && root.focusSection === "input" && root.selectedIndex === rowIndex
-    onHasCursorChanged: if (hasCursor) root.ensureCursorVisible(sourceRow)
-    current: isActive
-    implicitHeight: sourceInner.implicitHeight + A.Appearance.space2
-
-    Row {
-      id: sourceInner
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.leftMargin: A.Appearance.space15
-      anchors.rightMargin: A.Appearance.space15
-      spacing: A.Appearance.space2
-
-      Text {
-        textFormat: Text.PlainText
-        text: root.sourceGlyph(sourceRow.node)
-        color: A.Appearance.foreground
-        font.family: A.Appearance.fontFamily
-        font.pixelSize: A.Appearance.fontSizeTitle
-        width: A.Appearance.iconColumnWidth
-        horizontalAlignment: Text.AlignHCenter
-        anchors.verticalCenter: parent.verticalCenter
+      onClicked: {
+        if (deviceRow.section === "output") root.setDefaultSink(deviceRow.node)
+        else root.setDefaultSource(deviceRow.node)
       }
-
-      Text {
-        textFormat: Text.PlainText
-        text: root.nodeLabel(sourceRow.node)
-        color: A.Appearance.foreground
-        font.family: A.Appearance.fontFamily
-        font.pixelSize: A.Appearance.fontSizeBody
-        font.bold: sourceRow.isActive
-        elide: Text.ElideRight
-        width: parent.width - A.Appearance.iconColumnWidth - A.Appearance.space2
-        anchors.verticalCenter: parent.verticalCenter
-      }
-    }
-
-    MouseArea {
-      anchors.fill: parent
-      hoverEnabled: true
-      cursorShape: Qt.PointingHandCursor
-      onContainsMouseChanged: if (containsMouse) {
-        root.cursorActive = true
-        root.focusSection = "input"
-        root.selectedIndex = sourceRow.rowIndex
-      }
-      onClicked: root.setDefaultSource(sourceRow.node)
     }
   }
 
@@ -1110,11 +1050,9 @@ Item {
 
     readonly property real streamVolume: node && node.audio ? node.audio.volume : 0
     readonly property bool streamMuted: node && node.audio ? node.audio.muted : false
-    readonly property bool isActive: root.streamRepresentsPlayer(node, root.activeMediaPlayer)
 
     hasCursor: root.cursorActive && root.focusSection === "streams" && root.selectedIndex === rowIndex
     onHasCursorChanged: if (hasCursor) root.ensureCursorVisible(streamRow)
-    current: isActive
     implicitHeight: streamColumn.implicitHeight + A.Appearance.space2
 
     Column {
@@ -1158,7 +1096,6 @@ Item {
           color: A.Appearance.foreground
           font.family: A.Appearance.fontFamily
           font.pixelSize: A.Appearance.fontSizeBody
-          font.bold: streamRow.isActive
           elide: Text.ElideRight
           width: parent.width - streamMuteIcon.width - streamPct.width - A.Appearance.space4
           anchors.verticalCenter: parent.verticalCenter
