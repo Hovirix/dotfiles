@@ -35,7 +35,7 @@ Powered by Mango and modern Rust/C tools.
 | Description          | Tool                                       | Language |
 | :------------------- | :----------------------------------------- | :------: |
 | Notification daemon  | [mako](https://github.com/emersion/mako)   |  ![][c]  |
-| Application launcher | [fuzzel](https://codeberg.org/dnkl/fuzzel) |  ![][c]  |
+| Application launcher | Quickshell |  ![][c]  |
 
 <br>
 
