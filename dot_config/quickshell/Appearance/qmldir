@@ -1,0 +1,3 @@
+module Appearance
+
+singleton Appearance 1.0 Appearance.qml
