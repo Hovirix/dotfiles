@@ -11,10 +11,12 @@ Item {
     }
 
     NotificationServer {
-        actionsSupported: false
+        actionsSupported: true
         bodySupported: true
+        bodyMarkupSupported: true
+        bodyHyperlinksSupported: true
         imageSupported: true
-        persistenceSupported: false
+        persistenceSupported: true
         keepOnReload: false
 
         onNotification: function(notification) {

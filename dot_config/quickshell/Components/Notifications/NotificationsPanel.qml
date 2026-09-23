@@ -3,13 +3,12 @@ import Quickshell
 import Quickshell.Services.Notifications
 import Quickshell.Widgets
 
-import "../Appearance" as A
-import "../Services" as Services
+import "../../Appearance" as A
 
 PanelWindow {
     id: window
 
-    required property Services.Notifications notifications
+    required property Service notifications
 
     screen: Quickshell.screens[0]
     visible: notifications.items.length > 0
@@ -40,6 +39,17 @@ PanelWindow {
         return source ? Quickshell.iconPath(source, true) : ""
     }
 
+    function activateDefault(notification) {
+        var acts = notification.actions || []
+        for (var i = 0; i < acts.length; i++) {
+            if (acts[i].identifier === "default") {
+                acts[i].invoke()
+                return true
+            }
+        }
+        return false
+    }
+
     Column {
         id: stack
         width: parent.width
@@ -55,11 +65,14 @@ PanelWindow {
                 readonly property int padding: A.Appearance.space3
 
                 width: window.width
-                implicitHeight: contentRow.height + padding * 2
+                implicitHeight: contentColumn.height + padding * 2
                 height: implicitHeight
                 color: A.Appearance.popover
                 border.width: A.Appearance.borderWidth
-                border.color: A.Appearance.subtleRing
+                border.color: card.modelData.urgency === NotificationUrgency.Critical
+                    ? A.Appearance.destructive
+                    : (card.modelData.urgency === NotificationUrgency.Low
+                        ? A.Appearance.subtleRing : A.Appearance.primary)
                 radius: A.Appearance.radius
 
                 Connections {
@@ -76,12 +89,27 @@ PanelWindow {
                     onTriggered: card.modelData.expire()
                 }
 
-                Item {
-                    id: contentRow
+                MouseArea {
+                    id: dismissArea
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (!window.activateDefault(card.modelData))
+                            card.modelData.dismiss()
+                    }
+                }
+
+                Column {
+                    id: contentColumn
                     x: card.padding
                     y: card.padding
                     width: card.width - card.padding * 2
-                    height: Math.max(iconBox.height, notificationText.implicitHeight)
+                    spacing: A.Appearance.space2
+
+                    Item {
+                        id: contentRow
+                        width: parent.width
+                        height: Math.max(iconBox.height, notificationText.implicitHeight)
 
                     Item {
                         id: iconBox
@@ -128,7 +156,9 @@ PanelWindow {
                             wrapMode: Text.Wrap
                             maximumLineCount: 2
                             elide: Text.ElideRight
-                            textFormat: Text.PlainText
+                            textFormat: Text.StyledText
+                            linkColor: A.Appearance.link
+                            onLinkActivated: function(link) { Qt.openUrlExternally(link) }
                             renderType: Text.NativeRendering
                         }
 
@@ -142,18 +172,61 @@ PanelWindow {
                             wrapMode: Text.Wrap
                             maximumLineCount: 3
                             elide: Text.ElideRight
-                            textFormat: Text.PlainText
+                            textFormat: Text.StyledText
+                            linkColor: A.Appearance.link
+                            onLinkActivated: function(link) { Qt.openUrlExternally(link) }
                             renderType: Text.NativeRendering
                         }
 
                     }
 
-                }
+                    } // contentRow
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: card.modelData.dismiss()
+                    Row {
+                        id: actionsRow
+                        width: parent.width
+                        spacing: A.Appearance.space2
+                        visible: actionRepeater.count > 0
+
+                        Repeater {
+                            id: actionRepeater
+                            model: {
+                                var out = []
+                                var acts = card.modelData.actions || []
+                                for (var i = 0; i < acts.length; i++) {
+                                    if (acts[i].identifier !== "default")
+                                        out.push(acts[i])
+                                }
+                                return out
+                            }
+
+                            Rectangle {
+                                required property var modelData
+                                height: A.Appearance.buttonHeight
+                                width: actionLabel.implicitWidth + A.Appearance.space25 * 2
+                                color: A.Appearance.secondary
+                                radius: A.Appearance.radius
+
+                                Text {
+                                    id: actionLabel
+                                    anchors.centerIn: parent
+                                    text: parent.modelData.text
+                                    color: A.Appearance.foreground
+                                    font.family: A.Appearance.fontFamily
+                                    font.pixelSize: A.Appearance.fontSizeBody
+                                    font.weight: A.Appearance.fontWeightMedium
+                                    elide: Text.ElideRight
+                                    renderType: Text.NativeRendering
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: parent.modelData.invoke()
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
