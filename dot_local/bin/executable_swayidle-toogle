@@ -3,8 +3,8 @@ set -eu
 
 if pgrep -x swayidle >/dev/null 2>&1; then
   pkill -x swayidle
-  notify 'Idle' 'swayidle stopped' system-lock-screen low
+  notify-send -a 'Idle' -i system-lock-screen -u low 'Idle' 'swayidle stopped'
 else
   swayidle -w >/dev/null 2>&1 &
-  notify 'Idle' 'swayidle started' system-lock-screen normal
+  notify-send -a 'Idle' -i system-lock-screen -u normal 'Idle' 'swayidle started'
 fi
