@@ -2,8 +2,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-import "../Appearance" as A
-import "../Ui" as Ui
+import "../../Appearance" as A
+import "../../Ui" as Ui
 
 Item {
     id: root
@@ -156,7 +156,7 @@ Item {
     property var openFile: Process {}
 
     Ui.Popup {
-        visible: root.controller.current === "launcher"
+        shown: root.controller.current === "launcher"
         contentWidth: root.mode === "emoji"
             ? A.Appearance.popupWidthCompact
             : (root.mode === "open"
@@ -308,8 +308,15 @@ Item {
 
                                 Text {
                                     width: parent.width
-                                    text: root.mode === "open" ? root.fileName(modelData)
-                                        : (root.mode === "apps" ? modelData.name : modelData.substring(modelData.indexOf("  ") + 2))
+                                    text: {
+                                        if (modelData === undefined || modelData === null)
+                                            return ""
+                                        if (root.mode === "open")
+                                            return root.fileName(modelData)
+                                        if (root.mode === "apps")
+                                            return String(modelData.name || "")
+                                        return String(modelData.substring(modelData.indexOf("  ") + 2))
+                                    }
                                     color: A.Appearance.foreground
                                     font.family: A.Appearance.fontFamily
                                     font.pixelSize: root.mode === "apps"
@@ -326,7 +333,7 @@ Item {
                                     text: String(modelData.genericName || modelData.comment || " ")
                                     color: A.Appearance.mutedForeground
                                     font.family: A.Appearance.fontFamily
-                                    font.pixelSize: A.Appearance.fontSizeLabel
+                                    font.pixelSize: A.Appearance.fontSizeBody
                                     elide: Text.ElideRight
                                     renderType: Text.NativeRendering
                                 }
