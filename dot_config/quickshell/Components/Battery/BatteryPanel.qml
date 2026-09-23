@@ -1,7 +1,6 @@
 import QtQuick
-import "../Appearance" as A
-import "../Ui" as Ui
-import "../Services" as Services
+import "../../Appearance" as A
+import "../../Ui" as Ui
 
 // Lyra card: header (title + description, percentage in the action slot),
 // progress block (label row + h-1 track), separator, detail rows.
@@ -10,7 +9,7 @@ Item {
     id: root
 
     required property var controller
-    required property Services.Battery battery
+    required property Service battery
 
     readonly property real displayPercent:
         Math.max(0, Math.min(100, battery.percentage))
@@ -52,14 +51,22 @@ Item {
     }
 
     Ui.Popup {
-        visible: root.controller.current === "battery"
+        shown: root.controller.current === "battery"
         contentHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
         onCloseRequested: root.controller.close()
+        onVisibleChanged: if (visible) {
+            Qt.callLater(function() { keys.forceActiveFocus() })
+        }
 
-        Column {
-            id: panelColumn
-            width: parent.width
-            spacing: A.Appearance.space4
+        Ui.KeyCatcher {
+            id: keys
+            anchors.fill: parent
+            onCloseRequested: root.controller.close()
+
+            Column {
+                id: panelColumn
+                width: parent.width
+                spacing: A.Appearance.space4
 
             // CardHeader: glyph + title/description on the left,
             // percentage in the action slot on the right.
@@ -167,6 +174,7 @@ Item {
 
                 value: `${root.battery.energy.toFixed(1)} / ${root.battery.energyCapacity.toFixed(1)} Wh`
             }
+        }
         }
     }
 }

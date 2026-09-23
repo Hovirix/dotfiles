@@ -1,13 +1,12 @@
 import QtQuick
 import Quickshell
-import "../Ui" as Ui
-import "../Services" as Services
+import "../../Ui" as Ui
 
 // Native layer-shell OSD card, bottom-center. No compositor rules needed.
 PanelWindow {
     id: window
 
-    required property Services.Brightness brightness
+    required property Service audio
     property bool shown: false
 
     screen: Quickshell.screens[0]
@@ -43,8 +42,8 @@ PanelWindow {
 
     Ui.Osd {
         id: card
-        title: "Brightness"
-        valueText: `${Math.round(window.brightness.value * 100)}%`
-        value: window.brightness.value
+        title: "Volume"
+        valueText: window.audio.outputMuted ? "Muted" : `${Math.round(window.audio.outputVolume * 100)}%`
+        value: window.audio.outputMuted ? 0 : window.audio.outputVolume
     }
 }

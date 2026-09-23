@@ -1,5 +1,3 @@
-// Pure audio-label/model logic, copied from omarchy (shell/plugins/panels/audio/Model.js).
-// No framework imports; safe to keep alongside the local fork.
 function isPlaybackStream(node) {
   if (!node || !node.isStream) return false
   if (node.isSink === true) return true
@@ -35,18 +33,6 @@ function outputVolumeName(volume, muted) {
   if (p >= 30) return "Easy listening"
   if (p >= 15) return "Murmur"
   return "Whisper"
-}
-
-function parseSinkAvailability(raw) {
-  var next = {}
-  var lines = String(raw || "").split("\n")
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim()
-    if (!line) continue
-    var parts = line.split("\t")
-    if (parts.length >= 2) next[parts[0]] = parts[1] !== "0"
-  }
-  return next
 }
 
 function friendlyDeviceLabel(text) {
@@ -223,42 +209,4 @@ function streamLabel(node, players, streams) {
   return friendlyStreamLabel(matchingMprisStreamLabel(label, players)
     || unmatchedMprisStreamLabel(label, players, streams)
     || label) || "Stream"
-}
-
-function streamRepresentsPlayer(node, player, players, streams) {
-  if (!node || !player) return false
-  var playerLabel = mprisPlayerLabel(player)
-  if (!playerLabel) return false
-
-  var label = rawStreamLabel(node)
-  if (!streamLabelIsGeneric(label)) return streamRepresentsMprisPlayer(label, playerLabel)
-  return streamRepresentsMprisPlayer(streamLabel(node, players, streams), playerLabel)
-}
-
-if (typeof module !== "undefined") {
-  module.exports = {
-    isPlaybackStream: isPlaybackStream,
-    isAudioSource: isAudioSource,
-    listSnapshot: listSnapshot,
-    outputVolumeName: outputVolumeName,
-    parseSinkAvailability: parseSinkAvailability,
-    friendlyDeviceLabel: friendlyDeviceLabel,
-    nodeProps: nodeProps,
-    nodeLabel: nodeLabel,
-    isHeadphones: isHeadphones,
-    sinkGlyph: sinkGlyph,
-    sourceGlyph: sourceGlyph,
-    friendlyStreamLabel: friendlyStreamLabel,
-    streamLabelKey: streamLabelKey,
-    streamLabelIsGeneric: streamLabelIsGeneric,
-    rawStreamLabel: rawStreamLabel,
-    mprisPlayerLabel: mprisPlayerLabel,
-    mprisPlayerIsProxy: mprisPlayerIsProxy,
-    streamRepresentsMprisPlayer: streamRepresentsMprisPlayer,
-    mprisLabelsFor: mprisLabelsFor,
-    matchingMprisStreamLabel: matchingMprisStreamLabel,
-    unmatchedMprisStreamLabel: unmatchedMprisStreamLabel,
-    streamLabel: streamLabel,
-    streamRepresentsPlayer: streamRepresentsPlayer
-  }
 }
