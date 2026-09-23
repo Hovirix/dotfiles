@@ -21,7 +21,7 @@ Rectangle {
     color: A.Appearance.popover
 
     border.width: A.Appearance.borderWidth
-    border.color: A.Appearance.subtleRing
+    border.color: A.Appearance.primary
 
     radius: A.Appearance.radius
 

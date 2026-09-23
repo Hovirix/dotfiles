@@ -1,8 +1,8 @@
 import QtQuick
 import Quickshell
 
-import "../Appearance" as A
-import "../Ui" as Ui
+import "../../Appearance" as A
+import "../../Ui" as Ui
 
 Item {
     id: root
@@ -47,7 +47,7 @@ Item {
     }
 
     Ui.Popup {
-        visible: root.controller.current === "clock"
+        shown: root.controller.current === "clock"
         contentWidth: A.Appearance.popupWidthStandard
         contentHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
         onCloseRequested: root.controller.close()
@@ -194,7 +194,7 @@ Item {
                                 color: parent.today
                                     ? A.Appearance.primaryForeground
                                     : (!parent.inMonth
-                                        ? A.Appearance.border
+                                        ? A.Appearance.mutedForeground
                                         : (parent.weekend ? A.Appearance.primary : A.Appearance.foreground))
                                 opacity: parent.inMonth || parent.today ? 1 : 0.65
                                 font.family: A.Appearance.fontFamily

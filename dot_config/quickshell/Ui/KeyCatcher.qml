@@ -27,8 +27,12 @@ Item {
         if (blocked)
             return
 
-        if (event.key === Qt.Key_Escape) {
-            closeRequested()
+        if (event.key === Qt.Key_Q) {
+            // Swallow the press; the panel closes on release below. Closing
+            // on press would unmap the surface immediately, handing focus
+            // back to the app before the release arrives — Mango delivers
+            // each key event once, to the focused surface, so the app
+            // would then observe a lone Q release.
             event.accepted = true
             return
         }
@@ -74,6 +78,16 @@ Item {
         }
         if (event.text && event.text.length === 1) {
             textKey(event.text)
+        }
+    }
+
+    Keys.onReleased: function(event) {
+        if (blocked)
+            return
+
+        if (event.key === Qt.Key_Q) {
+            closeRequested()
+            event.accepted = true
         }
     }
 }

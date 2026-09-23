@@ -23,8 +23,6 @@ QtObject {
     // Slightly above Lyra's default xs/sm scale for comfortable desktop
     // legibility while keeping menu density compact.
     readonly property int fontSizeBody: 13
-    readonly property int fontSizeLabel: 13
-    readonly property int fontSizeValue: 13
     readonly property int fontSizeTitle: 15
     readonly property int fontSizeOsd: 18
 
@@ -41,33 +39,39 @@ QtObject {
     // CATPPUCCIN MOCHA -> SHADCN SEMANTIC TOKENS
     // ================================================================
 
+    // Table: Background Pane.
     readonly property color background: "#1e1e2e"            // base
+    // Table: Body Copy, Main Headline.
     readonly property color foreground: "#cdd6f4"            // text
 
-    readonly property color card: "#1e1e2e"                  // base
-    readonly property color cardForeground: "#cdd6f4"        // text
-
+    // Table: Secondary Panes (Mantle).
     readonly property color popover: "#181825"               // mantle
-    readonly property color popoverForeground: "#cdd6f4"     // text
 
-    readonly property color primary: "#cba6f7"               // mauve
-    readonly property color primaryForeground: "#11111b"     // crust
+    // User accent. Indicators, icons, toggles, today-cell.
+    readonly property color primary: "#fab387"               // peach
+    // Table: On Accent.
+    readonly property color primaryForeground: "#1e1e2e"     // base
 
+    // Table: Surface Elements (Surface 0).
     readonly property color secondary: "#313244"             // surface0
-    readonly property color secondaryForeground: "#cdd6f4"   // text
 
+    // Table: Surface Elements (Surface 0).
     readonly property color muted: "#313244"                 // surface0
+    // Table: Sub-Headlines, Labels.
     readonly property color mutedForeground: "#a6adc8"       // subtext0
 
-    readonly property color accent: "#45475a"                // surface1
-    readonly property color accentForeground: "#cdd6f4"      // text
+    // Table: Selection Background (Overlay 2, use at 20-30% opacity).
+    readonly property color selection: "#9399b2"             // overlay2
+    // Table: Links, URLs, Tags, Pills.
+    readonly property color link: "#89b4fa"                  // blue
 
+    // Table: Errors.
     readonly property color destructive: "#f38ba8"           // red
 
+    // Style guide: structural dividers inside a surface use bg-border
+    // at 1px (Ui.Separator). Neutral, never the accent color.
     readonly property color border: "#45475a"                // surface1
     readonly property color input: "#45475a"                 // surface1
-
-    readonly property color ring: "#cba6f7"                  // mauve
 
     readonly property color success: "#a6e3a1"               // green
     readonly property color warning: "#f9e2af"               // yellow
@@ -171,6 +175,8 @@ QtObject {
 
     // Lyra duration-100.
     readonly property int durationFast: 100
+    // Matches Mango's 0.215,0.61,0.355,1 cubic-bezier curve.
+    readonly property int easingOut: Easing.OutCubic
 
     // ================================================================
     // SEMANTIC BATTERY COLORS

@@ -15,7 +15,6 @@ Item {
     property real liveValue: value
 
     signal moved(real value)
-    signal released(real value)
     signal rightClicked()
 
     implicitWidth: 200
@@ -51,6 +50,7 @@ Item {
             enabled: !root.dragging
             NumberAnimation {
                 duration: A.Appearance.durationFast
+                easing.type: A.Appearance.easingOut
             }
         }
     }
@@ -67,6 +67,7 @@ Item {
             enabled: !root.dragging
             NumberAnimation {
                 duration: A.Appearance.durationFast
+                easing.type: A.Appearance.easingOut
             }
         }
     }
@@ -107,7 +108,6 @@ Item {
             if (mouse.button !== Qt.LeftButton)
                 return
             root.dragging = false
-            root.released(root.liveValue)
             root.liveValue = root.value
         }
         onWheel: function(wheel) {
@@ -115,7 +115,6 @@ Item {
             var next = Math.max(root.minimum, Math.min(root.maximum, root.liveValue + delta))
             root.liveValue = next
             root.moved(next)
-            root.released(next)
         }
     }
 }

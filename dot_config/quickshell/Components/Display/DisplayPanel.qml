@@ -1,20 +1,16 @@
 import QtQuick
 
-import "../Appearance" as A
-import "../Ui" as Ui
-import "../Services" as Services
+import "../../Appearance" as A
+import "../../Ui" as Ui
 
 Item {
     id: root
 
     required property var controller
-    required property Services.Display display
-    required property Services.Brightness brightness
+    required property Service display
 
     property int selectedIndex: 0
     property bool cursorActive: false
-    property bool editingOutput: false
-    property int actionIndex: 0
     property string focusArea: "outputs"
     property int settingIndex: 0
     property bool editingSetting: false
@@ -34,18 +30,9 @@ Item {
         selectedIndex = Math.max(0, Math.min(display.outputs.length - 1, selectedIndex + delta))
     }
 
-    function beginEdit() {
-        if (!selectedOutput)
-            return
-        editingOutput = true
-        actionIndex = selectedOutput.enabled ? 0 : 1
-    }
-
-    function applySelectedAction() {
-        if (!selectedOutput)
-            return
-        display.setOutputEnabled(selectedOutput, actionIndex !== 1)
-        editingOutput = false
+    function toggleSelectedOutput() {
+        if (selectedOutput)
+            display.toggleOutput(selectedOutput)
     }
 
     function settingOptions() {
@@ -205,7 +192,7 @@ Item {
                     text: `Choose ${menu.title}`
                     color: A.Appearance.foreground
                     font.family: A.Appearance.fontFamily
-                    font.pixelSize: A.Appearance.fontSizeLabel
+                    font.pixelSize: A.Appearance.fontSizeBody
                     font.weight: A.Appearance.fontWeightMedium
                     renderType: Text.NativeRendering
                 }
@@ -216,7 +203,7 @@ Item {
                     text: `${menu.selected + 1}/${menu.options.length}`
                     color: A.Appearance.mutedForeground
                     font.family: A.Appearance.fontFamily
-                    font.pixelSize: A.Appearance.fontSizeLabel
+                    font.pixelSize: A.Appearance.fontSizeBody
                     renderType: Text.NativeRendering
                 }
             }
@@ -235,7 +222,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         color: root.optionIndex === optionNumber
-                            ? A.Appearance.accent : "transparent"
+                            ? Qt.rgba(A.Appearance.selection.r, A.Appearance.selection.g, A.Appearance.selection.b, 0.3) : "transparent"
 
                         Behavior on color {
                             ColorAnimation { duration: A.Appearance.durationFast }
@@ -299,7 +286,7 @@ Item {
         Column {
             anchors.left: outputGlyph.right
             anchors.leftMargin: A.Appearance.space2
-            anchors.right: outputActions.left
+            anchors.right: outputSwitch.left
             anchors.rightMargin: A.Appearance.space3
             anchors.verticalCenter: parent.verticalCenter
             spacing: A.Appearance.space05
@@ -327,39 +314,19 @@ Item {
             }
         }
 
-        Row {
-            id: outputActions
+        Ui.Switch {
+            id: outputSwitch
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            spacing: A.Appearance.space1
-
-            Ui.Button {
-                text: "On"
-                active: root.editingOutput && root.selectedIndex === outputRow.rowIndex
-                    ? root.actionIndex === 0 : outputRow.output.enabled
-                bordered: true
-                foreground: (root.editingOutput && root.selectedIndex === outputRow.rowIndex
-                    ? root.actionIndex === 0 : outputRow.output.enabled)
-                    ? A.Appearance.primary : A.Appearance.foreground
-                onClicked: root.display.setOutputEnabled(outputRow.output, true)
+            checked: outputRow.output.enabled
+            hasCursor: outputRow.hasCursor
+            onHovered: function(on) {
+                if (on) {
+                    root.cursorActive = true
+                    root.selectedIndex = outputRow.rowIndex
+                }
             }
-            Ui.Button {
-                text: "Off"
-                active: root.editingOutput && root.selectedIndex === outputRow.rowIndex
-                    ? root.actionIndex === 1 : !outputRow.output.enabled
-                bordered: true
-                foreground: (root.editingOutput && root.selectedIndex === outputRow.rowIndex
-                    ? root.actionIndex === 1 : !outputRow.output.enabled)
-                    ? A.Appearance.primary : A.Appearance.foreground
-                onClicked: root.display.setOutputEnabled(outputRow.output, false)
-            }
-            Ui.Button {
-                text: "Auto"
-                active: root.editingOutput && root.selectedIndex === outputRow.rowIndex
-                    && root.actionIndex === 2
-                bordered: true
-                onClicked: root.display.setOutputEnabled(outputRow.output, true)
-            }
+            onToggled: root.display.toggleOutput(outputRow.output)
         }
 
         HoverHandler {
@@ -371,14 +338,13 @@ Item {
     }
 
     Ui.Popup {
-        visible: root.controller.current === "display"
+        shown: root.controller.current === "display"
         contentWidth: A.Appearance.popupWidthWorkspace
         contentHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
         onCloseRequested: root.controller.close()
         onVisibleChanged: if (visible) {
             root.selectedIndex = 0
             root.cursorActive = false
-            root.editingOutput = false
             root.editingSetting = false
             root.focusArea = "outputs"
             Qt.callLater(function() { keyCatcher.forceActiveFocus() })
@@ -389,19 +355,15 @@ Item {
             anchors.fill: parent
             onMoveRequested: function(dx, dy) {
                 if (root.focusArea === "outputs" && dx !== 0) {
-                    // Output actions are immediately keyboard-addressable:
-                    // choose a monitor, then h/l stages On/Off/Auto.
-                    if (!root.editingOutput)
-                        root.beginEdit()
-                    root.actionIndex = Math.max(0, Math.min(2, root.actionIndex + dx))
+                    root.cursorActive = true
+                    root.toggleSelectedOutput()
                 } else if (root.editingSetting && (dx !== 0 || dy !== 0)) {
                     var options = root.settingOptions()
                     root.optionIndex = Math.max(0, Math.min(options.length - 1,
                         root.optionIndex + (dx !== 0 ? dx : dy)))
                 } else if (dy !== 0) {
                     root.cursorActive = true
-                    if (root.editingOutput || root.editingSetting) {
-                        root.editingOutput = false
+                    if (root.editingSetting) {
                         root.editingSetting = false
                     } else if (root.focusArea === "outputs") {
                         root.moveCursor(dy)
@@ -411,25 +373,22 @@ Item {
                 }
             }
             onActivateRequested: {
-                    if (root.editingOutput)
-                        root.applySelectedAction()
-                else if (root.editingSetting)
+                if (root.editingSetting)
                     root.applySetting()
                 else if (root.focusArea === "outputs")
-                    root.beginEdit()
+                    root.toggleSelectedOutput()
                 else
                     root.beginSettingEdit()
             }
             onCloseRequested: {
-                if (root.editingOutput || root.editingSetting) {
-                    root.editingOutput = false
+                if (root.editingSetting) {
                     root.editingSetting = false
                 } else {
                     root.controller.close()
                 }
             }
             onTabRequested: function(direction) {
-                if (root.editingOutput || root.editingSetting)
+                if (root.editingSetting)
                     return
                 root.focusArea = root.focusArea === "outputs" ? "settings" : "outputs"
                 root.cursorActive = true
@@ -489,47 +448,6 @@ Item {
                             font.letterSpacing: 1.2
                             renderType: Text.NativeRendering
                         }
-                    }
-                }
-
-                Ui.Separator { width: parent.width }
-
-                // Brightness section: uppercase header + value, h-1 bar.
-                Column {
-                    width: parent.width
-                    spacing: A.Appearance.space15
-                    height: implicitHeight
-
-                    Item {
-                        width: parent.width
-                        implicitHeight: Math.max(brightnessHeader.implicitHeight, brightnessValue.implicitHeight)
-                        height: implicitHeight
-
-                        Ui.SectionHeader {
-                            id: brightnessHeader
-                            text: "BRIGHTNESS"
-                            foreground: A.Appearance.foreground
-                            fontFamily: A.Appearance.fontFamily
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Text {
-                            id: brightnessValue
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: `${Math.round(root.brightness.value * 100)}%`
-                            color: A.Appearance.mutedForeground
-                            font.family: A.Appearance.fontFamily
-                            font.pixelSize: A.Appearance.fontSizeBody
-                            font.weight: A.Appearance.fontWeightMedium
-                            renderType: Text.NativeRendering
-                        }
-                    }
-
-                    Ui.Progress {
-                        width: parent.width
-                        value: root.brightness.value
                     }
                 }
 
@@ -614,22 +532,6 @@ Item {
                             }
                         }
                     }
-                }
-
-                Text {
-                    width: parent.width
-                    text: root.editingOutput
-                        ? "h/l choose action  ·  enter apply  ·  j/k cancel"
-                        : (root.editingSetting
-                            ? "j/k or h/l choose value  ·  enter apply  ·  esc cancel"
-                            : (root.focusArea === "settings"
-                                ? "j/k select setting  ·  enter edit  ·  tab outputs"
-                                : "j/k or hover output  ·  h/l choose action  ·  enter apply  ·  tab settings"))
-                    color: A.Appearance.mutedForeground
-                    font.family: A.Appearance.fontFamily
-                    font.pixelSize: A.Appearance.fontSizeBody
-                    horizontalAlignment: Text.AlignRight
-                    renderType: Text.NativeRendering
                 }
             }
         }

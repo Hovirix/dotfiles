@@ -16,11 +16,14 @@ Rectangle {
     property int contentPadding: A.Appearance.space2
 
     radius: A.Appearance.radius
-    color: hasCursor ? A.Appearance.accent : (current ? Qt.rgba(A.Appearance.primary.r, A.Appearance.primary.g, A.Appearance.primary.b, 0.12) : "transparent")
+    color: hasCursor
+        ? Qt.rgba(A.Appearance.selection.r, A.Appearance.selection.g, A.Appearance.selection.b, 0.3)
+        : (current ? Qt.rgba(A.Appearance.selection.r, A.Appearance.selection.g, A.Appearance.selection.b, 0.2) : "transparent")
 
     Behavior on color {
         ColorAnimation {
             duration: A.Appearance.durationFast
+            easing.type: A.Appearance.easingOut
         }
     }
 

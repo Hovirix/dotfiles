@@ -25,7 +25,10 @@ Item {
         radius: A.Appearance.radius
 
         Behavior on width {
-            NumberAnimation { duration: A.Appearance.durationFast }
+            NumberAnimation {
+                duration: A.Appearance.durationFast
+                easing.type: A.Appearance.easingOut
+            }
         }
     }
 }

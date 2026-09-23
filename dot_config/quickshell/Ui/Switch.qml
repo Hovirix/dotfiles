@@ -12,7 +12,6 @@ Item {
     property bool hasCursor: false
 
     property color foreground: A.Appearance.foreground
-    property color accent: A.Appearance.primary
 
     signal toggled()
     signal hovered(bool isHovered)
@@ -51,6 +50,7 @@ Item {
         Behavior on color {
             ColorAnimation {
                 duration: A.Appearance.durationFast
+                easing.type: A.Appearance.easingOut
             }
         }
 
@@ -65,7 +65,7 @@ Item {
             Behavior on x {
                 NumberAnimation {
                     duration: A.Appearance.durationFast
-                    easing.type: Easing.OutCubic
+                    easing.type: A.Appearance.easingOut
                 }
             }
         }

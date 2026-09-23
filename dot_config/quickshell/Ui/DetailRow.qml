@@ -54,7 +54,7 @@ Item {
         color: root.labelColor
 
         font.family: A.Appearance.fontFamily
-        font.pixelSize: A.Appearance.fontSizeLabel
+        font.pixelSize: A.Appearance.fontSizeBody
         font.weight: A.Appearance.fontWeightNormal
 
         renderType: Text.NativeRendering
@@ -70,7 +70,7 @@ Item {
         color: root.valueColor
 
         font.family: A.Appearance.fontFamily
-        font.pixelSize: A.Appearance.fontSizeValue
+        font.pixelSize: A.Appearance.fontSizeBody
         font.weight: A.Appearance.fontWeightNormal
 
         renderType: Text.NativeRendering
