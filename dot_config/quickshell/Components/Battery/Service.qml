@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Io
 import Quickshell.Services.UPower
 
 // UPower-backed battery service. Feeds Overlays/Battery.qml.
@@ -7,6 +8,10 @@ import Quickshell.Services.UPower
 // Capacity and health come from the physical laptop battery: the
 // display device does not expose energy-full-design, so health and
 // capacity rows would otherwise stay empty.
+//
+// Threshold alerts (low <= 30, critical <= 15 while discharging, plus
+// charger-plugged) are emitted here via notify-send so they render
+// through Components/Notifications like every other notification.
 QtObject {
     id: root
 
@@ -115,6 +120,103 @@ QtObject {
         if (!available)
             return 0
         return root.batteryNumber("energyCapacity")
+    }
+
+    // Alert thresholds mirror Appearance.batteryColor (30 warning, 15 critical).
+    // Emergency (5) resends a final warning when discharge continues.
+    readonly property int lowThreshold: 30
+    readonly property int criticalThreshold: 15
+    readonly property int emergencyThreshold: 5
+
+    // Latched so each threshold notifies once per discharge cycle.
+    // Cleared on charger-plug and when the level recovers with hysteresis.
+    property bool lowNotified: false
+    property bool criticalNotified: false
+    property bool emergencyNotified: false
+    property bool lastDischarging: false
+
+    Component.onCompleted: {
+        root.lastDischarging = root.discharging
+        root.checkBattery()
+    }
+    onAvailableChanged: {
+        root.lastDischarging = root.discharging
+        root.checkBattery()
+    }
+    onPercentageChanged: root.checkBattery()
+    onDischargingChanged: {
+        if (root.available && root.lastDischarging && !root.discharging) {
+            root.lowNotified = false
+            root.criticalNotified = false
+            root.emergencyNotified = false
+            root.sendPlugged()
+        }
+        root.lastDischarging = root.discharging
+        root.checkBattery()
+    }
+
+    function checkBattery(): void {
+        if (!root.available || !root.discharging)
+            return
+        const pct = root.percentage
+        // UPower reports 0 while initializing (NaN maps to 0 above);
+        // treat non-positive as unknown so reloads never false-alarm.
+        // A genuine 0% is seconds from forced shutdown anyway.
+        if (!(pct > 0))
+            return
+        if (pct > root.lowThreshold + 2)
+            root.lowNotified = false
+        if (pct > root.criticalThreshold + 2)
+            root.criticalNotified = false
+        if (pct > root.emergencyThreshold + 2)
+            root.emergencyNotified = false
+        if (pct <= root.emergencyThreshold && !root.emergencyNotified) {
+            root.emergencyNotified = true
+            root.criticalNotified = true
+            root.lowNotified = true
+            root.sendDischargeAlert("Critical", "critical")
+        } else if (pct <= root.criticalThreshold && !root.criticalNotified) {
+            root.criticalNotified = true
+            root.lowNotified = true
+            root.sendDischargeAlert("Critical", "critical")
+        } else if (pct <= root.lowThreshold && !root.lowNotified) {
+            root.lowNotified = true
+            root.sendDischargeAlert("Low", "normal")
+        }
+    }
+
+    function sendDischargeAlert(label: string, urgency: string): void {
+        const pct = Math.round(root.percentage)
+        const remaining = root.timeShort(root.timeRemaining)
+        const body = remaining !== "" ? `${label} · ${pct}% · ${remaining} remaining` : `${label} · ${pct}% remaining`
+        root.notifier.exec(["notify-send", "-a", "Battery", "-u", urgency, "-i", root.levelIcon(false), "Battery", body])
+    }
+
+    function sendPlugged(): void {
+        const pct = Math.round(root.percentage)
+        const remaining = root.timeShort(root.timeRemaining)
+        let body = `Charging · ${pct}%`
+        if (root.state === "Fully charged")
+            body = `Fully charged · ${pct}%`
+        else if (remaining !== "")
+            body = `Charging · ${pct}% · ${remaining} to full`
+        // battery-state hint lets the panel paint title and border green.
+        root.notifier.exec(["notify-send", "-a", "Battery", "-u", "low", "-i", root.levelIcon(true), "-h", "string:battery-state:charging", "Battery", body])
+    }
+
+    // Icon per alert: the battery level while discharging (battery-020),
+    // a plug (ac-adapter) while charging so the event never reads as
+    // a level. NotificationsPanel falls back to its glyph when a name
+    // does not resolve.
+    function levelIcon(charging: bool): string {
+        if (charging)
+            return "ac-adapter"
+        const raw = Math.round(root.percentage / 10) * 10
+        const tag = ("00" + Math.max(0, Math.min(100, raw))).slice(-3)
+        return `battery-${tag}`
+    }
+
+    property var notifier: Process {
     }
 
     // "3h 42m" / "42m" / "" when unknown.

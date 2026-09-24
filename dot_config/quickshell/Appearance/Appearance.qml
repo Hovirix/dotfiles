@@ -153,7 +153,7 @@ QtObject {
     readonly property int notificationWidth: 400
     readonly property int notificationIconSize: 36
     readonly property int notificationGlyphSize: 24
-    readonly property int notificationTimeout: 5000
+    readonly property int notificationTimeout: 3000
 
     // Lyra h-1
     readonly property int progressHeight: 4

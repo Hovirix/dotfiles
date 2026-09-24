@@ -147,6 +147,8 @@ Item {
     property var recentQuery: Process {
         stdout: StdioCollector {
             onStreamFinished: {
+                if (root.mode !== "open" || root.controller.current !== "launcher")
+                    return
                 var lines = text.trim().split("\n")
                 root.allItems = lines.length === 1 && lines[0] === "" ? [] : lines
             }
@@ -172,6 +174,7 @@ Item {
             anchors.fill: parent
             vimNavigation: false
             spaceActivates: false
+            qCloses: false
             onMoveRequested: function(dx, dy) { root.move(dx, dy) }
             onActivateRequested: root.activate()
             onCloseRequested: root.controller.close()

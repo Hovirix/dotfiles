@@ -23,7 +23,7 @@ ShellRoot {
     Clock.ClockPanel { controller: overlays }
     Audio.VolumeOsd { id: volumeOsd; audio: audio }
     Brightness.BrightnessOsd { id: brightnessOsd; brightness: brightness }
-    Audio.AudioMenu { id: audioMenu }
+    Audio.AudioMenu { controller: overlays }
     Launcher.LauncherPanel { id: launcherMenu; controller: overlays }
     Notifications.NotificationsPanel { notifications: notifications }
 
@@ -45,7 +45,7 @@ ShellRoot {
     property var ipc: IpcHandler {
         target: "shell"
 
-        function audio(): void { audioMenu.toggle() }
+        function audio(): void { overlays.toggle("audio") }
         function battery(): void { overlays.toggle("battery") }
         function display(): void { displayOverlay.open() }
         function clock(): void { overlays.toggle("clock") }

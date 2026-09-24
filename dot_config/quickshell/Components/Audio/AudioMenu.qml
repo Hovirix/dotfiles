@@ -9,11 +9,8 @@ import "./audio-model.js" as Model
 Item {
  id: root
 
- property bool opened: false
-
- function open() { opened = true }
- function close() { opened = false }
- function toggle() { opened ? close() : open() }
+ required property var controller
+ readonly property bool opened: controller.current === "audio"
 
  readonly property var sink: Pipewire.defaultAudioSink
  readonly property var source: Pipewire.defaultAudioSource
@@ -116,15 +113,13 @@ Item {
  property int selectedIndex: -1
  property bool cursorActive: false
 
- // "header" is a virtual section for the hero output mute toggle; it sits
- // above the output section so the speaker can be muted from the keyboard.
- readonly property bool headerHasCursor: cursorActive && focusSection === "header"
- // Only channels that actually exist get a vote. A box with no default source
- // would otherwise report "input unmuted" forever, leaving the hero switch
- // able to mute but never to unmute.
- readonly property bool hasOutput: !!(volumeSink && volumeSink.audio)
- readonly property bool hasInput: !!(source && source.audio)
- readonly property bool anyAudible: (hasOutput && !outputMuted) || (hasInput && !inputMuted)
+  // "header" is a virtual section for the hero output mute toggle; it sits
+  // above the output section so the speaker can be muted from the keyboard.
+  readonly property bool headerHasCursor: cursorActive && focusSection === "header"
+  // The hero switch mirrors the output mute only. It used to track
+  // output+input combined, which left it stuck on whenever the mic stayed
+  // unmuted even though the output had muted.
+  readonly property bool hasOutput: !!(volumeSink && volumeSink.audio)
 
  function sectionCount(section) {
    if (section === "output") return displayAudioSinks.length
@@ -231,9 +226,9 @@ Item {
    }
  }
 
- // Enter/Space: activate whatever the cursor is on.
- function activateCursor() {
-   if (focusSection === "header") { toggleAllMuted(); return }
+  // Enter/Space: activate whatever the cursor is on.
+  function activateCursor() {
+    if (focusSection === "header") { toggleOutputMute(); return }
    if (focusSection === "output") {
      if (selectedIndex === -1) { toggleOutputMute(); return }
      var sink = displayAudioSinks[selectedIndex]
@@ -379,24 +374,17 @@ Item {
    source.audio.volume = Math.max(0, Math.min(1, v))
  }
 
- function toggleOutputMute() {
-   if (volumeSink && volumeSink.audio) volumeSink.audio.muted = !volumeSink.audio.muted
- }
+  // The hero switch mirrors the output mute, so it always follows what the
+  // output row below does. Input keeps its own mute in its section.
+  function toggleOutputMute() {
+    if (volumeSink && volumeSink.audio) volumeSink.audio.muted = !volumeSink.audio.muted
+  }
 
- function toggleInputMute() {
-   if (source && source.audio) source.audio.muted = !source.audio.muted
- }
+  function toggleInputMute() {
+    if (source && source.audio) source.audio.muted = !source.audio.muted
+  }
 
- // The hero switch is the whole panel's on/off, so it carries both channels
- // at once. It reads as on while anything is still audible, which keeps
- // muting a single channel from the row below flipping the master switch.
- function toggleAllMuted() {
-   var mute = anyAudible
-   if (hasOutput) volumeSink.audio.muted = mute
-   if (hasInput) source.audio.muted = mute
- }
-
- function setDefaultSink(node) {
+  function setDefaultSink(node) {
    if (node) Pipewire.preferredDefaultAudioSink = node
  }
 
@@ -451,7 +439,7 @@ Item {
    shown: root.opened
    contentHeight: Math.min(panelColumn.implicitHeight + A.Appearance.dialogPadding * 2,
                            A.Appearance.popupMaxHeight)
-   onCloseRequested: root.close()
+   onCloseRequested: root.controller.close()
    onVisibleChanged: if (visible) Qt.callLater(function() {
      keyCatcher.forceActiveFocus()
    })
@@ -462,10 +450,10 @@ Item {
      onMoveRequested: function(dx, dy) {
        if (!root.cursorActive) root.cursorActive = true
        if (dy !== 0) root.moveCursor(dy)
-       else if (dx !== 0) root.adjustVolume(dx * 0.05)
+        else if (dx !== 0) root.adjustVolume(dx * 0.02)
      }
      onActivateRequested: if (root.cursorActive) root.activateCursor()
-     onCloseRequested: root.close()
+      onCloseRequested: root.controller.close()
      onTabRequested: function(direction) { root.cycleFocusSection(direction) }
      onTextKey: function(t) {
        // 'm' always toggles the active channel; the popup defaults to output.
@@ -510,19 +498,18 @@ Item {
              anchors.verticalCenter: parent.verticalCenter
            }
 
-           // Compact on/off switch on the trailing edge of the hero, and the
-           // header's only cursor target. Checked means something is still
-           // audible, so muting everything reads as switching audio off.
-           Ui.Switch {
-             id: powerSwitch
-             checked: root.anyAudible
-             hasCursor: root.headerHasCursor
-             foreground: A.Appearance.foreground
-             anchors.right: parent.right
-             anchors.verticalCenter: parent.verticalCenter
-             onHovered: function(on) { if (on) root.setHeaderCursor() }
-             onToggled: root.toggleAllMuted()
-           }
+            // Compact on/off switch on the trailing edge of the hero, and the
+            // header's only cursor target. Checked means output is audible.
+            Ui.Switch {
+              id: powerSwitch
+              checked: root.hasOutput && !root.outputMuted
+              hasCursor: root.headerHasCursor
+              foreground: A.Appearance.foreground
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+              onHovered: function(on) { if (on) root.setHeaderCursor() }
+              onToggled: root.toggleOutputMute()
+            }
 
            Column {
              id: heroLabels
@@ -618,7 +605,7 @@ Item {
                   height: implicitHeight
                   minimum: 0
                   maximum: 1
-                  step: 0.05
+                  step: 0.02
                   value: root.outputVolume
                   opacity: root.outputMuted ? 0.5 : 1.0
                   enabled: !!root.sink

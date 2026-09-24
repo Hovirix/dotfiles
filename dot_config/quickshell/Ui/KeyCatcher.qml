@@ -13,6 +13,7 @@ Item {
     property bool blocked: false
     property bool vimNavigation: true
     property bool spaceActivates: true
+    property bool qCloses: true
 
     signal moveRequested(int dx, int dy)
     signal activateRequested()
@@ -27,7 +28,12 @@ Item {
         if (blocked)
             return
 
-        if (event.key === Qt.Key_Q) {
+        if (event.key === Qt.Key_Escape) {
+            closeRequested()
+            event.accepted = true
+            return
+        }
+        if (qCloses && event.key === Qt.Key_Q) {
             // Swallow the press; the panel closes on release below. Closing
             // on press would unmap the surface immediately, handing focus
             // back to the app before the release arrives — Mango delivers
@@ -85,7 +91,7 @@ Item {
         if (blocked)
             return
 
-        if (event.key === Qt.Key_Q) {
+        if (qCloses && event.key === Qt.Key_Q) {
             closeRequested()
             event.accepted = true
         }

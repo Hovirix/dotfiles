@@ -39,15 +39,14 @@ PanelWindow {
         return source ? Quickshell.iconPath(source, true) : ""
     }
 
-    function activateDefault(notification) {
-        var acts = notification.actions || []
-        for (var i = 0; i < acts.length; i++) {
-            if (acts[i].identifier === "default") {
-                acts[i].invoke()
-                return true
-            }
-        }
-        return false
+    // Battery charging cards carry a battery-state hint so title and
+    // border share the success color; everything else follows urgency.
+    // Null-safe: delegates evaluate while hidden and during resets.
+    function batteryState(notification) {
+        if (!notification || !notification.hints)
+            return ""
+        var state = notification.hints["battery-state"]
+        return typeof state === "string" ? state : ""
     }
 
     Column {
@@ -62,6 +61,7 @@ PanelWindow {
                 id: card
                 required property var modelData
                 readonly property string notificationIconSource: window.iconSource(modelData)
+                readonly property bool isCharging: window.batteryState(modelData) === "charging"
                 readonly property int padding: A.Appearance.space3
 
                 width: window.width
@@ -71,8 +71,9 @@ PanelWindow {
                 border.width: A.Appearance.borderWidth
                 border.color: card.modelData.urgency === NotificationUrgency.Critical
                     ? A.Appearance.destructive
-                    : (card.modelData.urgency === NotificationUrgency.Low
-                        ? A.Appearance.subtleRing : A.Appearance.primary)
+                    : (card.isCharging ? A.Appearance.success
+                        : (card.modelData.urgency === NotificationUrgency.Low
+                            ? A.Appearance.subtleRing : A.Appearance.primary))
                 radius: A.Appearance.radius
 
                 Connections {
@@ -80,23 +81,14 @@ PanelWindow {
                     function onClosed() { window.notifications.remove(card.modelData) }
                 }
 
+                // Passive cards: every notification auto-dismisses, nothing
+                // is clickable and no action buttons are rendered.
                 Timer {
                     interval: card.modelData.expireTimeout > 0
                         ? card.modelData.expireTimeout * 1000
                         : A.Appearance.notificationTimeout
                     running: !card.modelData.resident
-                        && card.modelData.urgency !== NotificationUrgency.Critical
                     onTriggered: card.modelData.expire()
-                }
-
-                MouseArea {
-                    id: dismissArea
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        if (!window.activateDefault(card.modelData))
-                            card.modelData.dismiss()
-                    }
                 }
 
                 Column {
@@ -149,13 +141,12 @@ PanelWindow {
                             text: card.modelData.summary
                             color: card.modelData.urgency === NotificationUrgency.Critical
                                 ? A.Appearance.destructive
-                                : A.Appearance.foreground
+                                : (card.isCharging ? A.Appearance.success
+                                    : A.Appearance.foreground)
                             font.family: A.Appearance.fontFamily
                             font.pixelSize: A.Appearance.fontSizeTitle
                             font.weight: A.Appearance.fontWeightMedium
                             wrapMode: Text.Wrap
-                            maximumLineCount: 2
-                            elide: Text.ElideRight
                             textFormat: Text.StyledText
                             linkColor: A.Appearance.link
                             onLinkActivated: function(link) { Qt.openUrlExternally(link) }
@@ -170,8 +161,6 @@ PanelWindow {
                             font.family: A.Appearance.fontFamily
                             font.pixelSize: A.Appearance.fontSizeBody
                             wrapMode: Text.Wrap
-                            maximumLineCount: 3
-                            elide: Text.ElideRight
                             textFormat: Text.StyledText
                             linkColor: A.Appearance.link
                             onLinkActivated: function(link) { Qt.openUrlExternally(link) }
@@ -181,52 +170,6 @@ PanelWindow {
                     }
 
                     } // contentRow
-
-                    Row {
-                        id: actionsRow
-                        width: parent.width
-                        spacing: A.Appearance.space2
-                        visible: actionRepeater.count > 0
-
-                        Repeater {
-                            id: actionRepeater
-                            model: {
-                                var out = []
-                                var acts = card.modelData.actions || []
-                                for (var i = 0; i < acts.length; i++) {
-                                    if (acts[i].identifier !== "default")
-                                        out.push(acts[i])
-                                }
-                                return out
-                            }
-
-                            Rectangle {
-                                required property var modelData
-                                height: A.Appearance.buttonHeight
-                                width: actionLabel.implicitWidth + A.Appearance.space25 * 2
-                                color: A.Appearance.secondary
-                                radius: A.Appearance.radius
-
-                                Text {
-                                    id: actionLabel
-                                    anchors.centerIn: parent
-                                    text: parent.modelData.text
-                                    color: A.Appearance.foreground
-                                    font.family: A.Appearance.fontFamily
-                                    font.pixelSize: A.Appearance.fontSizeBody
-                                    font.weight: A.Appearance.fontWeightMedium
-                                    elide: Text.ElideRight
-                                    renderType: Text.NativeRendering
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: parent.modelData.invoke()
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
