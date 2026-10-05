@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Paperless-ngx
+GenericName=Document Manager
+Comment=Self-hosted document management and archiving
+Exec=chromium --app=https://paperless.hovirix.dev
+Icon=paperless-ngx
+Terminal=false
+Categories=Office;Network;
+Keywords=documents;scan;archive;paperless;

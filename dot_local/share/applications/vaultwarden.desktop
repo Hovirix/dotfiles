@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Vaultwarden
+GenericName=Password Manager
+Comment=Self-hosted password vault (Bitwarden-compatible)
+Exec=chromium --app=https://vaultwarden.hovirix.dev
+Icon=vaultwarden
+Terminal=false
+Categories=Network;Security;
+Keywords=password;vault;bitwarden;login;

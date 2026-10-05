@@ -7,7 +7,4 @@ require("no-status"):setup()
 -- (smart-enter's `setup()` requires an opts table and errors without one;
 -- defaults are used unless explicitly configured.)
 require("diff")
-require("smart-enter")
-require("smart-filter")
-require("smart-paste")
 require("jump-to-char")

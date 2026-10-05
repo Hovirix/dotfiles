@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Chess.com
+GenericName=Online Chess
+Comment=Play chess online for free on Chess.com
+Exec=chromium --app=https://www.chess.com
+Icon=chess-com
+Terminal=false
+Categories=Game;BoardGame;Network;
+Keywords=chess;game;tactics;puzzles;

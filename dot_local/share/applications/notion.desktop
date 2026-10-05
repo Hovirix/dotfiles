@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Notion
+GenericName=Workspace
+Comment=Notion notes, docs, and projects
+Exec=chromium --app=https://app.notion.com
+Icon=notion
+Terminal=false
+Categories=Office;Network;
+Keywords=notes;docs;wiki;projects;

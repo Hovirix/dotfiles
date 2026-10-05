@@ -81,13 +81,14 @@ PanelWindow {
                     function onClosed() { window.notifications.remove(card.modelData) }
                 }
 
-                // Passive cards: every notification auto-dismisses, nothing
-                // is clickable and no action buttons are rendered.
+                // Keep notifications from becoming permanent desktop overlays.
+                // Some clients mark informational warnings as resident even
+                // though they provide no useful interaction.
                 Timer {
                     interval: card.modelData.expireTimeout > 0
                         ? card.modelData.expireTimeout * 1000
                         : A.Appearance.notificationTimeout
-                    running: !card.modelData.resident
+                    running: true
                     onTriggered: card.modelData.expire()
                 }
 

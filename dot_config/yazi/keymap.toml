@@ -6,10 +6,6 @@ run = "cd ~/Projects"
 on = ["g", "w"]
 run = "cd ~/Documents/work"
 
-[[mgr.append_keymap]]
-on = ["g", "o"]
-run = "cd ~/Documents/notes"
-
 [[mgr.prepend_keymap]]
 on = "!"
 for = "unix"
@@ -17,24 +13,9 @@ run = 'shell "$SHELL" --block'
 desc = "Open $SHELL here"
 
 [[mgr.prepend_keymap]]
-on = "l"
-run = "plugin smart-enter"
-desc = "Enter child directory, or open hovered file"
-
-[[mgr.prepend_keymap]]
-on = "p"
-run = "plugin smart-paste"
-desc = "Paste into hovered directory or CWD"
-
-[[mgr.prepend_keymap]]
 on = "f"
 run = "plugin jump-to-char"
 desc = "Jump to file starting with char"
-
-[[mgr.prepend_keymap]]
-on = "F"
-run = "plugin smart-filter"
-desc = "Smart filter"
 
 [[mgr.prepend_keymap]]
 on = "<C-d>"
