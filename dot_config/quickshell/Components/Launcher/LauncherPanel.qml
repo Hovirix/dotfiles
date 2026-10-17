@@ -35,12 +35,9 @@ Item {
             return String(item).toLowerCase().indexOf(needle) >= 0
         })
     }
-    readonly property int pageSize: mode === "emoji" ? 16 : 12
+    readonly property int pageSize: mode === "emoji" ? 16 : 10
     readonly property int pageStart: Math.floor(selectedIndex / pageSize) * pageSize
     readonly property var visibleItems: filteredItems.slice(pageStart, pageStart + pageSize)
-
-    // Keep a fixed full-page height so the window never resizes while filtering.
-    readonly property int appListHeight: pageSize * A.Appearance.rowHeight + (pageSize - 1) * A.Appearance.space1
 
     function applicationText(entry) {
         var keywords = ""
@@ -109,6 +106,11 @@ Item {
         selectedIndex = Math.max(0, Math.min(filteredItems.length - 1, selectedIndex + delta))
     }
 
+    function cycleApp(direction) {
+        if (mode === "apps" && filteredItems.length > 0)
+            selectedIndex = (selectedIndex + direction + filteredItems.length) % filteredItems.length
+    }
+
     function fileName(path) {
         var parts = String(path).split("/")
         return parts[parts.length - 1]
@@ -155,13 +157,13 @@ Item {
     property var copy: Process {}
     property var openFile: Process {}
 
-    // Content for the shared menu window (see BatteryPanel for the contract).
-    readonly property int menuWidth: root.mode === "emoji"
-        ? A.Appearance.popupWidthCompact
-        : (root.mode === "open"
-            ? A.Appearance.popupWidthWide
-            : A.Appearance.popupWidthStandard)
-    readonly property int menuHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
+    readonly property int menuWidth: A.Appearance.popupWidthStandard
+    // Repeater rows can appear after Column reports its implicit height on a reload.
+    readonly property int listRows: mode === "emoji" ? Math.ceil(visibleItems.length / 4) : visibleItems.length
+    readonly property int menuHeight: A.Appearance.dialogPadding * 2 + A.Appearance.buttonHeight
+        + A.Appearance.borderWidth + A.Appearance.space2 * 2
+        + Math.max(1, listRows) * A.Appearance.menuRowHeight
+        + Math.max(0, listRows - 1) * A.Appearance.space1
 
     function focusMenu(): void {
         Qt.callLater(function() { keys.forceActiveFocus() })
@@ -174,6 +176,7 @@ Item {
             spaceActivates: false
             qCloses: false
             onMoveRequested: function(dx, dy) { root.move(dx, dy) }
+            onTabRequested: function(direction) { root.cycleApp(direction) }
             onActivateRequested: root.activate()
             onCloseRequested: root.controller.close()
             onBackspaceRequested: root.setQuery(root.query.slice(0, -1))
@@ -220,7 +223,7 @@ Item {
                 Text {
                     visible: root.filteredItems.length === 0
                     width: parent.width
-                    height: root.mode === "apps" ? root.appListHeight : 40
+                    height: A.Appearance.menuRowHeight
                     text: root.mode === "open" ? "No files"
                         : (root.mode === "apps" ? "No applications" : "No emoji")
                     color: A.Appearance.mutedForeground
@@ -244,13 +247,13 @@ Item {
                             required property var modelData
                             required property int index
                             width: (parent.width - A.Appearance.space1 * 3) / 4
-                            height: 48
+                            height: A.Appearance.menuRowHeight
                             hasCursor: root.selectedIndex === root.pageStart + index
                             Text {
                                 anchors.centerIn: parent
                                 text: String(modelData).split("  ")[0]
                                 color: A.Appearance.foreground
-                                font.pixelSize: 24
+                                font.pixelSize: A.Appearance.heroGlyphSize
                                 renderType: Text.NativeRendering
                             }
                         }
@@ -261,7 +264,6 @@ Item {
                     visible: root.mode !== "emoji" && root.filteredItems.length > 0
                     width: parent.width
                     spacing: A.Appearance.space1
-                    height: root.mode === "apps" ? root.appListHeight : implicitHeight
 
                     Repeater {
                         model: root.mode !== "emoji" ? root.visibleItems : []
@@ -269,40 +271,56 @@ Item {
                             required property var modelData
                             required property int index
                             width: parent.width
-                            height: root.mode === "apps" ? A.Appearance.rowHeight : 38
+                            height: A.Appearance.menuRowHeight
                             hasCursor: root.selectedIndex === root.pageStart + index
-                            contentPadding: root.mode === "apps" ? 0 : A.Appearance.space2
+                            contentPadding: 0
 
-                            Text {
-                                id: rowIcon
-                                visible: root.mode !== "apps"
-                                anchors.left: parent.left
-                                anchors.leftMargin: A.Appearance.space2
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: root.mode === "open" ? root.fileIcon(modelData) : String(modelData).split("  ")[0]
-                                color: hasCursor ? A.Appearance.primary : A.Appearance.mutedForeground
-                                font.family: A.Appearance.iconFontFamily
-                                font.pixelSize: A.Appearance.iconSize
-                                renderType: Text.NativeRendering
-                            }
-
-                            Image {
-                                id: appIcon
-                                visible: root.mode === "apps"
-                                width: 28
-                                height: 28
+                            Item {
+                                id: iconSlot
+                                width: A.Appearance.launcherIconSize
+                                height: A.Appearance.launcherIconSize
                                 anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
-                                source: visible ? root.applicationIcon(modelData) : ""
-                                sourceSize.width: width
-                                sourceSize.height: height
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
+
+                                Text {
+                                    visible: root.mode !== "apps"
+                                    anchors.centerIn: parent
+                                    text: root.mode === "open" ? root.fileIcon(modelData) : String(modelData).split("  ")[0]
+                                    color: hasCursor ? A.Appearance.primary : A.Appearance.mutedForeground
+                                    font.family: A.Appearance.iconFontFamily
+                                    font.pixelSize: A.Appearance.iconSize
+                                    renderType: Text.NativeRendering
+                                }
+
+                                Image {
+                                    id: appIcon
+                                    visible: root.mode === "apps"
+                                    width: A.Appearance.launcherIconSize
+                                    height: A.Appearance.launcherIconSize
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: (A.Appearance.launcherIconSize - A.Appearance.iconSize) / 2
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    source: visible ? root.applicationIcon(modelData) : ""
+                                    sourceSize.width: width
+                                    sourceSize.height: height
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                }
+
+                                Image {
+                                    visible: appIcon.visible && (appIcon.status === Image.Error || appIcon.status === Image.Null)
+                                    anchors.fill: appIcon
+                                    source: Quickshell.iconPath("application-x-executable", true)
+                                    sourceSize.width: width
+                                    sourceSize.height: height
+                                    fillMode: Image.PreserveAspectFit
+                                }
                             }
 
                             Column {
-                                anchors.left: root.mode === "apps" ? appIcon.right : rowIcon.right
+                                anchors.left: iconSlot.right
                                 anchors.leftMargin: A.Appearance.space3
+                                    + (root.mode === "apps" ? (A.Appearance.launcherIconSize - A.Appearance.iconSize) / 2 : 0)
                                 anchors.right: parent.right
                                 anchors.rightMargin: A.Appearance.space2
                                 anchors.verticalCenter: parent.verticalCenter
@@ -321,7 +339,7 @@ Item {
                                     color: A.Appearance.foreground
                                     font.family: A.Appearance.fontFamily
                                     font.pixelSize: root.mode === "apps"
-                                        ? A.Appearance.fontSizeTitle
+                                        ? A.Appearance.fontSizeOsd
                                         : A.Appearance.fontSizeBody
                                     elide: root.mode === "open" ? Text.ElideMiddle : Text.ElideRight
                                     renderType: Text.NativeRendering

@@ -46,10 +46,10 @@ PanelWindow {
     Rectangle {
         id: card
 
-        x: Math.round((root.screenW - root.contentWidth) / 2)
-        y: Math.round((root.screenH - root.contentHeight) / 2)
-        width: root.contentWidth
-        height: root.contentHeight
+        x: Math.round((root.screenW - width) / 2)
+        y: Math.round((root.screenH - height) / 2)
+        width: Math.min(root.contentWidth, root.screenW - A.Appearance.dialogPadding * 2)
+        height: Math.min(root.contentHeight, root.screenH - A.Appearance.dialogPadding * 2)
         color: A.Appearance.popover
         border.width: A.Appearance.borderWidth
         border.color: A.Appearance.primary

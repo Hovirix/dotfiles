@@ -30,7 +30,7 @@ ShellRoot {
     Ui.Popup {
         shown: overlays.current !== ""
         contentWidth: menuLoader.item ? menuLoader.item.menuWidth : A.Appearance.popupWidthStandard
-        contentHeight: menuLoader.item ? menuLoader.item.menuHeight : 200
+        contentHeight: menuLoader.item ? menuLoader.item.menuHeight : A.Appearance.buttonHeight
         onCloseRequested: overlays.close()
 
         Loader {

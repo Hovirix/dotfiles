@@ -46,8 +46,7 @@ Item {
         precision: SystemClock.Minutes
     }
 
-    // Content for the shared menu window (see BatteryPanel for the contract).
-    readonly property int menuWidth: A.Appearance.popupWidthStandard
+    readonly property int menuWidth: A.Appearance.popupWidthCalendar
     readonly property int menuHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
 
     function focusMenu(): void {

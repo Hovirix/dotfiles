@@ -408,7 +408,6 @@ Item {
   // not publish a change after load, so snapshot once on completion.
   Component.onCompleted: refreshDisplayAudioModels()
 
-  // Content for the shared menu window (see BatteryPanel for the contract).
   // `opened` stays true whenever loaded: the window only loads this while
   // the controller selects audio, and unloading tears down the PipeWire
   // repeaters and peak monitors with it.

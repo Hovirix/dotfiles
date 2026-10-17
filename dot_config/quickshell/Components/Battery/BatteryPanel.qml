@@ -34,8 +34,6 @@ Item {
         return `${state} · ${root.timeText} to full`
     }
 
-    // Content for the shared menu window: sizing the window reads
-    // menuWidth/menuHeight, focusMenu() restores keyboard focus on show.
     readonly property int menuWidth: A.Appearance.popupWidthStandard
     readonly property int menuHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
 

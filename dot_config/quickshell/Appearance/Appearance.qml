@@ -117,23 +117,19 @@ QtObject {
     // COMMON COMPONENT DIMENSIONS
     // ================================================================
 
-    // Window sizing scale. Widgets choose by information density, never by
-    // one-off pixel values:
-    // compact   — small pickers (emoji)
-    // standard  — single-column menus (audio, battery, power)
-    // wide      — content browsers and calendar
-    // workspace — multi-column control surfaces (display)
-    readonly property int popupWidthCompact: 400
-    readonly property int popupWidthStandard: 480
-    readonly property int popupWidthWide: 640
+    // Content-sized menus, with wider surfaces only where their content needs it.
+    readonly property int popupWidthStandard: 380
+    readonly property int popupWidthCalendar: 560
     readonly property int popupWidthWorkspace: 880
     readonly property int popupMaxHeight: 560
 
     readonly property int rowHeight: 32
+    readonly property int menuRowHeight: 50
     // h-14 two-line list rows (output cards).
     readonly property int rowHeightLarge: 56
 
     readonly property int iconSize: 16
+    readonly property int launcherIconSize: 34
     readonly property int iconColumnWidth: 20
     readonly property int iconLabelGap: 10
 
