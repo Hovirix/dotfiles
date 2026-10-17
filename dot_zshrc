@@ -39,9 +39,7 @@ setopt HIST_FCNTL_LOCK
 
 # Input/Output
 setopt ALIASES
-# setopt CORRECT
 setopt NO_FLOW_CONTROL
-# setopt IGNORE_EOF
 setopt HASH_CMDS
 setopt HASH_DIRS
 
@@ -134,7 +132,7 @@ alias tree='ls -T'
 alias cat='bat'
 alias grep='grep --color=auto'
 alias cze='chezmoi edit --apply'
-alias oc='opencode'
+alias oc='opencode2'
 alias y='yazi'
 
 # Git
@@ -206,9 +204,7 @@ groot() {
 
 # --- Networking --------------------------------------
 
-myip() {
-  curl -s ifconfig.me
-}
+alias myip='curl -s ifconfig.me'
 
 web() {
     w3m "https://duckduckgo.com/html/?q=$(printf '%s' "$*" | sed 's/ /+/g')"

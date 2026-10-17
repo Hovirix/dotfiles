@@ -1,0 +1,258 @@
+[env]
+WLR_RENDERER = "vulkan"
+
+[global]
+exec_once = [
+    "swaybg -i ~/Pictures/Wallpapers/nixos-mocha.png -m fill",
+    "wlsunset -t 3000 -T 6500 -s 20:00 -S 07:00",
+    "swayidle -w",
+    "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE",
+    "quickshell --daemonize --no-duplicate",
+    "chatgpt",
+    "chromium",
+    # "chromium --app=https://app.notion.com",
+]
+
+# Input devices
+xkb_rules_layout = "us,us"
+xkb_rules_variant = ",intl"
+xkb_rules_options = "ctrl:nocaps"
+mouse_natural_scrolling = 0
+mouse_accel_profile = 1
+mouse_accel_speed = 0.0
+tap_to_click = 1
+trackpad_disable_while_typing = 1
+trackpad_natural_scrolling = 1
+trackpad_accel_profile = 1
+trackpad_accel_speed = 1.0
+
+# Misc
+xwayland_persistence = 0
+allow_shortcuts_inhibit = 0
+focus_cross_monitor = 1
+no_border_when_single = 1
+idle_inhibit_ignore_visible = 1
+idle_inhibit_when_fullscreen = 1
+
+# Visuals
+border_px = 2
+gap_inner_horizontal = 0
+gap_inner_vertical = 0
+gap_outer_horizontal = 0
+gap_outer_vertical = 0
+cursor_size = 24
+cursor_theme = "Bibata-Modern-Amber"
+root_color = 0x1e1e2eff
+border_color = 0x6c7086ff
+focus_color = 0xfab387ff
+urgent_color = 0xf38ba8ff
+scratchpad_color = 0xb4befeff
+blur = 0
+shadows = 0
+animations = 0
+
+# Window management
+new_is_master = 0
+default_master_factor = 0.50
+
+[[rule.monitor_rule]]
+name = "^eDP-1$"
+width = 2880
+height = 1800
+refresh = 120
+x = 2048
+y = 0
+scale = 1.5
+vrr = 1
+icc = "~/.config/mango/LAPTOP.icc"
+
+[[rule.monitor_rule]]
+name = "^DP-2$"
+width = 2560
+height = 1440
+refresh = 144
+x = 0
+y = 0
+scale = 1.25
+vrr = 1
+
+[[rule.window_rule]]
+tags = 1
+monitor = "eDP-1"
+is_open_silent = 1
+app_id = "(?i).*chromium.*"
+
+[[rule.window_rule]]
+tags = 2
+monitor = "eDP-1"
+app_id = "(?i).*virt-manager.*"
+
+[[rule.window_rule]]
+tags = 2
+monitor = "eDP-1"
+app_id = "(?i).*qemu.*"
+
+[[rule.window_rule]]
+tags = 3
+monitor = "eDP-1"
+app_id = "(?i).*wezterm.*"
+
+[[rule.window_rule]]
+tags = 4
+monitor = "eDP-1"
+is_open_silent = 1
+app_id = "(?i).*notion.*"
+
+[[rule.window_rule]]
+tags = 5
+monitor = "eDP-1"
+app_id = "(?i).*freetube.*"
+
+[[rule.window_rule]]
+is_floating = 1
+width = 0.75
+height = 0.75
+app_id = "^tui$"
+
+[[rule.window_rule]]
+is_floating = 1
+width = 0.6
+height = 0.6
+title = "(?i).*localsend.*"
+
+[[rule.window_rule]]
+is_named_scratchpad = 1
+width = 0.8
+height = 0.8
+app_id = "^foot-scratchpad$"
+
+[[rule.window_rule]]
+is_named_scratchpad = 1
+is_open_silent = 1
+width = 0.95
+height = 0.95
+app_id = "(?i).*chatgpt.*"
+
+# Tags
+[[rule.tag_rule]]
+id = "*"
+layout_name = "master"
+
+[[rule.tag_rule]]
+id = 1
+monitor_name = "eDP-1"
+
+[[rule.tag_rule]]
+id = 2
+monitor_name = "eDP-1"
+
+[[rule.tag_rule]]
+id = 3
+monitor_name = "eDP-1"
+
+[[rule.tag_rule]]
+id = 4
+monitor_name = "eDP-1"
+
+[[rule.tag_rule]]
+id = 5
+monitor_name = "eDP-1"
+
+[[rule.tag_rule]]
+id = 6
+monitor_name = "DP-2"
+
+[[rule.tag_rule]]
+id = 7
+monitor_name = "DP-2"
+
+[[rule.tag_rule]]
+id = 8
+monitor_name = "DP-2"
+
+[[rule.tag_rule]]
+id = 9
+monitor_name = "DP-2"
+
+[bind.default]
+# Tags
+"SUPER+code:9" = "toggleoverview"
+"SUPER+code:10" = "viewcrossmon,1,eDP-1"
+"SUPER+code:11" = "viewcrossmon,2,eDP-1"
+"SUPER+code:12" = "viewcrossmon,3,eDP-1"
+"SUPER+code:13" = "viewcrossmon,4,eDP-1"
+"SUPER+code:14" = "viewcrossmon,5,eDP-1"
+"SUPER+code:15" = "viewcrossmon,6,DP-2"
+"SUPER+code:16" = "viewcrossmon,7,DP-2"
+"SUPER+code:17" = "viewcrossmon,8,DP-2"
+"SUPER+code:18" = "viewcrossmon,9,DP-2"
+
+# Move the focused window to a tag
+"SUPER+SHIFT+code:10" = "tagcrossmon,1,eDP-1"
+"SUPER+SHIFT+code:11" = "tagcrossmon,2,eDP-1"
+"SUPER+SHIFT+code:12" = "tagcrossmon,3,eDP-1"
+"SUPER+SHIFT+code:13" = "tagcrossmon,4,eDP-1"
+"SUPER+SHIFT+code:14" = "tagcrossmon,5,eDP-1"
+"SUPER+SHIFT+code:15" = "tagcrossmon,6,DP-2"
+"SUPER+SHIFT+code:16" = "tagcrossmon,7,DP-2"
+"SUPER+SHIFT+code:17" = "tagcrossmon,8,DP-2"
+"SUPER+SHIFT+code:18" = "tagcrossmon,9,DP-2"
+
+# Applications
+"SUPER+Return" = "spawn,wezterm"
+"SUPER+w" = "spawn,foot --app-id tui -e impala"
+"SUPER+b" = "spawn,foot --app-id tui -e bluetui"
+"SUPER+m" = "spawn,foot --app-id tui -e btop"
+"SUPER+g" = "toggle_named_scratchpad,(?i).*chatgpt.*,none,chatgpt"
+"SUPER+BackSpace" = "toggle_named_scratchpad,^foot-scratchpad$,none,foot --app-id foot-scratchpad"
+
+# Quickshell
+"SUPER+a" = "spawn,quickshell ipc call shell audio"
+"SUPER+c" = "spawn,quickshell ipc call shell clock"
+"SUPER+e" = "spawn,quickshell ipc call shell emoji"
+"SUPER+p" = "spawn,quickshell ipc call shell battery"
+"SUPER+d" = "spawn,quickshell ipc call shell display"
+"SUPER+R" = "spawn,quickshell ipc call shell launcher"
+"SUPER+o" = "spawn,quickshell ipc call shell openRecent"
+
+# Scripts
+"SUPER+i" = "spawn,swayidle-toogle"
+"SUPER+s" = "spawn,screenshot"
+"SUPER+SHIFT+s" = "spawn,screenshot --save"
+"SUPER+space" = "spawn,keyboard-layout-toggle"
+
+# Brightness
+"XF86MonBrightnessUp" = "spawn,quickshell ipc call shell brightnessUp"
+"XF86MonBrightnessDown" = "spawn,quickshell ipc call shell brightnessDown"
+
+# Audio
+"XF86AudioRaiseVolume" = "spawn,quickshell ipc call shell volumeUp"
+"XF86AudioLowerVolume" = "spawn,quickshell ipc call shell volumeDown"
+"XF86AudioMute" = "spawn,quickshell ipc call shell volumeMute"
+
+# Mango
+"SUPER+SHIFT+r" = "reload_config"
+
+# Window management
+"SUPER+q" = "killclient"
+"SUPER+t" = "togglefloating"
+"SUPER+f" = "togglefullscreen"
+"SUPER+h" = "focusdir,left"
+"SUPER+l" = "focusdir,right"
+"SUPER+k" = "focusdir,up"
+"SUPER+j" = "focusdir,down"
+"SUPER+SHIFT+h" = "exchange_client,left"
+"SUPER+SHIFT+l" = "exchange_client,right"
+"SUPER+SHIFT+k" = "exchange_client,up"
+"SUPER+SHIFT+j" = "exchange_client,down"
+"SUPER+CTRL+h" = "resizewin,-10,0"
+"SUPER+CTRL+l" = "resizewin,+10,0"
+"SUPER+CTRL+k" = "resizewin,0,-10"
+"SUPER+CTRL+j" = "resizewin,0,+10"
+
+[mousebind.default]
+"SUPER+btn_left" = "moveresize,curmove"
+"SUPER+btn_right" = "moveresize,curresize"
+
+[switchbind.default]
+fold = "spawn_shell,swaylock -f && systemctl suspend"

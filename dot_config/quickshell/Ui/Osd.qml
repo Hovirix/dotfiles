@@ -13,9 +13,9 @@ Rectangle {
     implicitWidth: width
 
     implicitHeight:
-        A.Appearance.osdPadding * 2
+        A.Appearance.dialogPadding * 2
         + Math.max(title.implicitHeight, value.implicitHeight)
-        + A.Appearance.osdGap
+        + A.Appearance.space3
         + A.Appearance.osdProgressHeight
 
     color: A.Appearance.popover
@@ -27,11 +27,11 @@ Rectangle {
 
     Item {
         anchors.fill: parent
-        anchors.margins: A.Appearance.osdPadding
+        anchors.margins: A.Appearance.dialogPadding
 
         Column {
             anchors.fill: parent
-            spacing: A.Appearance.osdGap
+            spacing: A.Appearance.space3
 
             Row {
                 width: parent.width

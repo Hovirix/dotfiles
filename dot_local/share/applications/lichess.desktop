@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Lichess
+Exec=chromium --app=https://lichess.org
+Icon=lichess
+Terminal=false

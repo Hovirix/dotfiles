@@ -16,10 +16,12 @@ do
 end
 
 config.default_domain = "local"
+config.default_prog = { "herdr" }
 config.default_gui_startup_args = { "start" }
 
 config.enable_tab_bar = false
 config.disable_default_key_bindings = true
+config.window_close_confirmation = "NeverPrompt"
 
 config.adjust_window_size_when_changing_font_size = false
 

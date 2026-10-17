@@ -39,10 +39,8 @@ Item {
     readonly property int pageStart: Math.floor(selectedIndex / pageSize) * pageSize
     readonly property var visibleItems: filteredItems.slice(pageStart, pageStart + pageSize)
 
-    // Apps list keeps one fixed full-page height so the window never
-    // resizes while filtering: uniform two-line rows, padded when short.
-    readonly property int appRowHeight: 48
-    readonly property int appListHeight: pageSize * appRowHeight + (pageSize - 1) * A.Appearance.space1
+    // Keep a fixed full-page height so the window never resizes while filtering.
+    readonly property int appListHeight: pageSize * A.Appearance.rowHeight + (pageSize - 1) * A.Appearance.space1
 
     function applicationText(entry) {
         var keywords = ""
@@ -157,17 +155,17 @@ Item {
     property var copy: Process {}
     property var openFile: Process {}
 
-    Ui.Popup {
-        shown: root.controller.current === "launcher"
-        contentWidth: root.mode === "emoji"
-            ? A.Appearance.popupWidthCompact
-            : (root.mode === "open"
-                ? A.Appearance.popupWidthWide
-                : A.Appearance.popupWidthStandard)
-        contentHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
-        onCloseRequested: root.controller.close()
-        onVisibleChanged: if (visible)
-            Qt.callLater(function() { keys.forceActiveFocus() })
+    // Content for the shared menu window (see BatteryPanel for the contract).
+    readonly property int menuWidth: root.mode === "emoji"
+        ? A.Appearance.popupWidthCompact
+        : (root.mode === "open"
+            ? A.Appearance.popupWidthWide
+            : A.Appearance.popupWidthStandard)
+    readonly property int menuHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
+
+    function focusMenu(): void {
+        Qt.callLater(function() { keys.forceActiveFocus() })
+    }
 
         Ui.KeyCatcher {
             id: keys
@@ -271,7 +269,7 @@ Item {
                             required property var modelData
                             required property int index
                             width: parent.width
-                            height: root.mode === "apps" ? root.appRowHeight : 38
+                            height: root.mode === "apps" ? A.Appearance.rowHeight : 38
                             hasCursor: root.selectedIndex === root.pageStart + index
                             contentPadding: root.mode === "apps" ? 0 : A.Appearance.space2
 
@@ -328,23 +326,10 @@ Item {
                                     elide: root.mode === "open" ? Text.ElideMiddle : Text.ElideRight
                                     renderType: Text.NativeRendering
                                 }
-                                Text {
-                                    visible: root.mode === "apps"
-                                    width: parent.width
-                                    // A single space keeps the line height for
-                                    // entries without subtitle metadata.
-                                    text: String(modelData.genericName || modelData.comment || " ")
-                                    color: A.Appearance.mutedForeground
-                                    font.family: A.Appearance.fontFamily
-                                    font.pixelSize: A.Appearance.fontSizeBody
-                                    elide: Text.ElideRight
-                                    renderType: Text.NativeRendering
-                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 }

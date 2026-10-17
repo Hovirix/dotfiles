@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-pause() {
-  echo
-  read -rp "Press Enter to continue..."
-}
-
 echo "Insert exactly ONE YubiKey."
-pause
+echo
+read -rp "Press Enter to continue..."
 
 echo
 echo "Detected YubiKeys:"
@@ -23,28 +19,20 @@ read -rp "Configure this YubiKey for USB+NFC passkeys and OpenPGP? [y/N] " ok
 [[ "$ok" == "y" || "$ok" == "Y" ]] || exit 1
 
 echo
-echo "Configuring USB apps..."
-ykman config usb \
-  --enable u2f \
-  --enable fido2 \
-  --enable openpgp \
-  --disable otp \
-  --disable oath \
-  --disable piv \
-  --disable hsmauth \
-  --force
+for iface in usb nfc; do
+  echo "Configuring ${iface} apps..."
+  ykman config "$iface" \
+    --enable u2f \
+    --enable fido2 \
+    --enable openpgp \
+    --disable otp \
+    --disable oath \
+    --disable piv \
+    --disable hsmauth \
+    --force
 
-echo
-echo "Configuring NFC apps..."
-ykman config nfc \
-  --enable u2f \
-  --enable fido2 \
-  --enable openpgp \
-  --disable otp \
-  --disable oath \
-  --disable piv \
-  --disable hsmauth \
-  --force
+  echo
+done
 
 echo
 echo "Set or change FIDO2 PIN."

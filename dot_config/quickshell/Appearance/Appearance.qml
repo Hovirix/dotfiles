@@ -39,8 +39,6 @@ QtObject {
     // CATPPUCCIN MOCHA -> SHADCN SEMANTIC TOKENS
     // ================================================================
 
-    // Table: Background Pane.
-    readonly property color background: "#1e1e2e"            // base
     // Table: Body Copy, Main Headline.
     readonly property color foreground: "#cdd6f4"            // text
 
@@ -51,9 +49,6 @@ QtObject {
     readonly property color primary: "#fab387"               // peach
     // Table: On Accent.
     readonly property color primaryForeground: "#1e1e2e"     // base
-
-    // Table: Surface Elements (Surface 0).
-    readonly property color secondary: "#313244"             // surface0
 
     // Table: Surface Elements (Surface 0).
     readonly property color muted: "#313244"                 // surface0
@@ -71,7 +66,6 @@ QtObject {
     // Style guide: structural dividers inside a surface use bg-border
     // at 1px (Ui.Separator). Neutral, never the accent color.
     readonly property color border: "#45475a"                // surface1
-    readonly property color input: "#45475a"                 // surface1
 
     readonly property color success: "#a6e3a1"               // green
     readonly property color warning: "#f9e2af"               // yellow
@@ -115,11 +109,9 @@ QtObject {
     readonly property int radius: 0
 
     readonly property int borderWidth: 1
-    readonly property int separatorSize: 1
 
     // Standard Lyra popover.
     readonly property int dialogPadding: 16
-    readonly property int dialogGap: 16
 
     // ================================================================
     // COMMON COMPONENT DIMENSIONS
@@ -165,8 +157,6 @@ QtObject {
     // ================================================================
 
     readonly property int osdWidth: 440
-    readonly property int osdPadding: 16
-    readonly property int osdGap: 12
     readonly property int osdProgressHeight: 6
 
     // ================================================================

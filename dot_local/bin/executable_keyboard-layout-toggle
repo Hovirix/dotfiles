@@ -1,14 +1,10 @@
 #!/bin/sh
 set -eu
 
-require() {
-  command -v "$1" >/dev/null 2>&1 || {
-    notify-send -a 'Keyboard' -i dialog-error -u critical 'Keyboard' "$1 not found"
-    exit 1
-  }
+command -v mmsg >/dev/null 2>&1 || {
+  notify-send -a 'Keyboard' -i dialog-error -u critical 'Keyboard' "mmsg not found"
+  exit 1
 }
-
-require mmsg
 
 mmsg dispatch switch_keyboard_layout >/dev/null
 layout="$(mmsg get keyboardlayout | sed -e 's/^.*"layout":"//' -e 's/"*}//')"

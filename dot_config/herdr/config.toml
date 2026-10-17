@@ -13,6 +13,3 @@ version_check = false
 pane_gaps = false
 pane_scrollbars = false
 accent = "#fab387"
-
-[keys]
-focus_agent = "prefix+a"

@@ -7,16 +7,11 @@ Item {
     id: root
 
     property bool checked: false
-    property bool busy: false
-    property bool interactive: true
     property bool hasCursor: false
-
-    property color foreground: A.Appearance.foreground
 
     signal toggled()
     signal hovered(bool isHovered)
 
-    readonly property alias containsMouse: mouse.containsMouse
     readonly property bool hot: hasCursor || mouse.containsMouse
 
     property int trackWidth: 32
@@ -43,7 +38,7 @@ Item {
         height: root.trackHeight
         anchors.centerIn: parent
         radius: A.Appearance.radius
-        color: root.checked ? A.Appearance.primary : A.Appearance.input
+        color: root.checked ? A.Appearance.primary : A.Appearance.border
         border.width: A.Appearance.borderWidth
         border.color: root.checked ? A.Appearance.primary : A.Appearance.border
 
@@ -75,10 +70,9 @@ Item {
         id: mouse
 
         anchors.fill: parent
-        enabled: root.interactive
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onContainsMouseChanged: root.hovered(containsMouse)
-        onClicked: if (!root.busy) root.toggled()
+        onClicked: root.toggled()
     }
 }

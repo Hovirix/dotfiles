@@ -4,8 +4,8 @@ import "../Appearance" as A
 Rectangle {
     width: parent ? parent.width : implicitWidth
     implicitWidth: 100
-    implicitHeight: A.Appearance.separatorSize
-    height: A.Appearance.separatorSize
+    implicitHeight: A.Appearance.borderWidth
+    height: A.Appearance.borderWidth
 
     color: A.Appearance.border
 }

@@ -1,3 +1,8 @@
+Host box
+  HostName u683062-sub2.your-storagebox.de
+  User u683062-sub2
+  Port 23
+
 Host pve
   HostName pve.home.hovirix.dev
   User root

@@ -1,21 +1,21 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:full-border"
-rev = "6229767"
+rev = "6cf1f43"
 hash = "f281261ff04ad7ec867c3f802a50835f"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:no-status"
-rev = "6229767"
+rev = "6cf1f43"
 hash = "3e023d31f29201efdac2a6ae35fedb78"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:diff"
-rev = "6229767"
+rev = "6cf1f43"
 hash = "14558d2829c0aa05e99c57de8f74d199"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:jump-to-char"
-rev = "6229767"
+rev = "6cf1f43"
 hash = "7a4b4237223aaa94e589d1c01a23542a"
 
 [flavor]

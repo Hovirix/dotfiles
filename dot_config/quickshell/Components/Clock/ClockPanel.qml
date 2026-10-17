@@ -46,15 +46,14 @@ Item {
         precision: SystemClock.Minutes
     }
 
-    Ui.Popup {
-        shown: root.controller.current === "clock"
-        contentWidth: A.Appearance.popupWidthStandard
-        contentHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
-        onCloseRequested: root.controller.close()
-        onVisibleChanged: if (visible) {
-            root.shownMonth = root.monthStart(clock.date)
-            Qt.callLater(function() { keys.forceActiveFocus() })
-        }
+    // Content for the shared menu window (see BatteryPanel for the contract).
+    readonly property int menuWidth: A.Appearance.popupWidthStandard
+    readonly property int menuHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
+
+    function focusMenu(): void {
+        root.shownMonth = root.monthStart(clock.date)
+        Qt.callLater(function() { keys.forceActiveFocus() })
+    }
 
         Ui.KeyCatcher {
             id: keys
@@ -67,7 +66,7 @@ Item {
             Column {
                 id: panel
                 width: parent.width
-                spacing: A.Appearance.dialogGap
+                spacing: A.Appearance.dialogPadding
 
                 Column {
                     width: parent.width
@@ -209,5 +208,4 @@ Item {
                 }
             }
         }
-    }
 }

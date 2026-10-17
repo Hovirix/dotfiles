@@ -5,12 +5,10 @@ import QtQuick
 // boilerplate key handling lives here.
 //
 // Keys.priority: Keys.BeforeItem means this handler gets keys first, even
-// when a descendant has activeFocus. When a menu has an inline editor the
-// menu must set `blocked: editor.activeFocus` so keys pass through.
+// when a descendant has activeFocus.
 Item {
     id: root
 
-    property bool blocked: false
     property bool vimNavigation: true
     property bool spaceActivates: true
     property bool qCloses: true
@@ -25,9 +23,6 @@ Item {
     focus: true
     Keys.priority: Keys.BeforeItem
     Keys.onPressed: function(event) {
-        if (blocked)
-            return
-
         if (event.key === Qt.Key_Escape) {
             closeRequested()
             event.accepted = true
@@ -88,9 +83,6 @@ Item {
     }
 
     Keys.onReleased: function(event) {
-        if (blocked)
-            return
-
         if (qCloses && event.key === Qt.Key_Q) {
             closeRequested()
             event.accepted = true

@@ -9,10 +9,6 @@ Item {
     property string label: ""
     property string value: ""
 
-    property color iconColor: A.Appearance.mutedForeground
-    property color labelColor: A.Appearance.mutedForeground
-    property color valueColor: A.Appearance.foreground
-
     implicitHeight: A.Appearance.rowHeight
     height: implicitHeight
 
@@ -30,7 +26,7 @@ Item {
 
             text: root.icon
 
-            color: root.iconColor
+            color: A.Appearance.mutedForeground
 
             font.family: A.Appearance.iconFontFamily
             font.pixelSize: A.Appearance.iconSize
@@ -51,7 +47,7 @@ Item {
 
         text: root.label
 
-        color: root.labelColor
+        color: A.Appearance.mutedForeground
 
         font.family: A.Appearance.fontFamily
         font.pixelSize: A.Appearance.fontSizeBody
@@ -67,7 +63,7 @@ Item {
 
         text: root.value
 
-        color: root.valueColor
+        color: A.Appearance.foreground
 
         font.family: A.Appearance.fontFamily
         font.pixelSize: A.Appearance.fontSizeBody

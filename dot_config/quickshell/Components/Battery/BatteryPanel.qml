@@ -34,6 +34,15 @@ Item {
         return `${state} · ${root.timeText} to full`
     }
 
+    // Content for the shared menu window: sizing the window reads
+    // menuWidth/menuHeight, focusMenu() restores keyboard focus on show.
+    readonly property int menuWidth: A.Appearance.popupWidthStandard
+    readonly property int menuHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
+
+    function focusMenu(): void {
+        Qt.callLater(function() { keys.forceActiveFocus() })
+    }
+
     function batteryIcon() {
         if (!battery.available)
             return "󰂑"
@@ -50,18 +59,10 @@ Item {
         return "󰁹"
     }
 
-    Ui.Popup {
-        shown: root.controller.current === "battery"
-        contentHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
+    Ui.KeyCatcher {
+        id: keys
+        anchors.fill: parent
         onCloseRequested: root.controller.close()
-        onVisibleChanged: if (visible) {
-            Qt.callLater(function() { keys.forceActiveFocus() })
-        }
-
-        Ui.KeyCatcher {
-            id: keys
-            anchors.fill: parent
-            onCloseRequested: root.controller.close()
 
             Column {
                 id: panelColumn
@@ -176,5 +177,4 @@ Item {
             }
         }
         }
-    }
 }

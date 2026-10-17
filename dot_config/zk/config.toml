@@ -1,8 +1,0 @@
-[notebook]
-dir = "~/Documents/notes"
-
-[note]
-filename = "{{id}}-{{slug title}}"
-
-
-

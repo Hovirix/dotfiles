@@ -57,16 +57,21 @@ function nodeLabel(node) {
   return friendlyDeviceLabel(node.description || p["node.description"] || node.name || "Unknown")
 }
 
-function isHeadphones(node) {
-  if (!node) return false
+function nodeBlob(node) {
+  if (!node) return ""
   var p = nodeProps(node)
-  var blob = String([
-    node.name, node.description, node.nickname,
+  return String([
+    node.name, node.description, node.nickname, node.nick,
     p["device.icon-name"] || "",
     p["device.product.name"] || "",
     p["node.description"] || "",
     p["node.nick"] || ""
   ].join(" ")).toLowerCase()
+}
+
+function isHeadphones(node) {
+  if (!node) return false
+  var blob = nodeBlob(node)
   return blob.indexOf("headphone") !== -1
     || blob.indexOf("headset") !== -1
     || blob.indexOf("earbud") !== -1
@@ -77,12 +82,7 @@ function isHeadphones(node) {
 function sinkGlyph(node) {
   if (!node) return "󰓃"
   if (isHeadphones(node)) return "󰋋"
-  var p = nodeProps(node)
-  var blob = String([
-    node.name, node.description, node.nickname,
-    p["device.icon-name"] || "",
-    p["device.product.name"] || ""
-  ].join(" ")).toLowerCase()
+  var blob = nodeBlob(node)
   if (blob.indexOf("bluetooth") !== -1) return "󰂯"
   if (blob.indexOf("hdmi") !== -1 || blob.indexOf("display") !== -1) return "󰍹"
   return "󰓃"
@@ -90,11 +90,7 @@ function sinkGlyph(node) {
 
 function sourceGlyph(node) {
   if (!node) return "󰍬"
-  var p = nodeProps(node)
-  var blob = String([
-    node.name, node.description, node.nickname,
-    p["device.icon-name"] || ""
-  ].join(" ")).toLowerCase()
+  var blob = nodeBlob(node)
   if (blob.indexOf("headset") !== -1) return "󰋋"
   if (blob.indexOf("bluetooth") !== -1) return "󰂯"
   if (blob.indexOf("webcam") !== -1 || blob.indexOf("camera") !== -1) return "󰄀"
@@ -104,12 +100,8 @@ function sourceGlyph(node) {
 function friendlyStreamLabel(label) {
   label = String(label || "").trim()
   if (!label) return ""
-
-  var known = {
-    "spotify": "Spotify"
-  }
-  var normalized = label.toLowerCase()
-  return known[normalized] || label
+  if (label.toLowerCase() === "spotify") return "Spotify"
+  return label
 }
 
 function streamLabelKey(label) {
@@ -128,17 +120,6 @@ function rawStreamLabel(node) {
     || p["media.name"]
     || p["node.name"]
     || node.name
-}
-
-function mprisPlayerLabel(player) {
-  if (!player) return ""
-  return friendlyStreamLabel(player.identity || player.desktopEntry || "")
-}
-
-function mprisPlayerIsProxy(player) {
-  var dbusName = String(player && player.dbusName || "").toLowerCase()
-  var desktopEntry = String(player && player.desktopEntry || "").toLowerCase()
-  return dbusName.indexOf("playerctld") !== -1 || desktopEntry === "playerctld"
 }
 
 function streamRepresentsMprisPlayer(streamLabel, playerLabel) {
@@ -162,10 +143,12 @@ function mprisLabelsFor(players, predicate) {
     if (!player) continue
     if (!player.isPlaying && !player.canPlay) continue
 
-    var playerLabel = mprisPlayerLabel(player)
+    var playerLabel = player ? friendlyStreamLabel(player.identity || player.desktopEntry || "") : ""
     if (!playerLabel || !predicate(playerLabel)) continue
 
-    if (mprisPlayerIsProxy(player)) {
+    var dbusName = String(player.dbusName || "").toLowerCase()
+    var isProxy = dbusName.indexOf("playerctld") !== -1 || String(player.desktopEntry || "").toLowerCase() === "playerctld"
+    if (isProxy) {
       if (player.isPlaying) playingProxyCandidates.push(playerLabel)
       proxyCandidates.push(playerLabel)
     } else {

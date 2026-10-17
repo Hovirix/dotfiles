@@ -9,8 +9,8 @@
 
 ## Coupled Configuration
 
-- `dot_config/mango/config.conf` invokes the scripts in `dot_local/bin/` by their deployed names, without the `executable_` prefix. Keep bindings and script names aligned.
-- Mango `exec-once` lines are shell-interpreted (`~` expansion, `;` chaining work); plain `VAR=value` lines are environment assignments, not shell.
+- `dot_config/mango/config.toml` invokes the scripts in `dot_local/bin/` by their deployed names, without the `executable_` prefix. Keep bindings and script names aligned.
+- Mango `exec_once` commands are shell-interpreted (`~` expansion, `;` chaining work); `[env]` values are environment assignments, not shell.
 - Since lazygit 0.63 the `git.mergetool` YAML key no longer exists; its "Open merge tool" action shells out to plain `git mergetool`. Helix is therefore wired up as the merge tool via `[merge] tool = helix` and `[mergetool "helix"]` in `dot_config/git/config`, not in `dot_config/lazygit/config.yml`.
 - Mango output names, modes, scales, and tag assignments are hardware-specific (`eDP-1` and `HDMI-A-1`); do not generalize them without user confirmation.
 - Most `dot_local/bin/` scripts are POSIX `sh` with `set -eu`. Only `executable_setup-yubikey.sh` currently uses Bash; do not introduce Bash syntax into the other scripts.
@@ -65,7 +65,7 @@
 
 ## Focused Checks
 
-- Mango: `mango -c dot_config/mango/config.conf -p`
+- Mango: `mango -c dot_config/mango/config.toml -p`
 - Zsh: `zsh -n dot_zshrc dot_zprofile`
 - WezTerm: `wezterm --config-file dot_wezterm.lua show-keys >/dev/null`
 - Shell scripts: use `sh -n dot_local/bin/executable_<name>` for `#!/bin/sh` files and `bash -n` for the two Bash files.

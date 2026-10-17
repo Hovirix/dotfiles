@@ -30,7 +30,7 @@ Item {
    var list = []
    for (var i = 0; i < nodes.length; i++) {
      var n = nodes[i]
-     if (n && !n.isSink && !n.isStream && isAudioSource(n)) {
+      if (n && !n.isSink && !n.isStream && Model.isAudioSource(n)) {
        var name = n.name || ""
        if (name === "quickshell") continue
        list.push(n)
@@ -43,26 +43,19 @@ Item {
    var list = []
    for (var i = 0; i < nodes.length; i++) {
      var n = nodes[i]
-     if (!n || !n.isStream || !isPlaybackStream(n)) continue
+      if (!n || !n.isStream || !Model.isPlaybackStream(n)) continue
      list.push(n)
    }
    return list
  }
 
- // Identify true playback streams without reading node.properties here:
- // PwNode.properties is invalid until the node is bound, and reading it while
- // capture streams are appearing (for example, when Voxtype starts recording)
- // can destabilize Quickshell's Pipewire service. Quickshell versions differ
- // in how \`type\` is exposed (media.class, enum name, or numeric enum), but
- // playback streams consistently accept audio input from clients and publish
- // \`isSink: true\`; capture streams publish as stream sources.
- function isPlaybackStream(node) {
-   return Model.isPlaybackStream(node)
- }
-
- function isAudioSource(node) {
-   return Model.isAudioSource(node)
- }
+  // Identify true playback streams without reading node.properties here:
+  // PwNode.properties is invalid until the node is bound, and reading it while
+  // capture streams are appearing (for example, when Voxtype starts recording)
+  // can destabilize Quickshell's Pipewire service. Quickshell versions differ
+  // in how `type` is exposed (media.class, enum name, or numeric enum), but
+  // playback streams consistently accept audio input from clients and publish
+  // `isSink: true`; capture streams publish as stream sources.
 
  readonly property var audioSinks: {
    var list = candidateSinks.slice()
@@ -276,15 +269,11 @@ Item {
  onAudioSourcesChanged: scheduleDisplayAudioModelRefresh()
  onAudioStreamsChanged: scheduleDisplayAudioModelRefresh()
 
- function listSnapshot(list) {
-   return Model.listSnapshot(list)
- }
-
- function refreshDisplayAudioModels() {
-   if (!opened) return
-   displayAudioSinks = listSnapshot(audioSinks)
-   displayAudioSources = listSnapshot(audioSources)
-   displayAudioStreams = listSnapshot(audioStreams)
+  function refreshDisplayAudioModels() {
+    if (!opened) return
+    displayAudioSinks = Model.listSnapshot(audioSinks)
+    displayAudioSources = Model.listSnapshot(audioSources)
+    displayAudioStreams = Model.listSnapshot(audioStreams)
    clampCursor()
  }
 
@@ -347,10 +336,10 @@ Item {
    if (selectedIndex < floor) selectedIndex = floor
  }
 
- function outputIcon() {
-   if (!sink || !sink.audio) return ""
-   if (isHeadphones(sink)) return "󰋋"
-   if (outputMuted) return ""
+  function outputIcon() {
+    if (!sink || !sink.audio) return ""
+    if (Model.isHeadphones(sink)) return "󰋋"
+    if (outputMuted) return ""
    var v = outputVolume
    if (v >= 0.67) return ""
    if (v >= 0.34) return ""
@@ -358,11 +347,7 @@ Item {
    return ""
  }
 
- function outputVolumeName(volume, muted) {
-   return Model.outputVolumeName(volume, muted)
- }
-
- function setOutputVolume(v) {
+  function setOutputVolume(v) {
    if (!volumeSink || !volumeSink.audio) return outputVolume
    var volume = Math.max(0, Math.min(1, v))
    volumeSink.audio.volume = volume
@@ -392,25 +377,9 @@ Item {
    if (node) Pipewire.preferredDefaultAudioSource = node
  }
 
- function nodeLabel(node) {
-   return Model.nodeLabel(node)
- }
-
- function isHeadphones(node) {
-   return Model.isHeadphones(node)
- }
-
- function sinkGlyph(node) {
-   return Model.sinkGlyph(node)
- }
-
- function sourceGlyph(node) {
-   return Model.sourceGlyph(node)
- }
-
- function streamLabel(node) {
-   return Model.streamLabel(node, mprisPlayers, displayAudioStreams)
- }
+  function streamLabel(node) {
+    return Model.streamLabel(node, mprisPlayers, displayAudioStreams)
+  }
 
  PwObjectTracker { objects: root.candidateSinks }
  PwObjectTracker { objects: root.candidateSources }
@@ -428,23 +397,30 @@ Item {
     enabled: root.opened && !!root.sink
   }
 
- Timer {
-   id: audioModelRefreshTimer
-   interval: 75
-   repeat: false
-   onTriggered: root.refreshDisplayAudioModels()
- }
+  Timer {
+    id: audioModelRefreshTimer
+    interval: 75
+    repeat: false
+    onTriggered: root.refreshDisplayAudioModels()
+  }
 
- Ui.Popup {
-   shown: root.opened
-   contentHeight: Math.min(panelColumn.implicitHeight + A.Appearance.dialogPadding * 2,
-                           A.Appearance.popupMaxHeight)
-   onCloseRequested: root.controller.close()
-   onVisibleChanged: if (visible) Qt.callLater(function() {
-     keyCatcher.forceActiveFocus()
-   })
+  // Fresh Loader instances start with empty display lists; PipeWire may
+  // not publish a change after load, so snapshot once on completion.
+  Component.onCompleted: refreshDisplayAudioModels()
 
- Ui.KeyCatcher {
+  // Content for the shared menu window (see BatteryPanel for the contract).
+  // `opened` stays true whenever loaded: the window only loads this while
+  // the controller selects audio, and unloading tears down the PipeWire
+  // repeaters and peak monitors with it.
+  readonly property int menuWidth: A.Appearance.popupWidthStandard
+  readonly property int menuHeight: Math.min(panelColumn.implicitHeight + A.Appearance.dialogPadding * 2,
+                          A.Appearance.popupMaxHeight)
+
+  function focusMenu(): void {
+    Qt.callLater(function() { keyCatcher.forceActiveFocus() })
+  }
+
+  Ui.KeyCatcher {
      id: keyCatcher
      anchors.fill: parent
      onMoveRequested: function(dx, dy) {
@@ -504,7 +480,6 @@ Item {
               id: powerSwitch
               checked: root.hasOutput && !root.outputMuted
               hasCursor: root.headerHasCursor
-              foreground: A.Appearance.foreground
               anchors.right: parent.right
               anchors.verticalCenter: parent.verticalCenter
               onHovered: function(on) { if (on) root.setHeaderCursor() }
@@ -533,7 +508,7 @@ Item {
              Text {
                id: heroLabel
                textFormat: Text.PlainText
-               text: root.outputVolumeName(
+                text: Model.outputVolumeName(
                  outputSlider.dragging ? outputSlider.liveValue : root.outputVolume,
                  root.outputMuted
                ).toUpperCase()
@@ -560,12 +535,11 @@ Item {
              width: parent.width
              implicitHeight: Math.max(outputHeader.implicitHeight, outputPercent.implicitHeight)
 
-             Ui.SectionHeader {
-               id: outputHeader
-               text: "OUTPUT"
-               foreground: A.Appearance.foreground
-               fontFamily: A.Appearance.fontFamily
-               anchors.left: parent.left
+              Ui.SectionHeader {
+                id: outputHeader
+                text: "OUTPUT"
+                foreground: A.Appearance.foreground
+                anchors.left: parent.left
                anchors.verticalCenter: parent.verticalCenter
              }
 
@@ -672,12 +646,11 @@ Item {
              width: parent.width
              implicitHeight: Math.max(microphoneHeader.implicitHeight, microphonePercent.implicitHeight)
 
-             Ui.SectionHeader {
-               id: microphoneHeader
-               text: "INPUT"
-               foreground: A.Appearance.foreground
-               fontFamily: A.Appearance.fontFamily
-               anchors.left: parent.left
+              Ui.SectionHeader {
+                id: microphoneHeader
+                text: "INPUT"
+                foreground: A.Appearance.foreground
+                anchors.left: parent.left
                anchors.verticalCenter: parent.verticalCenter
              }
 
@@ -781,30 +754,28 @@ Item {
            spacing: A.Appearance.space25
            visible: root.displayAudioStreams.length > 0
 
-           Ui.SectionHeader {
-             text: "SOURCES"
-             foreground: A.Appearance.foreground
-             fontFamily: A.Appearance.fontFamily
-           }
+            Ui.SectionHeader {
+              text: "SOURCES"
+              foreground: A.Appearance.foreground
+            }
 
-           Repeater {
-             model: root.displayAudioStreams
+            Repeater {
+              model: root.displayAudioStreams
 
-             StreamRow {
-               required property var modelData
-               required property int index
-               width: panelColumn.width
-               node: modelData
-               rowIndex: index
-             }
-           }
-         }
-       }
-     }
-   }
- }
+              StreamRow {
+                required property var modelData
+                required property int index
+                width: panelColumn.width
+                node: modelData
+                rowIndex: index
+              }
+            }
+          }
+        }
+      }
+    }
 
- // ---- Reusable inline components ----
+  // ---- Reusable inline components ----
 
  // Device row — cursor target inside the "output" or "input" section.
  // Mouse hover updates the menu cursor at the root; visuals come
@@ -833,7 +804,7 @@ Item {
 
      Text {
        textFormat: Text.PlainText
-       text: deviceRow.section === "output" ? root.sinkGlyph(deviceRow.node) : root.sourceGlyph(deviceRow.node)
+        text: deviceRow.section === "output" ? Model.sinkGlyph(deviceRow.node) : Model.sourceGlyph(deviceRow.node)
        color: A.Appearance.foreground
        font.family: A.Appearance.iconFontFamily
        font.pixelSize: A.Appearance.fontSizeTitle
@@ -844,7 +815,7 @@ Item {
 
      Text {
        textFormat: Text.PlainText
-       text: root.nodeLabel(deviceRow.node)
+        text: Model.nodeLabel(deviceRow.node)
        color: A.Appearance.foreground
        font.family: A.Appearance.fontFamily
        font.pixelSize: A.Appearance.fontSizeBody
@@ -966,16 +937,16 @@ Item {
      }
    }
 
-   MouseArea {
-     anchors.fill: parent
-     hoverEnabled: true
-     acceptedButtons: Qt.NoButton
-     propagateComposedEvents: true
-     onContainsMouseChanged: if (containsMouse) {
-       root.cursorActive = true
-       root.focusSection = "streams"
-       root.selectedIndex = streamRow.rowIndex
-     }
-   }
- }
+    MouseArea {
+      anchors.fill: parent
+      hoverEnabled: true
+      acceptedButtons: Qt.NoButton
+      propagateComposedEvents: true
+       onContainsMouseChanged: if (containsMouse) {
+        root.cursorActive = true
+        root.focusSection = "streams"
+        root.selectedIndex = streamRow.rowIndex
+      }
+    }
+  }
 }

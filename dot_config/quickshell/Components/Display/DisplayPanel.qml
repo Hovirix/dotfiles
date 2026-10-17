@@ -18,12 +18,6 @@ Item {
     readonly property var selectedOutput: selectedIndex >= 0 && selectedIndex < display.outputs.length
         ? display.outputs[selectedIndex] : null
 
-    function open() {
-        controller.toggle("display")
-        if (controller.current === "display")
-            display.refresh()
-    }
-
     function moveCursor(delta) {
         if (display.outputs.length === 0)
             return
@@ -211,23 +205,16 @@ Item {
             Repeater {
                 model: parent.parent.shownOptions
 
-                Item {
+                Ui.SelectRow {
                     required property string modelData
                     required property int index
                     readonly property int optionNumber: parent.parent.start + index
 
                     width: parent.width
                     height: A.Appearance.rowHeight
+                    hasCursor: root.optionIndex === optionNumber
+                    contentPadding: 0
 
-                    Rectangle {
-                        anchors.fill: parent
-                        color: root.optionIndex === optionNumber
-                            ? Qt.rgba(A.Appearance.selection.r, A.Appearance.selection.g, A.Appearance.selection.b, 0.3) : "transparent"
-
-                        Behavior on color {
-                            ColorAnimation { duration: A.Appearance.durationFast }
-                        }
-                    }
                     Text {
                         anchors.left: parent.left
                         anchors.leftMargin: A.Appearance.space3
@@ -337,18 +324,17 @@ Item {
         }
     }
 
-    Ui.Popup {
-        shown: root.controller.current === "display"
-        contentWidth: A.Appearance.popupWidthWorkspace
-        contentHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
-        onCloseRequested: root.controller.close()
-        onVisibleChanged: if (visible) {
-            root.selectedIndex = 0
-            root.cursorActive = false
-            root.editingSetting = false
-            root.focusArea = "outputs"
-            Qt.callLater(function() { keyCatcher.forceActiveFocus() })
-        }
+    // Content for the shared menu window (see BatteryPanel for the contract).
+    readonly property int menuWidth: A.Appearance.popupWidthWorkspace
+    readonly property int menuHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
+
+    function focusMenu(): void {
+        root.selectedIndex = 0
+        root.cursorActive = false
+        root.editingSetting = false
+        root.focusArea = "outputs"
+        Qt.callLater(function() { keyCatcher.forceActiveFocus() })
+    }
 
         Ui.KeyCatcher {
             id: keyCatcher
@@ -456,7 +442,6 @@ Item {
                 Ui.SectionHeader {
                     text: "OUTPUTS"
                     foreground: A.Appearance.foreground
-                    fontFamily: A.Appearance.fontFamily
                 }
 
                 Text {
@@ -487,7 +472,6 @@ Item {
                 Ui.SectionHeader {
                     text: "SETTINGS"
                     foreground: A.Appearance.foreground
-                    fontFamily: A.Appearance.fontFamily
                 }
 
                 Column {
@@ -535,5 +519,4 @@ Item {
                 }
             }
         }
-    }
 }

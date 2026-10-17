@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Mistral
+Exec=chromium --app=https://chat.mistral.ai/work
+Icon=mistral
+Terminal=false
