@@ -10,7 +10,7 @@ exec_once = [
     "quickshell --daemonize --no-duplicate",
     "chatgpt",
     "chromium",
-    # "chromium --app=https://app.notion.com",
+    "chromium --app=https://app.notion.com",
 ]
 
 # Input devices
@@ -28,7 +28,7 @@ trackpad_accel_speed = 1.0
 
 # Misc
 xwayland_persistence = 0
-allow_shortcuts_inhibit = 0
+# allow_shortcuts_inhibit = 0
 focus_cross_monitor = 1
 no_border_when_single = 1
 idle_inhibit_ignore_visible = 1
@@ -91,6 +91,11 @@ app_id = "(?i).*virt-manager.*"
 tags = 2
 monitor = "eDP-1"
 app_id = "(?i).*qemu.*"
+
+[[rule.window_rule]]
+tags = 2
+monitor = "eDP-1"
+app_id = "(?i).*thunderbird.*"
 
 [[rule.window_rule]]
 tags = 3
@@ -207,19 +212,12 @@ monitor_name = "DP-2"
 "SUPER+BackSpace" = "toggle_named_scratchpad,^foot-scratchpad$,none,foot --app-id foot-scratchpad"
 
 # Quickshell
-"SUPER+a" = "spawn,quickshell ipc call shell audio"
-"SUPER+c" = "spawn,quickshell ipc call shell clock"
-"SUPER+e" = "spawn,quickshell ipc call shell emoji"
-"SUPER+p" = "spawn,quickshell ipc call shell battery"
-"SUPER+d" = "spawn,quickshell ipc call shell display"
-"SUPER+R" = "spawn,quickshell ipc call shell launcher"
-"SUPER+o" = "spawn,quickshell ipc call shell openRecent"
+"SUPER+space" = "spawn,quickshell ipc call shell menu"
 
 # Scripts
-"SUPER+i" = "spawn,swayidle-toogle"
-"SUPER+s" = "spawn,screenshot"
-"SUPER+SHIFT+s" = "spawn,screenshot --save"
-"SUPER+space" = "spawn,keyboard-layout-toggle"
+"SUPER+i" = "spawn,hx-idle-toggle"
+"SUPER+s" = "spawn,hx-screenshot"
+"SUPER+SHIFT+s" = "spawn,hx-screenshot --save"
 
 # Brightness
 "XF86MonBrightnessUp" = "spawn,quickshell ipc call shell brightnessUp"
@@ -255,4 +253,4 @@ monitor_name = "DP-2"
 "SUPER+btn_right" = "moveresize,curresize"
 
 [switchbind.default]
-fold = "spawn_shell,swaylock -f && systemctl suspend"
+fold = "spawn,hx-suspend"

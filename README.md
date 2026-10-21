@@ -67,6 +67,12 @@ Powered by Mango and modern Rust/C tools.
 | Media        | YouTube desktop client | [FreeTube](https://github.com/FreeTubeApp/FreeTube)     | ![][ts]  |
 | Productivity | Document / PDF viewer  | [zathura](https://github.com/pwmt/zathura)              |  ![][c]  |
 
+## Omarchy attribution
+
+The Quickshell UI incorporates code and design from [Omarchy's quattro branch](https://github.com/omacom/omarchy/tree/quattro), copyright (c) David Heinemeier Hansson, under the [MIT license](dot_config/quickshell/Ui/OMARCHY-LICENSE).
+
+Adapted components include the menu and search model, application search, emoji picker and catalog, filter input, pointer handling, cursor surfaces, section headers, separators, switches, sliders, and OSD. The Catppuccin theme uses a peach accent, JetBrains Mono text, and separate Nerd Font glyphs; desktop actions are integrated with Mango rather than Omarchy's runtime scripts.
+
 <!-- Language badges -->
 
 [rs]: https://img.shields.io/badge/-rust-orange

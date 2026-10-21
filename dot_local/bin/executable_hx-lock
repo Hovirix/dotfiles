@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+: "${XDG_RUNTIME_DIR:?hx-lock requires a user session}"
+# Serialize lock requests; -f returns only after swaylock has secured the session.
+exec flock -x -o "$XDG_RUNTIME_DIR/hx-lock.lock" sh -c '
+    pgrep -u "$(id -u)" -x swaylock >/dev/null 2>&1 ||
+        swaylock --ignore-empty-password --daemonize
+'

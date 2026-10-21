@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+hx-lock
+exec systemctl suspend

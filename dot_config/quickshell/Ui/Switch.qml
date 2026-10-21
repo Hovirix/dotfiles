@@ -1,65 +1,64 @@
 import QtQuick
 import "../Appearance" as A
 
-// Bare on/off switch, Lyra square geometry. The caller owns the value:
+// The caller owns the value:
 // bind `checked` to real state and flip it in response to `toggled()`.
 Item {
     id: root
 
     property bool checked: false
     property bool hasCursor: false
-
-    signal toggled()
-    signal hovered(bool isHovered)
-
     readonly property bool hot: hasCursor || mouse.containsMouse
+    property int knobInset: Math.max(1, Math.round((trackHeight - knobSize) / 2))
+    property int knobSize: Math.max(6, Math.round(trackHeight * 0.72))
+    readonly property bool mirrored: LayoutMirroring.enabled
+    property int trackHeight: A.Appearance.switchHeight
+    property int trackWidth: Math.round(trackHeight * 1.9)
 
-    property int trackWidth: 32
-    property int trackHeight: 18
-    property int knobSize: 12
-    property int knobInset: 3
+    signal hovered(bool isHovered)
+    signal toggled
 
-    implicitWidth: trackWidth
-    implicitHeight: trackHeight
+    implicitHeight: trackHeight + A.Appearance.space15 * 2
+    implicitWidth: trackWidth + A.Appearance.space15 * 2
 
     Rectangle {
         anchors.fill: parent
-        visible: root.hot
+        border.color: A.Appearance.cursorBorder
+        border.width: A.Appearance.borderWidth
         color: "transparent"
         radius: A.Appearance.radius
-        border.width: A.Appearance.borderWidth
-        border.color: A.Appearance.primary
+        visible: root.hot
     }
 
     Rectangle {
         id: track
 
-        width: root.trackWidth
-        height: root.trackHeight
         anchors.centerIn: parent
+        border.color: A.Appearance.normalBorder
+        border.width: root.checked ? 0 : A.Appearance.borderWidth
+        color: root.checked ? A.Appearance.currentFill : A.Appearance.normalFill
+        height: root.trackHeight
         radius: A.Appearance.radius
-        color: root.checked ? A.Appearance.primary : A.Appearance.border
-        border.width: A.Appearance.borderWidth
-        border.color: root.checked ? A.Appearance.primary : A.Appearance.border
+        width: root.trackWidth
 
         Behavior on color {
             ColorAnimation {
-                duration: A.Appearance.durationFast
+                duration: A.Appearance.durationControl
                 easing.type: A.Appearance.easingOut
             }
         }
 
         Rectangle {
-            width: root.knobSize
+            anchors.verticalCenter: parent.verticalCenter
+            color: root.checked ? A.Appearance.foreground : Qt.darker(A.Appearance.foreground, 1.25)
             height: root.knobSize
             radius: A.Appearance.radius
-            x: root.checked ? track.width - width - root.knobInset : root.knobInset
-            anchors.verticalCenter: parent.verticalCenter
-            color: root.checked ? A.Appearance.primaryForeground : A.Appearance.foreground
+            width: root.knobSize
+            x: root.checked !== root.mirrored ? track.width - width - root.knobInset : root.knobInset
 
             Behavior on x {
                 NumberAnimation {
-                    duration: A.Appearance.durationFast
+                    duration: A.Appearance.durationControl
                     easing.type: A.Appearance.easingOut
                 }
             }
@@ -70,9 +69,10 @@ Item {
         id: mouse
 
         anchors.fill: parent
-        hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onContainsMouseChanged: root.hovered(containsMouse)
+        hoverEnabled: true
+
         onClicked: root.toggled()
+        onContainsMouseChanged: root.hovered(containsMouse)
     }
 }

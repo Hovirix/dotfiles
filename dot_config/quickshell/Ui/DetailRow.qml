@@ -9,32 +9,26 @@ Item {
     property string label: ""
     property string value: ""
 
-    implicitHeight: A.Appearance.rowHeight
     height: implicitHeight
+    implicitHeight: A.Appearance.rowHeight
 
     // Fixed icon column.
     Item {
         id: iconBox
 
-        width: A.Appearance.iconColumnWidth
-        height: parent.height
-
         anchors.left: parent.left
+        height: parent.height
+        width: A.Appearance.iconColumnWidth
 
         Text {
             anchors.centerIn: parent
-
-            text: root.icon
-
             color: A.Appearance.mutedForeground
-
             font.family: A.Appearance.iconFontFamily
             font.pixelSize: A.Appearance.iconSize
             font.weight: Font.Normal
-
-            renderType: Text.NativeRendering
-
             horizontalAlignment: Text.AlignHCenter
+            renderType: Text.NativeRendering
+            text: root.icon
             verticalAlignment: Text.AlignVCenter
         }
     }
@@ -44,33 +38,24 @@ Item {
         anchors.left: iconBox.right
         anchors.leftMargin: A.Appearance.iconLabelGap
         anchors.verticalCenter: parent.verticalCenter
-
-        text: root.label
-
         color: A.Appearance.mutedForeground
-
         font.family: A.Appearance.fontFamily
         font.pixelSize: A.Appearance.fontSizeBody
         font.weight: A.Appearance.fontWeightNormal
-
         renderType: Text.NativeRendering
+        text: root.label
     }
 
     // Value.
     Text {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-
-        text: root.value
-
         color: A.Appearance.foreground
-
         font.family: A.Appearance.fontFamily
         font.pixelSize: A.Appearance.fontSizeBody
         font.weight: A.Appearance.fontWeightNormal
-
-        renderType: Text.NativeRendering
-
         horizontalAlignment: Text.AlignRight
+        renderType: Text.NativeRendering
+        text: root.value
     }
 }

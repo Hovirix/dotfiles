@@ -6,29 +6,31 @@ Item {
 
     property var items: []
 
-    function remove(notification) {
-        items = items.filter(function(item) { return item !== notification })
+    function remove(notification: Notification): void {
+        items = items.filter(function (item) {
+            return item !== notification;
+        });
     }
 
     NotificationServer {
         actionsSupported: true
-        bodySupported: true
-        bodyMarkupSupported: true
         bodyHyperlinksSupported: true
+        bodyMarkupSupported: true
+        bodySupported: true
         imageSupported: true
-        persistenceSupported: true
         keepOnReload: false
+        persistenceSupported: true
 
-        onNotification: function(notification) {
-            notification.tracked = true
-            root.items = [notification].concat(root.items.filter(function(item) {
-                return item !== notification
-            }))
+        onNotification: function (notification) {
+            notification.tracked = true;
+            root.items = [notification].concat(root.items.filter(function (item) {
+                return item !== notification;
+            }));
 
             while (root.items.length > 5) {
-                var oldest = root.items[root.items.length - 1]
-                root.items = root.items.slice(0, root.items.length - 1)
-                oldest.expire()
+                var oldest = root.items[root.items.length - 1];
+                root.items = root.items.slice(0, root.items.length - 1);
+                oldest.expire();
             }
         }
     }

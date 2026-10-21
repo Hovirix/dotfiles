@@ -1,16 +1,16 @@
 import QtQuick
 import "../Appearance" as A
 
-// Lyra progress track: muted track, square fill.
+// Shared progress track.
 Item {
     id: root
 
-    property real value: 0
-    property color fillColor: A.Appearance.primary
     property int barHeight: A.Appearance.progressHeight
+    property color fillColor: A.Appearance.primary
+    property real value: 0
 
-    implicitHeight: barHeight
     height: implicitHeight
+    implicitHeight: barHeight
 
     Rectangle {
         anchors.fill: parent
@@ -19,10 +19,10 @@ Item {
     }
 
     Rectangle {
-        width: parent.width * Math.max(0, Math.min(1, root.value))
-        height: parent.height
         color: root.fillColor
+        height: parent.height
         radius: A.Appearance.radius
+        width: parent.width * Math.max(0, Math.min(1, root.value))
 
         Behavior on width {
             NumberAnimation {

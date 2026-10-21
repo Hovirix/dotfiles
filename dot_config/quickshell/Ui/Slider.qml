@@ -1,53 +1,52 @@
 import QtQuick
 import "../Appearance" as A
 
-// Lyra volume slider: thin track, square fill, compact square knob.
 // Left-drag moves, wheel steps, right-click is the caller's secondary
 // action (audio uses it to mute the channel).
 Item {
     id: root
 
-    property real value: 0
-    property real minimum: 0
-    property real maximum: 1
-    property real step: 0.05
+    property real dragValue: 0
     property bool dragging: false
-    property real liveValue: value
+    readonly property bool hot: mouseArea.containsMouse || root.dragging
+    readonly property real knobSize: A.Appearance.sliderKnobSize
+    readonly property real liveValue: dragging ? dragValue : value
+    property real maximum: 1
+    property real minimum: 0
+    readonly property bool mirrored: LayoutMirroring.enabled
+    readonly property real progress: Math.max(0, Math.min(1, (liveValue - minimum) / range))
+    readonly property real range: Math.max(0.0001, maximum - minimum)
+    property real step: 0.05
+    property real value: 0
 
     signal moved(real value)
-    signal rightClicked()
+    signal rightClicked
 
-    implicitWidth: 200
-    implicitHeight: 22
-
-    onValueChanged: if (!dragging) liveValue = value
-
-    readonly property real range: Math.max(0.0001, maximum - minimum)
-    readonly property real progress: Math.max(0, Math.min(1, (liveValue - minimum) / range))
-    readonly property bool hot: mouseArea.containsMouse || root.dragging
-    readonly property real knobSize: 10
+    implicitHeight: A.Appearance.sliderHeight
+    implicitWidth: A.Appearance.sliderWidth
 
     Rectangle {
         id: track
 
-        anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        color: A.Appearance.currentFill
         height: A.Appearance.progressHeight
-        radius: A.Appearance.radius
-        color: A.Appearance.muted
+        radius: height / 2
     }
 
     Rectangle {
-        anchors.verticalCenter: track.verticalCenter
         anchors.left: track.left
+        anchors.verticalCenter: track.verticalCenter
+        color: A.Appearance.foreground
         height: track.height
-        radius: A.Appearance.radius
-        color: A.Appearance.primary
+        radius: track.radius
         width: track.width * root.progress
 
         Behavior on width {
             enabled: !root.dragging
+
             NumberAnimation {
                 duration: A.Appearance.durationFast
                 easing.type: A.Appearance.easingOut
@@ -56,15 +55,24 @@ Item {
     }
 
     Rectangle {
-        width: root.knobSize
-        height: root.knobSize
-        radius: A.Appearance.radius
-        color: root.hot ? A.Appearance.primary : A.Appearance.foreground
         anchors.verticalCenter: track.verticalCenter
-        x: Math.max(0, Math.min(track.width - width, track.width * root.progress - width / 2))
+        border.color: A.Appearance.popover
+        border.width: A.Appearance.popupBorderWidth
+        color: A.Appearance.foreground
+        height: root.knobSize
+        radius: height / 2
+        scale: root.hot ? 1.15 : 1
+        width: root.knobSize
+        x: Math.max(0, Math.min(track.width - width, track.width * (root.mirrored ? 1 - root.progress : root.progress) - width / 2))
 
+        Behavior on scale {
+            NumberAnimation {
+                duration: A.Appearance.durationControl
+            }
+        }
         Behavior on x {
             enabled: !root.dragging
+
             NumberAnimation {
                 duration: A.Appearance.durationFast
                 easing.type: A.Appearance.easingOut
@@ -75,46 +83,44 @@ Item {
     MouseArea {
         id: mouseArea
 
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+        function valueFromX(x: real): real {
+            var clamped = Math.max(0, Math.min(track.width, root.mirrored ? track.width - x : x));
+            return track.width > 0 ? Math.max(root.minimum, Math.min(root.maximum, root.minimum + clamped / track.width * root.range)) : root.minimum;
+        }
+
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
 
-        function valueFromX(x) {
-            var clamped = Math.max(0, Math.min(track.width, x))
-            return Math.max(root.minimum, Math.min(root.maximum, root.minimum + clamped / track.width * root.range))
-        }
-
-        onPressed: function(mouse) {
-            if (mouse.button !== Qt.LeftButton)
-                return
-            root.dragging = true
-            var next = valueFromX(mouse.x)
-            root.liveValue = next
-            root.moved(next)
-        }
-        onClicked: function(mouse) {
+        onClicked: function (mouse) {
             if (mouse.button === Qt.RightButton)
-                root.rightClicked()
+                root.rightClicked();
         }
-        onPositionChanged: function(mouse) {
+        onPositionChanged: function (mouse) {
             if (!root.dragging)
-                return
-            var next = valueFromX(mouse.x)
-            root.liveValue = next
-            root.moved(next)
+                return;
+            var next = valueFromX(mouse.x);
+            root.dragValue = next;
+            root.moved(next);
         }
-        onReleased: function(mouse) {
+        onPressed: function (mouse) {
             if (mouse.button !== Qt.LeftButton)
-                return
-            root.dragging = false
-            root.liveValue = root.value
+                return;
+            root.dragging = true;
+            var next = valueFromX(mouse.x);
+            root.dragValue = next;
+            root.moved(next);
         }
-        onWheel: function(wheel) {
-            var delta = wheel.angleDelta.y > 0 ? root.step : -root.step
-            var next = Math.max(root.minimum, Math.min(root.maximum, root.liveValue + delta))
-            root.liveValue = next
-            root.moved(next)
+        onReleased: function (mouse) {
+            if (mouse.button !== Qt.LeftButton)
+                return;
+            root.dragging = false;
+        }
+        onWheel: function (wheel) {
+            var delta = wheel.angleDelta.y > 0 ? root.step : -root.step;
+            var next = Math.max(root.minimum, Math.min(root.maximum, root.liveValue + delta));
+            root.moved(next);
         }
     }
 }

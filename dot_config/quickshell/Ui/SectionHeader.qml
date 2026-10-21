@@ -3,13 +3,13 @@ import "../Appearance" as A
 
 // Small-caps-style label introducing a menu section.
 Text {
-    property color foreground: A.Appearance.mutedForeground
+    property color foreground: A.Appearance.foreground
 
-    textFormat: Text.PlainText
-    color: foreground
+    color: Qt.darker(foreground, 1.4)
+    font.bold: true
     font.family: A.Appearance.fontFamily
-    font.pixelSize: A.Appearance.fontSizeBody
-    font.weight: A.Appearance.fontWeightMedium
-
+    font.pixelSize: A.Appearance.fontSizeCaption
     renderType: Text.NativeRendering
+    textFormat: Text.PlainText
+    topPadding: Math.ceil(font.pixelSize * 0.15)
 }

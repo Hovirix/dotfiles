@@ -4,27 +4,25 @@ import Quickshell.Services.Pipewire
 QtObject {
     id: root
 
-    readonly property var output: Pipewire.defaultAudioSink
-    readonly property real outputVolume: output && output.audio ? output.audio.volume : 0
+    readonly property PwNode output: Pipewire.defaultAudioSink
     readonly property bool outputMuted: output && output.audio ? output.audio.muted : false
-
-    property var outputTracker: PwObjectTracker {
+    property PwObjectTracker outputTracker: PwObjectTracker {
         objects: [root.output]
     }
+    readonly property real outputVolume: output && output.audio ? output.audio.volume : 0
 
     function toggleMute(): void {
         if (output && output.audio)
-            output.audio.muted = !output.audio.muted
-    }
-
-    function volumeUp(): void {
-        if (output && output.audio)
-            output.audio.volume = Math.max(0, Math.min(1, output.audio.volume + 0.02))
+            output.audio.muted = !output.audio.muted;
     }
 
     function volumeDown(): void {
         if (output && output.audio)
-            output.audio.volume = Math.max(0, Math.min(1, output.audio.volume - 0.02))
+            output.audio.volume = Math.max(0, Math.min(1, output.audio.volume - 0.02));
     }
 
+    function volumeUp(): void {
+        if (output && output.audio)
+            output.audio.volume = Math.max(0, Math.min(1, output.audio.volume + 0.02));
+    }
 }
