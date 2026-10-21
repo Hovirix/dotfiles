@@ -4,3 +4,4 @@ Name=Notion
 Exec=chromium --app=https://app.notion.com
 Icon=notion
 Terminal=false
+StartupWMClass=chrome-app.notion.com__-Default
