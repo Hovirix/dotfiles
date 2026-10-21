@@ -12,4 +12,8 @@ version_check = false
 [ui]
 pane_gaps = false
 pane_scrollbars = false
+prompt_new_tab_name = false
 accent = "#fab387"
+
+[ui.toast]
+delivery = "terminal"

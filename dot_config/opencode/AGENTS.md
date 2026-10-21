@@ -1,0 +1,5 @@
+- No verbosity.
+- No explanations.
+- Run only tests relevant to the change.
+- If an idea or implementation conflicts with the repository philosophy, stop and push back.
+- Ask questions when the problem statement is unclear.

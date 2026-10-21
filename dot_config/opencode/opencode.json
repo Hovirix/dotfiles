@@ -1,5 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "policies": [
+    {
+      "action": "provider.use",
+      "resource": "opencode",
+      "effect": "deny"
+    }
+  ],
   "plugins": [
     "@dietrichgebert/ponytail"
   ]
