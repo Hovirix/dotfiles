@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Resend
+Exec=chromium --app=https://resend.com/inboxes
+Icon=resend
+Terminal=false
