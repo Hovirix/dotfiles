@@ -31,19 +31,6 @@ select_alt = { fg = "#f38ba8", bg = "#313244" }
 unset_main = { fg = "#1e1e2e", bg = "#f2cdcd", bold = true }
 unset_alt = { fg = "#f2cdcd", bg = "#313244" }
 
-[status]
-# Permissions
-perm_sep = { fg = "#7f849c" }
-perm_type = { fg = "#fab387" }
-perm_read = { fg = "#f9e2af" }
-perm_write = { fg = "#f38ba8" }
-perm_exec = { fg = "#a6e3a1" }
-
-# Progress
-progress_label = { fg = "#ffffff", bold = true }
-progress_normal = { fg = "#a6e3a1", bg = "#45475a" }
-progress_error = { fg = "#f9e2af", bg = "#f38ba8" }
-
 [pick]
 border = { fg = "#fab387" }
 active = { fg = "#f5c2e7", bold = true }
