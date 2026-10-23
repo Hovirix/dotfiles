@@ -31,6 +31,10 @@
 .config/quickshell/Ui/Hero.qml
 .config/quickshell/Ui/Surface.qml
 .config/quickshell/Ui/Progress.qml
+.config/quickshell/ui/PointerGate.qml
+.config/quickshell/ui/IconButton.qml
+.config/quickshell/ui/Slider.qml
+.config/quickshell/ui/Switch.qml
 .config/quickshell/Appearance/qmldir
 .config/quickshell/Appearance/Appearance.qml
 .config/quickshell/Ui/Popup.qml

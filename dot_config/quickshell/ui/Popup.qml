@@ -3,9 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import ".."
 
-// Native layer-shell centered popup. Transparent full-screen surface that
-// catches outside clicks to dismiss; the card swallows its own clicks.
-// No compositor window rules needed.
+// Keyboard-only layer-shell popup; the empty input region passes pointing events through.
 PanelWindow {
     id: root
 
@@ -47,19 +45,14 @@ PanelWindow {
     screen: Quickshell.screens[0]
     visible: loader.sourceComponent !== null
 
+    mask: Region {
+    }
+
     anchors {
         bottom: true
         left: true
         right: true
         top: true
-    }
-
-    // Outside clicks dismiss. Disabled while hidden with the window.
-    MouseArea {
-        acceptedButtons: Qt.AllButtons
-        anchors.fill: parent
-
-        onClicked: root.close()
     }
 
     Rectangle {
@@ -79,12 +72,6 @@ PanelWindow {
         width: Math.min(root.contentWidth, root.screenW - (root.menuStyle ? Theme.menuScreenMargin : Theme.dialogPadding) * 2)
         x: Math.round((root.screenW - width) / 2)
         y: root.contentTop >= 0 ? root.contentTop : Math.round((root.screenH - height) / 2)
-
-        // Swallow card clicks so they never reach the dismiss area.
-        MouseArea {
-            acceptedButtons: Qt.AllButtons
-            anchors.fill: parent
-        }
 
         Loader {
             id: loader

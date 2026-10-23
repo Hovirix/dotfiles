@@ -16,16 +16,13 @@ Ui.Panel {
     property bool cursorActive: false
 
     // Native models and their lifetime guards belong to the service.
-    // Single cursor model shared by keyboard and mouse. Sections:
+
     //   "output"  — output slider + audio.output device list
     //   "input"   — input slider + audio.source device list
     //   "streams" — per-app playback streams
     // selectedIndex semantics within a section:
     //   -1            → on the slider row (h/l adjusts volume, m/Enter mute)
     //   0..N-1        → on the Nth device/stream row
-    // Visuals derive from hasCursor/current via SelectRow, never
-    // from containsMouse — that's what keeps the highlight unique across
-    // keyboard + mouse.
     property string focusSection: "output"
     // The hero switch mirrors the output mute only. It used to track
     // output+input combined, which left it stuck on whenever the mic stayed
@@ -278,12 +275,6 @@ Ui.Panel {
         return false;
     }
 
-    function setHeaderCursor(): void {
-        cursorActive = true;
-        focusSection = "header";
-        selectedIndex = -1;
-    }
-
     function toggleFocusedMute(): void {
         if (focusSection === "streams" && selectedIndex >= 0 && selectedIndex < audio.displayAudioStreams.length) {
             var stream = audio.displayAudioStreams[selectedIndex];
@@ -362,7 +353,6 @@ Ui.Panel {
                     implicitHeight: Math.max(heroIcon.implicitHeight, heroLabels.implicitHeight, powerSwitch.implicitHeight)
                     width: parent.width
 
-                    // Status only — the switch owns muting, mouse and keyboard alike.
                     Controls.Label {
                         id: heroIcon
 
@@ -377,19 +367,13 @@ Ui.Panel {
 
                     // Compact on/off switch on the trailing edge of the hero, and the
                     // header's only cursor target. Checked means output is audible.
-                    Ui.Switch {
+                    Ui.ToggleIndicator {
                         id: powerSwitch
 
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         checked: root.hasOutput && !audio.outputMuted
                         hasCursor: root.headerHasCursor
-
-                        onHovered: function (on) {
-                            if (on)
-                                root.setHeaderCursor();
-                        }
-                        onToggled: audio.toggleMute()
                     }
 
                     Column {
@@ -418,7 +402,7 @@ Ui.Panel {
                             font.bold: true
                             font.letterSpacing: 1.2
                             font.pixelSize: Theme.fontSizeBody
-                            text: Utils.outputVolumeName(outputSlider.dragging ? outputSlider.liveValue : audio.outputVolume, audio.outputMuted).toUpperCase()
+                            text: Utils.outputVolumeName(audio.outputVolume, audio.outputMuted).toUpperCase()
                             textFormat: Text.PlainText
                             width: parent.width
                         }
@@ -456,7 +440,7 @@ Ui.Panel {
                             font.bold: true
                             font.pixelSize: Theme.fontSizeBody
                             opacity: audio.outputMuted ? 0.5 : 1.0
-                            text: Math.round((outputSlider.dragging ? outputSlider.liveValue : audio.outputVolume) * 100) + "%"
+                            text: Math.round((audio.outputVolume) * 100) + "%"
                             textFormat: Text.PlainText
                         }
                     }
@@ -478,7 +462,7 @@ Ui.Panel {
                             anchors.fill: parent
                             implicitHeight: outputSlider.implicitHeight
 
-                            Ui.Slider {
+                            Ui.Level {
                                 id: outputSlider
 
                                 anchors.left: parent.left
@@ -489,13 +473,7 @@ Ui.Panel {
                                 maximum: 1
                                 minimum: 0
                                 opacity: audio.outputMuted ? 0.5 : 1.0
-                                step: 0.02
                                 value: audio.outputVolume
-
-                                onMoved: function (v) {
-                                    audio.setOutputVolume(v);
-                                }
-                                onRightClicked: audio.toggleMute()
                             }
 
                             // Output level meter docked under the slider so this row
@@ -520,14 +498,6 @@ Ui.Panel {
                                         }
                                     }
                                 }
-                            }
-                        }
-
-                        HoverHandler {
-                            onHoveredChanged: if (hovered) {
-                                root.cursorActive = true;
-                                root.focusSection = "output";
-                                root.selectedIndex = -1;
                             }
                         }
                     }
@@ -580,7 +550,7 @@ Ui.Panel {
                             font.bold: true
                             font.pixelSize: Theme.fontSizeBody
                             opacity: audio.inputMuted ? 0.5 : 1.0
-                            text: Math.round((inputSlider.dragging ? inputSlider.liveValue : audio.inputVolume) * 100) + "%"
+                            text: Math.round((audio.inputVolume) * 100) + "%"
                             textFormat: Text.PlainText
                         }
                     }
@@ -603,7 +573,7 @@ Ui.Panel {
                             anchors.fill: parent
                             implicitHeight: inputSlider.implicitHeight
 
-                            Ui.Slider {
+                            Ui.Level {
                                 id: inputSlider
 
                                 anchors.left: parent.left
@@ -614,13 +584,7 @@ Ui.Panel {
                                 maximum: 1
                                 minimum: 0
                                 opacity: audio.inputMuted ? 0.5 : 1.0
-                                step: 0.05
                                 value: audio.inputVolume
-
-                                onMoved: function (v) {
-                                    audio.setInputVolume(v);
-                                }
-                                onRightClicked: audio.toggleInputMute()
                             }
 
                             // Mic level meter docked under the slider so this row
@@ -645,14 +609,6 @@ Ui.Panel {
                                         }
                                     }
                                 }
-                            }
-                        }
-
-                        HoverHandler {
-                            onHoveredChanged: if (hovered) {
-                                root.cursorActive = true;
-                                root.focusSection = "input";
-                                root.selectedIndex = -1;
                             }
                         }
                     }
@@ -707,8 +663,7 @@ Ui.Panel {
     // ---- Reusable inline components ----
 
     // Device row — cursor target inside the "output" or "input" section.
-    // Mouse hover updates the menu cursor at the root; visuals come
-    // entirely from hasCursor/current via SelectRow, never from containsMouse.
+
     component DeviceRow: Ui.MenuRow {
         id: deviceRow
 
@@ -755,24 +710,6 @@ Ui.Panel {
                 width: parent.width - Theme.iconColumnWidth - Theme.space2
             }
         }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-
-            onClicked: {
-                if (deviceRow.section === "output")
-                    audio.setDefaultSink(deviceRow.node);
-                else
-                    audio.setDefaultSource(deviceRow.node);
-            }
-            onContainsMouseChanged: if (containsMouse) {
-                root.cursorActive = true;
-                root.focusSection = deviceRow.section;
-                root.selectedIndex = deviceRow.rowIndex;
-            }
-        }
     }
 
     // Per-app stream row — cursor target inside the "streams" section.
@@ -817,16 +754,6 @@ Ui.Panel {
                     text: streamRow.streamMuted ? "󰝟" : "󰕾"
                     textFormat: Text.PlainText
                     width: Theme.iconColumnWidth
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-
-                        onClicked: {
-                            if (streamRow.node && streamRow.node.audio)
-                                audio.toggleStreamMute(streamRow.node);
-                        }
-                    }
                 }
 
                 Controls.Label {
@@ -853,35 +780,12 @@ Ui.Panel {
                 }
             }
 
-            Ui.Slider {
+            Ui.Level {
                 maximum: 1.5
                 minimum: 0
                 opacity: streamRow.streamMuted ? 0.5 : 1.0
-                step: 0.05
                 value: streamRow.streamVolume
                 width: parent.width
-
-                onMoved: function (v) {
-                    if (streamRow.node && streamRow.node.audio)
-                        audio.setStreamVolume(streamRow.node, v);
-                }
-                onRightClicked: {
-                    if (streamRow.node && streamRow.node.audio)
-                        audio.toggleStreamMute(streamRow.node);
-                }
-            }
-        }
-
-        MouseArea {
-            acceptedButtons: Qt.NoButton
-            anchors.fill: parent
-            hoverEnabled: true
-            propagateComposedEvents: true
-
-            onContainsMouseChanged: if (containsMouse) {
-                root.cursorActive = true;
-                root.focusSection = "streams";
-                root.selectedIndex = streamRow.rowIndex;
             }
         }
     }

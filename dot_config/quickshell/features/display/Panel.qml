@@ -315,7 +315,6 @@ Ui.Panel {
     }
 
     // Compact viewport over long mode lists. h/l moves the highlighted value;
-    // clicking a value applies it immediately.
     component OptionMenu: Rectangle {
         id: menu
 
@@ -400,13 +399,6 @@ Ui.Panel {
                         text: "󰄬"
                         visible: root.optionIndex === optionRow.optionNumber
                     }
-
-                    TapHandler {
-                        onTapped: {
-                            root.optionIndex = optionRow.optionNumber;
-                            root.applySetting();
-                        }
-                    }
                 }
             }
         }
@@ -461,28 +453,13 @@ ${outputRow.output.refresh || ""}${outputRow.rowIndex === 0 ? " · " + qsTr("Pri
             }
         }
 
-        Ui.Switch {
+        Ui.ToggleIndicator {
             id: outputSwitch
 
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             checked: outputRow.output.enabled
             hasCursor: outputRow.hasCursor
-
-            onHovered: function (on) {
-                if (on) {
-                    root.cursorActive = true;
-                    root.selectedIndex = outputRow.rowIndex;
-                }
-            }
-            onToggled: root.display.toggleOutput(outputRow.output)
-        }
-
-        HoverHandler {
-            onHoveredChanged: if (hovered) {
-                root.cursorActive = true;
-                root.selectedIndex = outputRow.rowIndex;
-            }
         }
     }
     component SettingRow: Ui.MenuRow {

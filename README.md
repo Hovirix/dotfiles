@@ -78,15 +78,6 @@ Powered by Mango and modern Rust/C tools.
 
 Remove a feature's folder and its references in `shell.qml` together. Keep feature-specific logic inside its folder; bind native Quickshell models directly instead of copying them.
 
-Checks (inside a running Wayland session):
-
-```sh
-dbus-run-session -- python3 .opencode/tests/shell.py
-dbus-run-session -- quickshell -p .opencode/tests/notifications.qml
-```
-
-The shell check briefly opens each panel. Tests use a separate notification bus and do not change volume, brightness or monitor settings.
-
 ## Omarchy attribution
 
 The Quickshell UI incorporates code and design from [Omarchy's quattro branch](https://github.com/omacom/omarchy/tree/quattro), copyright (c) David Heinemeier Hansson, under the [MIT license](https://github.com/omacom/omarchy/blob/quattro/LICENSE).

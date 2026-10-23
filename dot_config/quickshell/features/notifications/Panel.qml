@@ -20,6 +20,9 @@ PanelWindow {
     screen: Quickshell.screens[0]
     visible: notifications.trackedNotifications.values.length > 0
 
+    mask: Region {
+    }
+
     Column {
         id: stack
 
@@ -34,8 +37,6 @@ PanelWindow {
 
                 notification: modelData
                 width: stack.width
-
-                onActivated: window.notifications.activate(notification)
             }
         }
     }

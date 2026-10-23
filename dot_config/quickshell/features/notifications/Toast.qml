@@ -11,8 +11,6 @@ Ui.Panel {
 
     required property Notification notification
 
-    signal activated
-
     implicitHeight: card.implicitHeight
 
     Rectangle {
@@ -92,20 +90,6 @@ Ui.Panel {
                 visible: text !== ""
                 width: parent.width
                 wrapMode: Text.Wrap
-            }
-        }
-
-        MouseArea {
-            acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            z: -1
-
-            onClicked: function (mouse) {
-                if (mouse.button === Qt.MiddleButton)
-                    root.notification.dismiss();
-                else
-                    root.activated();
             }
         }
     }

@@ -58,7 +58,7 @@ Ui.Panel {
     readonly property int rowsHeight: Utils.foldedListHeight(rowTotals, availableRowsHeight, Theme.menuRowGap, rowPeek, Theme.menuRowHeight)
     property int selectedIndex: 0
 
-    function activate(fromPointer: bool): void {
+    function activate(): void {
         var row = results[selectedIndex];
         if (!row)
             return;
@@ -72,7 +72,7 @@ Ui.Panel {
             controller.activate("emoji");
         } else if (Utils.isSubmenu(row.id)) {
             history = history.concat([category]);
-            enter(row.id, fromPointer);
+            enter(row.id);
         } else {
             controller.activate(row.id);
         }
@@ -85,18 +85,15 @@ Ui.Panel {
             return;
         var previous = history.length ? history[history.length - 1] : "root";
         history = history.slice(0, -1);
-        enter(previous, false);
+        enter(previous);
     }
 
-    function enter(id: string, fromPointer: bool): void {
+    function enter(id: string): void {
         freezeCardTop();
         category = id;
         query = "";
         selectedIndex = 0;
-        if (fromPointer)
-            pointerGate.allowInitialSample();
-        else
-            pointerGate.reset();
+
         if (id === "files")
             files.refresh();
         resultList.positionViewAtBeginning();
@@ -123,7 +120,7 @@ Ui.Panel {
         cardTop = -1;
         maxRowsHeight = -1;
         history = [];
-        pointerGate.reset();
+
         if (nextMode === "open")
             files.refresh();
         focusMenu();
@@ -157,21 +154,16 @@ Ui.Panel {
     function select(delta: int): void {
         if (!results.length)
             return;
-        pointerGate.reset();
+
         selectedIndex = ((selectedIndex + delta) % results.length + results.length) % results.length;
         revealCursor();
-    }
-
-    function selectFromPointer(index: int, item: Item, mouse): void {
-        if (pointerGate.moved(item, mouse))
-            selectedIndex = index;
     }
 
     function setQuery(text: string): void {
         freezeCardTop();
         query = text;
         selectedIndex = 0;
-        pointerGate.reset();
+
         resultList.positionViewAtBeginning();
     }
 
@@ -195,12 +187,6 @@ Ui.Panel {
         query: root.query
     }
 
-    Ui.PointerGate {
-        id: pointerGate
-
-        referenceItem: root
-    }
-
     Ui.Navigation {
         id: keys
 
@@ -211,7 +197,7 @@ Ui.Panel {
         textInputEdits: true
         vimNavigation: false
 
-        onActivateRequested: root.activate(false)
+        onActivateRequested: root.activate()
         onBackspaceRequested: root.back()
         onClearTextRequested: root.setQuery("")
         onCloseRequested: root.query ? root.setQuery("") : root.controller.close()
@@ -219,7 +205,7 @@ Ui.Panel {
             if (dy)
                 root.select(dy);
             else if (dx > 0)
-                root.activate(false);
+                root.activate();
             else
                 root.back();
         }
@@ -274,6 +260,7 @@ Ui.Panel {
                     anchors.fill: parent
                     boundsBehavior: Flickable.StopAtBounds
                     clip: true
+                    interactive: false
                     model: root.results
                     spacing: Theme.menuRowGap
 
@@ -366,37 +353,6 @@ Ui.Panel {
                             text: resultRow.submenu ? "›" : ""
                             width: Theme.iconSize
                             y: contentColumn.y + labelText.y + (labelText.height - height) / 2
-                        }
-
-                        MouseArea {
-                            id: mouseArea
-
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
-
-                            onClicked: {
-                                root.selectedIndex = resultRow.index;
-                                root.activate(true);
-                            }
-                            onEntered: root.selectFromPointer(resultRow.index, resultRow, {
-                                x: mouseX,
-                                y: mouseY
-                            })
-                            onPositionChanged: function (mouse) {
-                                root.selectFromPointer(resultRow.index, resultRow, mouse);
-                            }
-                        }
-                    }
-
-                    WheelHandler {
-                        target: null
-
-                        onWheel: function (event) {
-                            var delta = event.pixelDelta.y || event.angleDelta.y / 120 * Theme.menuRowHeight * 3;
-                            var bottom = resultList.originY + Math.max(0, resultList.contentHeight - resultList.height);
-                            resultList.contentY = Math.max(resultList.originY, Math.min(bottom, resultList.contentY - delta));
-                            event.accepted = true;
                         }
                     }
                 }

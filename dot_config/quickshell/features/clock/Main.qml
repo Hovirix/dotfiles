@@ -75,23 +75,11 @@ Scope {
                     RowLayout {
                         Layout.fillWidth: true
 
-                        Ui.IconButton {
-                            text: "󰅁"
-
-                            onClicked: root.changeMonth(-1)
-                        }
-
                         Label {
                             Layout.fillWidth: true
                             font.pixelSize: Theme.fontSizeDisplaySmall
                             horizontalAlignment: Text.AlignHCenter
                             text: Qt.formatDateTime(root.shownMonth, "MMMM yyyy")
-                        }
-
-                        Ui.IconButton {
-                            text: "󰅂"
-
-                            onClicked: root.changeMonth(1)
                         }
                     }
 

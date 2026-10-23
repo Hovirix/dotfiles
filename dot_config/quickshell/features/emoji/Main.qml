@@ -136,6 +136,7 @@ Scope {
                             cellHeight: Theme.emojiCellSize
                             cellWidth: Theme.emojiCellSize
                             clip: true
+                            interactive: false
                             model: emoji.entries
 
                             delegate: Rectangle {
@@ -156,19 +157,6 @@ Scope {
                                     text: cell.modelData ? cell.modelData.e : ""
                                     textFormat: Text.PlainText
                                     verticalAlignment: Text.AlignVCenter
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-
-                                    onClicked: {
-                                        root.selectedIndex = cell.index;
-                                        root.activate();
-                                    }
-                                    onContainsMouseChanged: if (containsMouse)
-                                        root.selectedIndex = cell.index
                                 }
                             }
                         }
