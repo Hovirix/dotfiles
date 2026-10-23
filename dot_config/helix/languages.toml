@@ -137,23 +137,9 @@ args = ["serve"]
 command = "zk"
 args = ["lsp"]
 
-# [language-server.clangd]
-# command = "clangd"
-# args = ["--clang-tidy", "-j=5", "--malloc-trim"]
-
 [language-server.tailwindcss-ls]
 command = "tailwindcss-language-server"
 args = ["--stdio"]
-
-[language-server.ruff]
-command = "ruff"
-args = ["server"]
-
-[language-server.ruff.config.settings]
-show-fixes = true
-target-version = "py313"
-lint = { preview = true }
-format = { docstring-code-format = true, preview = true }
 
 [language-server.rust-analyzer.config]
 check.command = "clippy"
