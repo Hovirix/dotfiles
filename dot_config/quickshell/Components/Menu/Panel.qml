@@ -1,10 +1,13 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import "../Apps" as Apps
+import "../Files" as Files
+import "../Files/utils.js" as FileUtils
 import Quickshell
 import "../../Appearance" as A
 import "../../Ui" as Ui
-import "menu-model.js" as Model
+import "utils.js" as Utils
 
 Item {
     id: root
@@ -25,7 +28,7 @@ Item {
             return files.entries.map(function (path) {
                 return {
                     kind: "file",
-                    label: files.name(path),
+                    label: FileUtils.name(path),
                     path: path
                 };
             });
@@ -38,7 +41,7 @@ Item {
                     path: qsTr("Apps")
                 };
             });
-        return Model.search(query, category, apps.matches);
+        return Utils.search(query, category, apps.matches);
     }
     readonly property int rowPeek: Math.round(A.Appearance.menuRowHeight * 0.55)
     readonly property var rowTotals: {
@@ -51,7 +54,7 @@ Item {
         }
         return totals;
     }
-    readonly property int rowsHeight: Model.foldedListHeight(rowTotals, availableRowsHeight, A.Appearance.menuRowGap, rowPeek, A.Appearance.menuRowHeight)
+    readonly property int rowsHeight: Utils.foldedListHeight(rowTotals, availableRowsHeight, A.Appearance.menuRowGap, rowPeek, A.Appearance.menuRowHeight)
     property int selectedIndex: 0
 
     function activate(fromPointer: bool): void {
@@ -66,7 +69,7 @@ Item {
             controller.close();
         } else if (row.id === "emoji") {
             controller.current = "emoji";
-        } else if (Model.isSubmenu(row.id)) {
+        } else if (Utils.isSubmenu(row.id)) {
             history = history.concat([category]);
             enter(row.id, fromPointer);
         } else {
@@ -171,7 +174,7 @@ Item {
         resultList.positionViewAtBeginning();
     }
 
-    Component.onCompleted: console.assert(Model.selfCheck(), "menu search self-check failed")
+    Component.onCompleted: console.assert(Utils.selfCheck(), "menu search self-check failed")
     onQueryChanged: if (filterInput.text !== query)
         filterInput.text = query
     onResultsChanged: Qt.callLater(function () {
@@ -179,13 +182,13 @@ Item {
         revealCursor();
     })
 
-    Apps {
+    Apps.Service {
         id: apps
 
         query: root.mode === "apps" || root.category === "apps" || root.mode === "go" && root.category === "root" ? root.query : ""
     }
 
-    Files {
+    Files.Service {
         id: files
 
         query: root.query
@@ -257,7 +260,7 @@ Item {
                     font.pixelSize: A.Appearance.fontSizeHeading
                     opacity: 0.58
                     renderType: Text.NativeRendering
-                    text: (root.mode === "apps" ? qsTr("Launch") : root.mode === "open" ? qsTr("Open") : Model.title(root.category)) + "…"
+                    text: (root.mode === "apps" ? qsTr("Launch") : root.mode === "open" ? qsTr("Open") : Utils.title(root.category)) + "…"
                     textFormat: Text.PlainText
                     verticalAlignment: Text.AlignVCenter
                     visible: !root.query && !filterInput.preeditText
@@ -284,7 +287,7 @@ Item {
                         required property int index
                         readonly property bool isApp: !!modelData && modelData.kind === "app"
                         required property var modelData
-                        readonly property bool submenu: !!modelData && Model.isSubmenu(modelData.id)
+                        readonly property bool submenu: !!modelData && Utils.isSubmenu(modelData.id)
 
                         color: hasCursor ? A.Appearance.cursorFill : "transparent"
                         height: root.rowHeight(modelData)
@@ -305,32 +308,20 @@ Item {
                                 color: resultRow.hasCursor ? A.Appearance.primary : A.Appearance.foreground
                                 font.family: A.Appearance.iconFontFamily
                                 font.pixelSize: A.Appearance.launcherIconSize
-                                text: !resultRow.modelData ? "" : resultRow.modelData.kind === "file" ? files.icon(resultRow.modelData.path) : resultRow.modelData.icon || ""
+                                text: !resultRow.modelData ? "" : resultRow.modelData.kind === "file" ? FileUtils.icon(resultRow.modelData.path) : resultRow.modelData.icon || ""
                                 textFormat: Text.PlainText
                                 visible: !resultRow.isApp
                             }
 
-                            Image {
+                            Ui.Icon {
                                 id: appIcon
 
                                 anchors.centerIn: parent
-                                asynchronous: true
-                                fillMode: Image.PreserveAspectFit
                                 height: A.Appearance.launcherIconSize
-                                source: resultRow.isApp ? apps.icon(resultRow.modelData.entry) : ""
-                                sourceSize.height: height * Screen.devicePixelRatio
-                                sourceSize.width: width * Screen.devicePixelRatio
+                                sources: resultRow.isApp ? [resultRow.modelData.entry.icon] : []
+                                fallback: "application-x-executable"
                                 visible: resultRow.isApp
                                 width: height
-                            }
-
-                            Image {
-                                anchors.fill: appIcon
-                                fillMode: Image.PreserveAspectFit
-                                source: Quickshell.iconPath("application-x-executable", true)
-                                sourceSize.height: height * Screen.devicePixelRatio
-                                sourceSize.width: width * Screen.devicePixelRatio
-                                visible: appIcon.visible && (appIcon.status === Image.Error || appIcon.status === Image.Null)
                             }
                         }
 

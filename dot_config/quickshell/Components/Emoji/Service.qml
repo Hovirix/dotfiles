@@ -1,13 +1,13 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "EmojiSearch.js" as Search
+import "utils.js" as Utils
 
 Item {
     id: root
 
     property var allItems: []
-    readonly property var entries: Search.filterEmojis(allItems, query, 1000)
+    readonly property var entries: Utils.filterEmojis(allItems, query, 1000)
     property string query: ""
 
     function copy(item: string): void {
@@ -17,6 +17,6 @@ Item {
     FileView {
         path: Qt.resolvedUrl("emojis.json")
 
-        onLoaded: root.allItems = Search.parseEmojis(text())
+        onLoaded: root.allItems = Utils.parseEmojis(text())
     }
 }

@@ -11,6 +11,7 @@ import "Components/Brightness" as Brightness
 import "Components/Clock" as Clock
 import "Components/Display" as Display
 import "Components/Menu" as Menu
+import "Components/Emoji" as Emoji
 import "Components/Notifications" as Notifications
 import "Appearance" as A
 import "Ui" as Ui
@@ -21,6 +22,7 @@ ShellRoot {
     // Aliases so Component blocks can assign same-named required props
     // without RHS self-shadowing (`battery: battery` reads null there).
     readonly property Battery.Service batteryService: battery
+    readonly property Audio.Service audioService: audio
     readonly property Display.Service displayService: display
     property IpcHandler ipc: IpcHandler {
         function audio(): void {
@@ -78,6 +80,10 @@ ShellRoot {
             launcherMenu("open");
         }
 
+        function activateNotification(): string {
+            return notifications.activateNewest();
+        }
+
         function volumeDown(): void {
             audio.volumeDown();
             osd.showVolume();
@@ -98,6 +104,7 @@ ShellRoot {
 
     Audio.Service {
         id: audio
+        active: overlays.current === "audio"
     }
 
     Brightness.Service {
@@ -157,7 +164,8 @@ ShellRoot {
     Component {
         id: audioComp
 
-        Audio.AudioMenu {
+        Audio.Panel {
+            audio: root.audioService
             controller: overlays
         }
     }
@@ -165,7 +173,7 @@ ShellRoot {
     Component {
         id: batteryComp
 
-        Battery.BatteryPanel {
+        Battery.Panel {
             battery: root.batteryService
             controller: overlays
         }
@@ -174,7 +182,7 @@ ShellRoot {
     Component {
         id: displayComp
 
-        Display.DisplayPanel {
+        Display.Panel {
             controller: overlays
             display: root.displayService
         }
@@ -183,7 +191,7 @@ ShellRoot {
     Component {
         id: clockComp
 
-        Clock.ClockPanel {
+        Clock.Panel {
             controller: overlays
         }
     }
@@ -191,7 +199,7 @@ ShellRoot {
     Component {
         id: menuComp
 
-        Menu.MenuPanel {
+        Menu.Panel {
             controller: overlays
             popup: popupWindow
         }
@@ -200,7 +208,7 @@ ShellRoot {
     Component {
         id: emojiComp
 
-        Menu.EmojiPanel {
+        Emoji.Panel {
             controller: overlays
         }
     }
@@ -208,11 +216,15 @@ ShellRoot {
     Ui.OsdWindow {
         id: osd
 
-        audio: audio
-        brightness: brightness
+        property bool isVolume: true
+        function showVolume(): void { isVolume = true; show(); }
+        function showBrightness(): void { isVolume = false; show(); }
+        icon: !isVolume ? "󰍹" : audio.outputMuted ? "" : ""
+        value: isVolume ? (audio.outputMuted ? 0 : audio.outputVolume) : brightness.value
+        valueText: `${Math.round(value * 100)}%`
     }
 
-    Notifications.NotificationsPanel {
+    Notifications.Panel {
         notifications: notifications
     }
 

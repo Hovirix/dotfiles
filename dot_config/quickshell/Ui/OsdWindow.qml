@@ -1,29 +1,18 @@
 import QtQuick
 import Quickshell
 import "../Appearance" as A
-import "../Components/Audio" as Audio
-import "../Components/Brightness" as Brightness
 
 // The only OSD window: bottom-center, auto-dismissing, non-focusable.
-// showVolume()/showBrightness() flip `kind`; the card binds title and
-// value to the matching live service. No compositor rules needed.
+// The shell supplies presentation properties; this window only owns dismissal.
 PanelWindow {
     id: window
 
-    required property Audio.Service audio
-    required property Brightness.Service brightness
-    readonly property bool isVolume: kind === "volume"
-    property string kind: "volume"
+    property string icon: ""
+    property real value: 0
+    property string valueText: ""
     property bool shown: false
 
-    function showBrightness(): void {
-        kind = "brightness";
-        shown = true;
-        dismiss.restart();
-    }
-
-    function showVolume(): void {
-        kind = "volume";
+    function show(): void {
         shown = true;
         dismiss.restart();
     }
@@ -61,8 +50,8 @@ PanelWindow {
     Osd {
         id: card
 
-        icon: !window.isVolume ? "󰍹" : window.audio.outputMuted ? "" : ""
-        value: window.isVolume ? (window.audio.outputMuted ? 0 : window.audio.outputVolume) : window.brightness.value
-        valueText: `${Math.round(value * 100)}%`
+        icon: window.icon
+        value: window.value
+        valueText: window.valueText
     }
 }

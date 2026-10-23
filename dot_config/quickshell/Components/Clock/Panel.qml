@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import "utils.js" as Utils
 import Quickshell
 
 import "../../Appearance" as A
@@ -9,41 +10,25 @@ import "../../Ui" as Ui
 Item {
     id: root
 
-    readonly property int calendarCells: firstWeekday(shownMonth) + daysInMonth(shownMonth) <= 35 ? 35 : 42
+    readonly property int calendarCells: Utils.firstWeekday(shownMonth) + Utils.daysInMonth(shownMonth) <= 35 ? 35 : 42
     required property var controller
     readonly property int menuHeight: panel.implicitHeight + A.Appearance.dialogPadding * 2
     readonly property int menuWidth: A.Appearance.popupWidthCalendar
     property date shownMonth: new Date()
 
     function calendarDate(index: int): date {
-        return new Date(shownMonth.getFullYear(), shownMonth.getMonth(), index - firstWeekday(shownMonth) + 1);
+        return new Date(shownMonth.getFullYear(), shownMonth.getMonth(), index - Utils.firstWeekday(shownMonth) + 1);
     }
 
     function changeMonth(delta: int): void {
         shownMonth = new Date(shownMonth.getFullYear(), shownMonth.getMonth() + delta, 1);
     }
 
-    function daysInMonth(date: date): int {
-        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    }
-
-    function firstWeekday(date: date): int {
-        return (monthStart(date).getDay() + 6) % 7;
-    }
-
     function focusMenu(): void {
-        root.shownMonth = root.monthStart(clock.date);
+        root.shownMonth = Utils.monthStart(clock.date);
         Qt.callLater(function () {
             keys.forceActiveFocus();
         });
-    }
-
-    function isToday(date: date): bool {
-        return date.getFullYear() === clock.date.getFullYear() && date.getMonth() === clock.date.getMonth() && date.getDate() === clock.date.getDate();
-    }
-
-    function monthStart(date: date): date {
-        return new Date(date.getFullYear(), date.getMonth(), 1);
     }
 
     SystemClock {
@@ -182,7 +167,7 @@ Item {
                         readonly property date cellDate: root.calendarDate(dayCell.index)
                         readonly property bool inMonth: dayCell.cellDate.getMonth() === root.shownMonth.getMonth()
                         required property int index
-                        readonly property bool today: root.isToday(dayCell.cellDate)
+                        readonly property bool today: Utils.isToday(dayCell.cellDate, clock.date)
                         readonly property bool weekend: index % 7 >= 5
 
                         height: 42

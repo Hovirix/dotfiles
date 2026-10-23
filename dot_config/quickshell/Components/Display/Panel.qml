@@ -15,7 +15,7 @@ Item {
     property string focusArea: "outputs"
     readonly property int menuHeight: panelColumn.implicitHeight + A.Appearance.dialogPadding * 2
 
-    // Content for the shared menu window (see BatteryPanel for the contract).
+    // Content for the shell's shared popup.
     readonly property int menuWidth: A.Appearance.popupWidthWorkspace
     property int optionIndex: 0
     property int selectedIndex: 0

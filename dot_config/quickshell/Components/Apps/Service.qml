@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import "AppSearch.js" as AppSearch
+import "utils.js" as Utils
 
 Item {
     id: root
@@ -9,18 +9,9 @@ Item {
     readonly property var entries: matches.map(function (row) {
         return row.entry;
     })
-    readonly property var matches: AppSearch.sortedEntries(DesktopEntries.applications.values || [], query)
+    readonly property var matches: Utils.sortedEntries(DesktopEntries.applications.values || [], query)
     property string query: ""
     readonly property var runningWindows: ToplevelManager.toplevels
-
-    function icon(entry: DesktopEntry): string {
-        var name = String((entry && entry.icon) || "");
-        if (name.indexOf("file://") === 0 || name.indexOf("image://") === 0)
-            return name;
-        if (name.charAt(0) === "/")
-            return "file://" + name;
-        return Quickshell.iconPath(name || "application-x-executable", true);
-    }
 
     function launch(entry: DesktopEntry): void {
         var id = String(entry.id).toLowerCase();
@@ -44,13 +35,13 @@ Item {
         entry.execute();
     }
 
-    Component.onCompleted: console.assert(AppSearch.sortedEntries([
+    Component.onCompleted: console.assert(Utils.sortedEntries([
         {
             name: "Terminal",
             genericName: "Shell",
             id: "terminal"
         }
-    ], "shell").length === 1 && AppSearch.sortedEntries([
+    ], "shell").length === 1 && Utils.sortedEntries([
         {
             name: "Foot Browser",
             id: "foot-browser"

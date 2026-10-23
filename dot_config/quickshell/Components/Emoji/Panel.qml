@@ -45,7 +45,7 @@ Item {
     onQueryChanged: if (filterInput.text !== query)
         filterInput.text = query
 
-    Emoji {
+    Service {
         id: emoji
 
         query: root.query

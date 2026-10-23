@@ -2,10 +2,6 @@ function entryName(entry) {
     return String((entry && entry.name) || (entry && entry.id) || "");
 }
 
-function entrySubtext(entry) {
-    return String((entry && entry.genericName) || "");
-}
-
 function entrySortKey(entry) {
     return entryName(entry).toLowerCase();
 }
@@ -108,15 +104,13 @@ function fuzzyScore(entry, query) {
     return 4000 - name.length;
 }
 
-function sortedEntries(values, query, hiddenCallback) {
+function sortedEntries(values, query) {
     var q = String(query || "").trim();
     var rows = [];
 
     for (var i = 0; i < values.length; i++) {
         var entry = values[i];
         if (!entry || entry.noDisplay)
-            continue;
-        if (hiddenCallback && hiddenCallback(entry))
             continue;
         var name = entryName(entry);
         if (!name)
@@ -127,8 +121,7 @@ function sortedEntries(values, query, hiddenCallback) {
         rows.push({
             entry: entry,
             score: score,
-            key: entrySortKey(entry),
-            name: name.toLowerCase()
+            key: entrySortKey(entry)
         });
     }
 
@@ -139,10 +132,6 @@ function sortedEntries(values, query, hiddenCallback) {
             return -1;
         if (a.key > b.key)
             return 1;
-        if (a.name < b.name)
-            return -1;
-        if (a.name > b.name)
-            return 1;
         return 0;
     });
 
@@ -152,7 +141,6 @@ function sortedEntries(values, query, hiddenCallback) {
 if (typeof module !== "undefined") {
     module.exports = {
         entryName: entryName,
-        entrySubtext: entrySubtext,
         entrySortKey: entrySortKey,
         entrySearchText: entrySearchText,
         entryAcronym: entryAcronym,

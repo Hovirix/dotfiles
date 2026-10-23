@@ -49,10 +49,7 @@ QtObject {
     readonly property color mutedForeground: Qt.darker(foreground, 1.4)
     readonly property color normalBorder: Qt.alpha(foreground, 0.4)
     readonly property color normalFill: Qt.alpha(foreground, 0.04)
-    readonly property int notificationGlyphSize: 24
-    readonly property int notificationIconSize: 36
-    readonly property int notificationTimeout: 3000
-    readonly property int notificationWidth: 380
+    readonly property int notificationImageSize: 40
     readonly property int osdBarWidth: 142
     readonly property int osdBottomMargin: 67
     readonly property int osdProgressHeight: 6

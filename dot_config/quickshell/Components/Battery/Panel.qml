@@ -1,4 +1,5 @@
 import QtQuick
+import "utils.js" as Utils
 import Quickshell.Services.UPower
 import "../../Appearance" as A
 import "../../Ui" as Ui
@@ -14,7 +15,7 @@ Item {
     readonly property int menuWidth: A.Appearance.popupWidthStandard
     // When UPower has no runtime estimate, use the current discharge rate.
     readonly property real runtimeSeconds: battery.timeRemaining > 0 ? battery.timeRemaining : (battery.discharging && battery.energy > 0 && battery.powerUsage > 0 ? battery.energy / battery.powerUsage * 3600 : 0)
-    readonly property string runtimeText: battery.timeShort(runtimeSeconds)
+    readonly property string runtimeText: Utils.timeShort(runtimeSeconds)
     readonly property bool showingPower: battery.available && battery.powerUsage > 0 && (battery.discharging || charging)
     readonly property color stateColor: A.Appearance.batteryStatusColor(displayPercent, battery.available, battery.discharging)
 

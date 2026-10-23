@@ -2,89 +2,22 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.Basic
-import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
 import "../../Appearance" as A
 import "../../Ui" as Ui
-import "./audio-model.js" as Model
+import "utils.js" as Utils
 
 Item {
     id: root
 
-    // Identify true playback streams without reading node.properties here:
-    // PwNode.properties is invalid until the node is bound, and reading it while
-    // capture streams are appearing (for example, when Voxtype starts recording)
-    // can destabilize Quickshell's Pipewire service. Quickshell versions differ
-    // in how `type` is exposed (media.class, enum name, or numeric enum), but
-    // playback streams consistently accept audio input from clients and publish
-    // `isSink: true`; capture streams publish as stream sources.
-
-    readonly property var audioSinks: {
-        var list = candidateSinks.slice();
-        if (sink && list.indexOf(sink) < 0)
-            list.unshift(sink);
-        return list;
-    }
-    readonly property var audioSources: {
-        var list = candidateSources.slice();
-        if (source && list.indexOf(source) < 0)
-            list.unshift(source);
-        return list;
-    }
-    readonly property var audioStreams: {
-        var list = [];
-        for (var i = 0; i < candidateStreams.length; i++)
-            if (candidateStreams[i].audio)
-                list.push(candidateStreams[i]);
-        return list;
-    }
-    readonly property var candidateSinks: {
-        var list = [];
-        for (var i = 0; i < nodes.length; i++) {
-            var n = nodes[i];
-            if (n && n.isSink && !n.isStream)
-                list.push(n);
-        }
-        return list;
-    }
-    readonly property var candidateSources: {
-        var list = [];
-        for (var i = 0; i < nodes.length; i++) {
-            var n = nodes[i];
-            if (n && !n.isSink && !n.isStream && Model.isAudioSource(n)) {
-                var name = n.name || "";
-                if (name === "quickshell")
-                    continue;
-                list.push(n);
-            }
-        }
-        return list;
-    }
-    readonly property var candidateStreams: {
-        var list = [];
-        for (var i = 0; i < nodes.length; i++) {
-            var n = nodes[i];
-            if (!n || !n.isStream || !Model.isPlaybackStream(n))
-                continue;
-            list.push(n);
-        }
-        return list;
-    }
+    required property Service audio
     required property var controller
     property bool cursorActive: false
 
-    // Feed Repeaters with panel-local snapshots instead of the live PipeWire
-    // model. PipeWire can remove nodes while Quickshell is dispatching the
-    // removal signal; rebuilding a Repeater from that signal path has crashed
-    // in Quickshell's PipeWire service. The snapshot timer lets that mutation
-    // settle first, and closed panels keep their repeaters detached entirely.
-    property var displayAudioSinks: []
-    property var displayAudioSources: []
-    property var displayAudioStreams: []
-
+    // Native models and their lifetime guards belong to the service.
     // Single cursor model shared by keyboard and mouse. Sections:
-    //   "output"  — output slider + sink device list
-    //   "input"   — input slider + source device list
+    //   "output"  — output slider + audio.output device list
+    //   "input"   — input slider + audio.source device list
     //   "streams" — per-app playback streams
     // selectedIndex semantics within a section:
     //   -1            → on the slider row (h/l adjusts volume, m/Enter mute)
@@ -96,27 +29,15 @@ Item {
     // The hero switch mirrors the output mute only. It used to track
     // output+input combined, which left it stuck on whenever the mic stayed
     // unmuted even though the output had muted.
-    readonly property bool hasOutput: !!(volumeSink && volumeSink.audio)
+    readonly property bool hasOutput: !!(audio.output && audio.output.audio)
 
     // "header" is a virtual section for the hero output mute toggle; it sits
     // above the output section so the speaker can be muted from the keyboard.
     readonly property bool headerHasCursor: cursorActive && focusSection === "header"
-    readonly property bool inputMuted: source && source.audio ? source.audio.muted : false
-    readonly property real inputVolume: source && source.audio ? source.audio.volume : 0
     readonly property int menuHeight: Math.min(panelColumn.implicitHeight + A.Appearance.dialogPadding * 2, A.Appearance.popupMaxHeight)
 
-    // `opened` stays true whenever loaded: the window only loads this while
-    // the controller selects audio, and unloading tears down the PipeWire
-    // repeaters and peak monitors with it.
     readonly property int menuWidth: A.Appearance.popupWidthStandard
-    readonly property var mprisPlayers: Mpris.players ? Mpris.players.values : []
-    readonly property var nodes: Pipewire.nodes ? Pipewire.nodes.values : []
-    readonly property bool opened: controller.current === "audio"
-    readonly property bool outputMuted: volumeSink && volumeSink.audio ? volumeSink.audio.muted : false
-    readonly property real outputVolume: volumeSink && volumeSink.audio ? volumeSink.audio.volume : 0
     property int selectedIndex: -1
-    readonly property PwNode sink: Pipewire.defaultAudioSink
-    readonly property PwNode source: Pipewire.defaultAudioSource
 
     // Order of visible sections, recomputed reactively so dropping a section
     // (e.g. no input devices) doesn't leave the cursor pointing at it.
@@ -130,38 +51,37 @@ Item {
             list.push("streams");
         return list;
     }
-    readonly property PwNode volumeSink: sink
 
     // Enter/Space: activate whatever the cursor is on.
     function activateCursor(): void {
         if (focusSection === "header") {
-            toggleOutputMute();
+            audio.toggleMute();
             return;
         }
         if (focusSection === "output") {
             if (selectedIndex === -1) {
-                toggleOutputMute();
+                audio.toggleMute();
                 return;
             }
-            var sink = displayAudioSinks[selectedIndex];
-            if (sink)
-                setDefaultSink(sink);
+            var selectedSink = audio.displayAudioSinks[selectedIndex];
+            if (selectedSink)
+                audio.setDefaultSink(selectedSink);
             return;
         }
         if (focusSection === "input") {
             if (selectedIndex === -1) {
-                toggleInputMute();
+                audio.toggleInputMute();
                 return;
             }
-            var src = displayAudioSources[selectedIndex];
+            var src = audio.displayAudioSources[selectedIndex];
             if (src)
-                setDefaultSource(src);
+                audio.setDefaultSource(src);
             return;
         }
         if (focusSection === "streams" && selectedIndex >= 0) {
-            var st = displayAudioStreams[selectedIndex];
+            var st = audio.displayAudioStreams[selectedIndex];
             if (st && st.audio)
-                st.audio.muted = !st.audio.muted;
+                audio.toggleStreamMute(st);
         }
     }
 
@@ -173,17 +93,17 @@ Item {
     // moving the global slider would surprise the user.
     function adjustVolume(delta: real): void {
         if (focusSection === "output" && selectedIndex === -1) {
-            setOutputVolume(outputVolume + delta);
+            audio.setOutputVolume(audio.outputVolume + delta);
             return;
         }
         if (focusSection === "input" && selectedIndex === -1) {
-            setInputVolume(inputVolume + delta);
+            audio.setInputVolume(audio.inputVolume + delta);
             return;
         }
-        if (focusSection === "streams" && selectedIndex >= 0 && selectedIndex < displayAudioStreams.length) {
-            var s = displayAudioStreams[selectedIndex];
+        if (focusSection === "streams" && selectedIndex >= 0 && selectedIndex < audio.displayAudioStreams.length) {
+            var s = audio.displayAudioStreams[selectedIndex];
             if (s && s.audio)
-                s.audio.volume = Math.max(0, Math.min(1.5, s.audio.volume + delta));
+                audio.setStreamVolume(s, s.audio.volume + delta);
         }
     }
 
@@ -208,13 +128,6 @@ Item {
             selectedIndex = Math.max(floor, count - 1);
         if (selectedIndex < floor)
             selectedIndex = floor;
-    }
-
-    function clearDisplayAudioModels(): void {
-        audioModelRefreshTimer.stop();
-        displayAudioSinks = [];
-        displayAudioSources = [];
-        displayAudioStreams = [];
     }
 
     // Tab keeps navigation at the section level: output, input, then app
@@ -311,13 +224,13 @@ Item {
     }
 
     function outputIcon(): string {
-        if (!sink || !sink.audio)
+        if (!audio.output || !audio.output.audio)
             return "";
-        if (Model.isHeadphones(sink))
+        if (Utils.isHeadphones(audio.output))
             return "󰋋";
-        if (outputMuted)
+        if (audio.outputMuted)
             return "";
-        var v = outputVolume;
+        var v = audio.outputVolume;
         if (v >= 0.67)
             return "";
         if (v >= 0.34)
@@ -325,15 +238,6 @@ Item {
         if (v > 0)
             return "";
         return "";
-    }
-
-    function refreshDisplayAudioModels(): void {
-        if (!opened)
-            return;
-        displayAudioSinks = Model.listSnapshot(audioSinks);
-        displayAudioSources = Model.listSnapshot(audioSources);
-        displayAudioStreams = Model.listSnapshot(audioStreams);
-        clampCursor();
     }
 
     // Keep the keyboard-focused row inside the visible viewport of the
@@ -346,19 +250,13 @@ Item {
             flick.contentY = 0;
     }
 
-    function scheduleDisplayAudioModelRefresh(): void {
-        if (!opened)
-            return;
-        audioModelRefreshTimer.restart();
-    }
-
     function sectionCount(section: string): int {
         if (section === "output")
-            return displayAudioSinks.length;
+            return audio.displayAudioSinks.length;
         if (section === "input")
-            return displayAudioSources.length;
+            return audio.displayAudioSources.length;
         if (section === "streams")
-            return displayAudioStreams.length;
+            return audio.displayAudioStreams.length;
         return 0;
     }
 
@@ -366,7 +264,7 @@ Item {
         if (section === "output")
             return true;
         if (section === "input")
-            return !!source;
+            return !!audio.source;
         return false;  // stream rows carry their own sliders inline; not a section-level slider
     }
 
@@ -374,20 +272,10 @@ Item {
         if (section === "output")
             return true;
         if (section === "input")
-            return displayAudioSources.length > 0 || !!source;
+            return audio.displayAudioSources.length > 0 || !!audio.source;
         if (section === "streams")
-            return displayAudioStreams.length > 0;
+            return audio.displayAudioStreams.length > 0;
         return false;
-    }
-
-    function setDefaultSink(node: PwNode): void {
-        if (node)
-            Pipewire.preferredDefaultAudioSink = node;
-    }
-
-    function setDefaultSource(node: PwNode): void {
-        if (node)
-            Pipewire.preferredDefaultAudioSource = node;
     }
 
     function setHeaderCursor(): void {
@@ -396,102 +284,28 @@ Item {
         selectedIndex = -1;
     }
 
-    function setInputVolume(v: real): void {
-        if (!source || !source.audio)
-            return;
-        source.audio.volume = Math.max(0, Math.min(1, v));
-    }
-
-    function setOutputVolume(v: real): real {
-        if (!volumeSink || !volumeSink.audio)
-            return outputVolume;
-        var volume = Math.max(0, Math.min(1, v));
-        volumeSink.audio.volume = volume;
-        return volume;
-    }
-
-    function streamLabel(node: PwNode): string {
-        return Model.streamLabel(node, mprisPlayers, displayAudioStreams);
-    }
-
     function toggleFocusedMute(): void {
-        if (focusSection === "streams" && selectedIndex >= 0 && selectedIndex < displayAudioStreams.length) {
-            var stream = displayAudioStreams[selectedIndex];
+        if (focusSection === "streams" && selectedIndex >= 0 && selectedIndex < audio.displayAudioStreams.length) {
+            var stream = audio.displayAudioStreams[selectedIndex];
             if (stream && stream.audio)
-                stream.audio.muted = !stream.audio.muted;
+                audio.toggleStreamMute(stream);
         } else if (focusSection === "input") {
-            toggleInputMute();
+            audio.toggleInputMute();
         } else {
-            toggleOutputMute();
+            audio.toggleMute();
         }
-    }
-
-    function toggleInputMute(): void {
-        if (source && source.audio)
-            source.audio.muted = !source.audio.muted;
     }
 
     // The hero switch mirrors the output mute, so it always follows what the
     // output row below does. Input keeps its own mute in its section.
-    function toggleOutputMute(): void {
-        if (volumeSink && volumeSink.audio)
-            volumeSink.audio.muted = !volumeSink.audio.muted;
-    }
 
-    // Fresh Loader instances start with empty display lists; PipeWire may
-    // not publish a change after load, so snapshot once on completion.
-    Component.onCompleted: refreshDisplayAudioModels()
-
-    // Clamp / repair the cursor whenever any list refreshes underneath us.
-    onAudioSinksChanged: scheduleDisplayAudioModelRefresh()
-    onAudioSourcesChanged: scheduleDisplayAudioModelRefresh()
-    onAudioStreamsChanged: scheduleDisplayAudioModelRefresh()
-    onOpenedChanged: {
-        if (opened) {
-            refreshDisplayAudioModels();
-            focusSection = "output";
-            selectedIndex = -1;  // first keyboard cursor reveal starts on the output slider
-            cursorActive = false;
-            Qt.callLater(resetScroll);
-        } else {
-            clearDisplayAudioModels();
+    Connections {
+        target: root.audio
+        function onModelsChanged() {
+            root.clampCursor();
         }
     }
-
-    PwObjectTracker {
-        objects: root.candidateSinks
-    }
-
-    PwObjectTracker {
-        objects: root.candidateSources
-    }
-
-    PwObjectTracker {
-        objects: root.audioStreams
-    }
-
-    PwNodePeakMonitor {
-        id: inputPeakMonitor
-
-        enabled: root.opened && !!root.source
-        node: root.source
-    }
-
-    PwNodePeakMonitor {
-        id: outputPeakMonitor
-
-        enabled: root.opened && !!root.sink
-        node: root.sink
-    }
-
-    Timer {
-        id: audioModelRefreshTimer
-
-        interval: 75
-        repeat: false
-
-        onTriggered: root.refreshDisplayAudioModels()
-    }
+    Component.onCompleted: Qt.callLater(resetScroll)
 
     Ui.KeyCatcher {
         id: keyCatcher
@@ -555,7 +369,7 @@ Item {
                         color: A.Appearance.foreground
                         font.family: A.Appearance.iconFontFamily
                         font.pixelSize: 24
-                        opacity: root.outputMuted ? 0.5 : 1.0
+                        opacity: audio.outputMuted ? 0.5 : 1.0
                         text: root.outputIcon()
                         textFormat: Text.PlainText
                     }
@@ -567,14 +381,14 @@ Item {
 
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        checked: root.hasOutput && !root.outputMuted
+                        checked: root.hasOutput && !audio.outputMuted
                         hasCursor: root.headerHasCursor
 
                         onHovered: function (on) {
                             if (on)
                                 root.setHeaderCursor();
                         }
-                        onToggled: root.toggleOutputMute()
+                        onToggled: audio.toggleMute()
                     }
 
                     Column {
@@ -606,7 +420,7 @@ Item {
                             font.family: A.Appearance.fontFamily
                             font.letterSpacing: 1.2
                             font.pixelSize: A.Appearance.fontSizeBody
-                            text: Model.outputVolumeName(outputSlider.dragging ? outputSlider.liveValue : root.outputVolume, root.outputMuted).toUpperCase()
+                            text: Utils.outputVolumeName(outputSlider.dragging ? outputSlider.liveValue : audio.outputVolume, audio.outputMuted).toUpperCase()
                             textFormat: Text.PlainText
                             width: parent.width
                         }
@@ -614,8 +428,7 @@ Item {
                 }
 
                 // ---- Output devices ----
-                Ui.Separator {
-                }
+                Ui.Separator {}
 
                 Column {
                     spacing: A.Appearance.space15
@@ -644,8 +457,8 @@ Item {
                             font.bold: true
                             font.family: A.Appearance.fontFamily
                             font.pixelSize: A.Appearance.fontSizeBody
-                            opacity: root.outputMuted ? 0.5 : 1.0
-                            text: Math.round((outputSlider.dragging ? outputSlider.liveValue : root.outputVolume) * 100) + "%"
+                            opacity: audio.outputMuted ? 0.5 : 1.0
+                            text: Math.round((outputSlider.dragging ? outputSlider.liveValue : audio.outputVolume) * 100) + "%"
                             textFormat: Text.PlainText
                         }
                     }
@@ -673,18 +486,18 @@ Item {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.top: parent.top
-                                enabled: !!root.sink
+                                enabled: !!audio.output
                                 height: implicitHeight
                                 maximum: 1
                                 minimum: 0
-                                opacity: root.outputMuted ? 0.5 : 1.0
+                                opacity: audio.outputMuted ? 0.5 : 1.0
                                 step: 0.02
-                                value: root.outputVolume
+                                value: audio.outputVolume
 
                                 onMoved: function (v) {
-                                    root.setOutputVolume(v);
+                                    audio.setOutputVolume(v);
                                 }
-                                onRightClicked: root.toggleOutputMute()
+                                onRightClicked: audio.toggleMute()
                             }
 
                             // Output level meter docked under the slider so this row
@@ -695,14 +508,14 @@ Item {
                                 anchors.top: outputSlider.bottom
                                 color: Qt.rgba(A.Appearance.foreground.r, A.Appearance.foreground.g, A.Appearance.foreground.b, 0.18)
                                 height: A.Appearance.space05
-                                opacity: root.outputMuted ? 0.35 : 1.0
+                                opacity: audio.outputMuted ? 0.35 : 1.0
 
                                 Rectangle {
                                     anchors.bottom: parent.bottom
                                     anchors.left: parent.left
                                     anchors.top: parent.top
                                     color: A.Appearance.foreground
-                                    width: parent.width * Math.max(0, Math.min(1, outputPeakMonitor.peak))
+                                    width: parent.width * Math.max(0, Math.min(1, audio.outputPeak))
 
                                     Behavior on width {
                                         NumberAnimation {
@@ -723,7 +536,7 @@ Item {
                     }
 
                     Repeater {
-                        model: root.displayAudioSinks
+                        model: audio.displayAudioSinks
 
                         DeviceRow {
                             required property int index
@@ -739,12 +552,12 @@ Item {
 
                 // ---- Input ----
                 Ui.Separator {
-                    visible: root.displayAudioSources.length > 0 || !!root.source
+                    visible: audio.displayAudioSources.length > 0 || !!audio.source
                 }
 
                 Column {
                     spacing: A.Appearance.space15
-                    visible: root.displayAudioSources.length > 0 || !!root.source
+                    visible: audio.displayAudioSources.length > 0 || !!audio.source
                     width: parent.width
 
                     Item {
@@ -770,8 +583,8 @@ Item {
                             font.bold: true
                             font.family: A.Appearance.fontFamily
                             font.pixelSize: A.Appearance.fontSizeBody
-                            opacity: root.inputMuted ? 0.5 : 1.0
-                            text: Math.round((inputSlider.dragging ? inputSlider.liveValue : root.inputVolume) * 100) + "%"
+                            opacity: audio.inputMuted ? 0.5 : 1.0
+                            text: Math.round((inputSlider.dragging ? inputSlider.liveValue : audio.inputVolume) * 100) + "%"
                             textFormat: Text.PlainText
                         }
                     }
@@ -782,7 +595,7 @@ Item {
                         contentPadding: 0
                         hasCursor: root.cursorActive && root.focusSection === "input" && root.selectedIndex === -1
                         height: inputControls.implicitHeight + A.Appearance.space2
-                        visible: !!root.source
+                        visible: !!audio.source
                         width: parent.width
 
                         onHasCursorChanged: if (hasCursor)
@@ -800,18 +613,18 @@ Item {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.top: parent.top
-                                enabled: !!root.source
+                                enabled: !!audio.source
                                 height: implicitHeight
                                 maximum: 1
                                 minimum: 0
-                                opacity: root.inputMuted ? 0.5 : 1.0
+                                opacity: audio.inputMuted ? 0.5 : 1.0
                                 step: 0.05
-                                value: root.inputVolume
+                                value: audio.inputVolume
 
                                 onMoved: function (v) {
-                                    root.setInputVolume(v);
+                                    audio.setInputVolume(v);
                                 }
-                                onRightClicked: root.toggleInputMute()
+                                onRightClicked: audio.toggleInputMute()
                             }
 
                             // Mic level meter docked under the slider so this row
@@ -822,14 +635,14 @@ Item {
                                 anchors.top: inputSlider.bottom
                                 color: Qt.rgba(A.Appearance.foreground.r, A.Appearance.foreground.g, A.Appearance.foreground.b, 0.18)
                                 height: A.Appearance.space05
-                                opacity: root.inputMuted ? 0.35 : 1.0
+                                opacity: audio.inputMuted ? 0.35 : 1.0
 
                                 Rectangle {
                                     anchors.bottom: parent.bottom
                                     anchors.left: parent.left
                                     anchors.top: parent.top
                                     color: A.Appearance.foreground
-                                    width: parent.width * Math.max(0, Math.min(1, inputPeakMonitor.peak))
+                                    width: parent.width * Math.max(0, Math.min(1, audio.inputPeak))
 
                                     Behavior on width {
                                         NumberAnimation {
@@ -850,7 +663,7 @@ Item {
                     }
 
                     Repeater {
-                        model: root.displayAudioSources
+                        model: audio.displayAudioSources
 
                         DeviceRow {
                             required property int index
@@ -866,12 +679,12 @@ Item {
 
                 // ---- Per-app streams ----
                 Ui.Separator {
-                    visible: root.displayAudioStreams.length > 0
+                    visible: audio.displayAudioStreams.length > 0
                 }
 
                 Column {
                     spacing: A.Appearance.space25
-                    visible: root.displayAudioStreams.length > 0
+                    visible: audio.displayAudioStreams.length > 0
                     width: parent.width
 
                     Ui.SectionHeader {
@@ -880,7 +693,7 @@ Item {
                     }
 
                     Repeater {
-                        model: root.displayAudioStreams
+                        model: audio.displayAudioStreams
 
                         StreamRow {
                             required property int index
@@ -904,7 +717,7 @@ Item {
     component DeviceRow: Ui.SelectRow {
         id: deviceRow
 
-        readonly property PwNode defaultNode: section === "output" ? root.sink : root.source
+        readonly property PwNode defaultNode: section === "output" ? audio.output : audio.source
         readonly property bool isActive: defaultNode && node && defaultNode.id === node.id
         required property PwNode node
         required property int rowIndex
@@ -933,7 +746,7 @@ Item {
                 font.family: A.Appearance.iconFontFamily
                 font.pixelSize: A.Appearance.fontSizeTitle
                 horizontalAlignment: Text.AlignHCenter
-                text: deviceRow.section === "output" ? Model.sinkGlyph(deviceRow.node) : Model.sourceGlyph(deviceRow.node)
+                text: deviceRow.section === "output" ? Utils.sinkGlyph(deviceRow.node) : Utils.sourceGlyph(deviceRow.node)
                 textFormat: Text.PlainText
                 width: A.Appearance.iconColumnWidth
             }
@@ -945,7 +758,7 @@ Item {
                 font.bold: deviceRow.isActive
                 font.family: A.Appearance.fontFamily
                 font.pixelSize: A.Appearance.fontSizeBody
-                text: Model.nodeLabel(deviceRow.node)
+                text: Utils.nodeLabel(deviceRow.node)
                 textFormat: Text.PlainText
                 width: parent.width - A.Appearance.iconColumnWidth - A.Appearance.space2
             }
@@ -958,9 +771,9 @@ Item {
 
             onClicked: {
                 if (deviceRow.section === "output")
-                    root.setDefaultSink(deviceRow.node);
+                    audio.setDefaultSink(deviceRow.node);
                 else
-                    root.setDefaultSource(deviceRow.node);
+                    audio.setDefaultSource(deviceRow.node);
             }
             onContainsMouseChanged: if (containsMouse) {
                 root.cursorActive = true;
@@ -1021,7 +834,7 @@ Item {
 
                         onClicked: {
                             if (streamRow.node && streamRow.node.audio)
-                                streamRow.node.audio.muted = !streamRow.node.audio.muted;
+                                audio.toggleStreamMute(streamRow.node);
                         }
                     }
                 }
@@ -1032,7 +845,7 @@ Item {
                     elide: Text.ElideRight
                     font.family: A.Appearance.fontFamily
                     font.pixelSize: A.Appearance.fontSizeBody
-                    text: root.streamLabel(streamRow.node)
+                    text: audio.streamLabel(streamRow.node)
                     textFormat: Text.PlainText
                     width: parent.width - streamMuteIcon.width - streamPct.width - A.Appearance.space4
                 }
@@ -1063,11 +876,11 @@ Item {
 
                 onMoved: function (v) {
                     if (streamRow.node && streamRow.node.audio)
-                        streamRow.node.audio.volume = v;
+                        audio.setStreamVolume(streamRow.node, v);
                 }
                 onRightClicked: {
                     if (streamRow.node && streamRow.node.audio)
-                        streamRow.node.audio.muted = !streamRow.node.audio.muted;
+                        audio.toggleStreamMute(streamRow.node);
                 }
             }
         }

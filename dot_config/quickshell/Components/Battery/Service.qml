@@ -1,8 +1,9 @@
 import QtQuick
+import "utils.js" as Utils
 import Quickshell.Io
 import Quickshell.Services.UPower
 
-// UPower-backed battery service. Feeds BatteryPanel.qml.
+// UPower-backed battery service.
 //
 // Percentage, state, and time come from the aggregate display device.
 // Energy, full capacity, and health come from the physical battery when available.
@@ -65,8 +66,7 @@ QtObject {
 
     // Emergency (5) resends a final warning after low (30) and critical (15).
     readonly property int lowThreshold: 30
-    property Process notifier: Process {
-    }
+    property Process notifier: Process {}
 
     // 0..100 scale (UPower reports 0..1).
     readonly property real percentage: {
@@ -161,7 +161,7 @@ QtObject {
 
     // Icon per alert: the battery level while discharging (battery-020),
     // a plug (ac-adapter) while charging so the event never reads as
-    // a level. NotificationsPanel falls back to its glyph when a name
+    // a level. The notification card falls back to its glyph when a name
     // does not resolve.
     function levelIcon(charging: bool): string {
         if (charging)
@@ -173,14 +173,14 @@ QtObject {
 
     function sendDischargeAlert(label: string, urgency: string): void {
         const pct = Math.round(root.percentage);
-        const remaining = root.timeShort(root.timeRemaining);
+        const remaining = Utils.timeShort(root.timeRemaining);
         const body = remaining !== "" ? qsTr("%1 · %2% · %3 remaining").arg(label).arg(pct).arg(remaining) : qsTr("%1 · %2% remaining").arg(label).arg(pct);
         root.notifier.exec(["notify-send", "-a", "Battery", "-u", urgency, "-i", root.levelIcon(false), qsTr("Battery"), body]);
     }
 
     function sendPlugged(): void {
         const pct = Math.round(root.percentage);
-        const remaining = root.timeShort(root.timeRemaining);
+        const remaining = Utils.timeShort(root.timeRemaining);
         let body = qsTr("Charging · %1%").arg(pct);
         if (root.state === UPowerDeviceState.FullyCharged)
             body = qsTr("Fully charged · %1%").arg(pct);
@@ -191,18 +191,6 @@ QtObject {
     }
 
     // "3h 42m" / "42m" / "" when unknown.
-    function timeShort(seconds: real): string {
-        const s = Math.floor(Number(seconds));
-        if (!isFinite(s) || s <= 0)
-            return "";
-        const h = Math.floor(s / 3600);
-        const m = Math.floor((s % 3600) / 60);
-        if (h > 0)
-            return qsTr("%1h %2m").arg(h).arg(m);
-        if (m > 0)
-            return qsTr("%1m").arg(m);
-        return "";
-    }
 
     Component.onCompleted: {
         root.lastDischarging = root.discharging;
