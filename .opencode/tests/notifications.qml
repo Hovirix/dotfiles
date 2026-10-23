@@ -1,57 +1,80 @@
-// Run: dbus-run-session -- env QT_QPA_PLATFORM=offscreen quickshell -p .opencode/tests/notifications.qml
+// Run: dbus-run-session -- quickshell -p .opencode/tests/notifications.qml
 import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
-import "file:/home/nixos/.local/share/chezmoi/dot_config/quickshell/Components/Notifications" as Notifications
+import "file:///home/nixos/.local/share/chezmoi/dot_config/quickshell/features/notifications" as Notifications
 
 ShellRoot {
     id: root
-    property int step: 0
+
+    property Notification first
     property int firstId: 0
     property int sent: 0
-    property Notification first
-    Notifications.Service { id: service }
+    property int step: 0
+
+    function check(value, label) {
+        if (!value)
+            throw new Error(label);
+    }
+
+    function send(summary, actions, resident, replaces, urgency) {
+        sender.command = ["busctl", "--user", "call", "--", "org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "Notify", "susssasa{sv}i", "Native test", String(replaces || 0), "dialog-information", summary, "<b>plain text</b>", String(actions.length)].concat(actions, ["2", "urgency", "y", String(urgency === undefined ? 2 : urgency), "resident", "b", resident ? "true" : "false", "-1"]);
+        sender.running = true;
+    }
+
+    Notifications.Main {
+        id: service
+
+        window.visible: false
+    }
+
     Item {
         Repeater {
             model: service.trackedNotifications
+
             Notifications.Toast {
                 required property Notification modelData
+
                 notification: modelData
                 width: 400
             }
         }
     }
-    function check(value, label) {
-        if (!value) throw new Error(label);
-    }
-    function send(summary, actions, resident, replaces, urgency) {
-        sender.command = ["busctl", "--user", "call", "--", "org.freedesktop.Notifications",
-            "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "Notify", "susssasa{sv}i",
-            "Native test", String(replaces || 0), "dialog-information", summary, "<b>plain text</b>",
-            String(actions.length)].concat(actions, ["2", "urgency", "y", String(urgency === undefined ? 2 : urgency),
-                "resident", "b", resident ? "true" : "false", "-1"]);
-        sender.running = true;
-    }
+
     Timer {
         interval: 1
         running: true
+
         onTriggered: {
             root.check(service.activateNewest() === "none", "empty queue");
             root.send("first", [], false);
         }
     }
+
     Process {
         id: sender
-        stderr: StdioCollector { onStreamFinished: if (text) console.error(text) }
-        onExited: function(code) {
-            if (code !== 0) { console.error("busctl failed", code); Qt.exit(1); return; }
+
+        stderr: StdioCollector {
+            onStreamFinished: if (text)
+                console.error(text)
+        }
+
+        onExited: function (code) {
+            if (code !== 0) {
+                console.error("busctl failed", code);
+                Qt.exit(1);
+                return;
+            }
             verify.restart();
         }
     }
+
     Timer {
         id: verify
+
         interval: 20
+
         onTriggered: {
             try {
                 var values = service.trackedNotifications.values;
@@ -85,6 +108,7 @@ ShellRoot {
                     break;
                 case 5:
                     root.check(service.expiry.objectAt(0).running && service.expiry.objectAt(0).interval === 5000, "low urgency expiry timer");
+
                     service.expiry.objectAt(0).interval = 1;
                     verify.restart();
                     break;

@@ -1,281 +1,370 @@
 //@ pragma IconTheme Papirus-Dark
-
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "Components/Audio" as Audio
-import "Components/Battery" as Battery
-import "Components/Brightness" as Brightness
-import "Components/Clock" as Clock
-import "Components/Display" as Display
-import "Components/Menu" as Menu
-import "Components/Emoji" as Emoji
-import "Components/Notifications" as Notifications
-import "Appearance" as A
-import "Ui" as Ui
+import "features/audio" as Audio
+import "features/battery" as Battery
+import "features/brightness" as Brightness
+import "features/clock" as Clock
+import "features/display" as Display
+import "features/launcher" as Launcher
+import "features/emoji" as Emoji
+import "features/notifications" as Notifications
+import "ui" as Ui
 
 ShellRoot {
     id: root
 
-    // Aliases so Component blocks can assign same-named required props
-    // without RHS self-shadowing (`battery: battery` reads null there).
-    readonly property Battery.Service batteryService: battery
-    readonly property Audio.Service audioService: audio
-    readonly property Display.Service displayService: display
-    property IpcHandler ipc: IpcHandler {
-        function audio(): void {
-            overlays.toggle("audio");
-        }
-
-        function battery(): void {
-            overlays.toggle("battery");
-        }
-
-        function brightnessDown(): void {
-            brightness.decrease();
-            osd.showBrightness();
-        }
-
-        function brightnessUp(): void {
+    function changeBrightness(direction: int): void {
+        if (direction > 0)
             brightness.increase();
-            osd.showBrightness();
-        }
+        else
+            brightness.decrease();
+        osd.showBrightness();
+    }
 
-        function clock(): void {
-            overlays.toggle("clock");
-        }
-
-        function close(): void {
-            overlays.close();
-        }
-
-        function display(): void {
-            overlays.toggle("display");
-            if (overlays.current === "display")
-                display.refresh();
-        }
-
-        function emoji(): void {
-            overlays.toggle("emoji");
-        }
-
-        function launcher(): void {
-            launcherMenu("apps");
-        }
-
-        // Loader instantiates synchronously, so the menu item exists on
-        // the next line and open() can set its mode immediately.
-        function launcherMenu(mode: string): void {
-            overlays.current = "menu";
-            menuLoader.item.open(mode);
-        }
-
-        function menu(): void {
-            launcherMenu("go");
-        }
-
-        function openRecent(): void {
-            launcherMenu("open");
-        }
-
-        function activateNotification(): string {
-            return notifications.activateNewest();
-        }
-
-        function volumeDown(): void {
-            audio.volumeDown();
-            osd.showVolume();
-        }
-
-        function volumeMute(): void {
-            audio.toggleMute();
-            osd.showVolume();
-        }
-
-        function volumeUp(): void {
+    function changeVolume(direction: int): void {
+        if (direction > 0)
             audio.volumeUp();
-            osd.showVolume();
-        }
-
-        target: "shell"
+        else if (direction < 0)
+            audio.volumeDown();
+        else
+            audio.toggleMute();
+        osd.showVolume();
     }
 
-    Audio.Service {
+    function openLauncher(mode: string): void {
+        launcher.open(mode);
+    }
+
+    function run(command: list<string>): void {
+        popup.close();
+        Quickshell.execDetached(command);
+    }
+
+    Audio.Main {
         id: audio
-        active: overlays.current === "audio"
+
+        popup: popup
     }
 
-    Brightness.Service {
+    Battery.Main {
+        id: battery
+
+        popup: popup
+    }
+
+    Brightness.Main {
         id: brightness
     }
 
-    Battery.Service {
-        id: battery
+    Clock.Main {
+        id: clock
+
+        popup: popup
     }
 
-    Display.Service {
+    Display.Main {
         id: display
+
+        popup: popup
     }
 
-    Notifications.Service {
+    Emoji.Main {
+        id: emoji
+
+        popup: popup
+    }
+
+    Notifications.Main {
         id: notifications
     }
 
-    // The only menu window: content swaps per overlays.current, inactive
-    // menus fully unload (cursor/scroll state resets on switch).
-    Ui.Popup {
-        id: popupWindow
+    Launcher.Main {
+        id: launcher
 
-        contentHeight: menuLoader.item ? menuLoader.item.menuHeight : A.Appearance.buttonHeight
-        contentPadding: menuStyle ? A.Appearance.menuPadding : A.Appearance.dialogPadding
-        contentTop: overlays.current === "menu" && menuLoader.item ? menuLoader.item.cardTop : -1
-        contentWidth: menuLoader.item ? menuLoader.item.menuWidth : A.Appearance.popupWidthStandard
-        menuStyle: overlays.current === "menu" || overlays.current === "emoji"
-        shown: overlays.current !== ""
-
-        onCloseRequested: overlays.close()
-
-        Loader {
-            id: menuLoader
-
-            anchors.fill: parent
-            sourceComponent: {
-                if (overlays.current === "audio")
-                    return audioComp;
-                if (overlays.current === "battery")
-                    return batteryComp;
-                if (overlays.current === "display")
-                    return displayComp;
-                if (overlays.current === "clock")
-                    return clockComp;
-                if (overlays.current === "menu")
-                    return menuComp;
-                if (overlays.current === "emoji")
-                    return emojiComp;
-                return null;
+        items: [
+            {
+                id: "apps",
+                label: qsTr("Apps"),
+                icon: "󰀻",
+                parent: "root"
+            },
+            {
+                id: "files",
+                label: qsTr("Files"),
+                icon: "󰈙",
+                parent: "root"
+            },
+            {
+                id: "emoji",
+                label: qsTr("Emoji"),
+                icon: "",
+                parent: "root"
+            },
+            {
+                id: "system",
+                label: qsTr("System"),
+                icon: "",
+                parent: "root"
+            },
+            {
+                id: "settings",
+                label: qsTr("Settings"),
+                icon: "",
+                parent: "root"
+            },
+            {
+                id: "lock",
+                label: qsTr("Lock"),
+                icon: "",
+                parent: "system"
+            },
+            {
+                id: "suspend",
+                label: qsTr("Suspend"),
+                icon: "󰒲",
+                parent: "system"
+            },
+            {
+                id: "reboot",
+                label: qsTr("Reboot"),
+                icon: "",
+                parent: "system"
+            },
+            {
+                id: "shutdown",
+                label: qsTr("Shutdown"),
+                icon: "",
+                parent: "system"
+            },
+            {
+                id: "idle",
+                label: qsTr("Toggle Idle Lock"),
+                icon: "󰒲",
+                parent: "system"
+            },
+            {
+                id: "screenshot",
+                label: qsTr("Screenshot"),
+                icon: "",
+                parent: "system"
+            },
+            {
+                id: "screenshotSave",
+                label: qsTr("Save Screenshot"),
+                icon: "",
+                parent: "system"
+            },
+            {
+                id: "audio",
+                label: qsTr("Audio"),
+                icon: "",
+                parent: "settings"
+            },
+            {
+                id: "display",
+                label: qsTr("Display"),
+                icon: "󰍹",
+                parent: "settings"
+            },
+            {
+                id: "network",
+                label: qsTr("Network"),
+                icon: "󰖩",
+                parent: "settings"
+            },
+            {
+                id: "bluetooth",
+                label: qsTr("Bluetooth"),
+                icon: "󰂯",
+                parent: "settings"
+            },
+            {
+                id: "battery",
+                label: qsTr("Battery"),
+                icon: "󰁹",
+                parent: "settings"
+            },
+            {
+                id: "brightnessUp",
+                label: qsTr("Brightness Up"),
+                icon: "󰃟",
+                parent: "settings"
+            },
+            {
+                id: "brightnessDown",
+                label: qsTr("Brightness Down"),
+                icon: "󰃞",
+                parent: "settings"
+            },
+            {
+                id: "clock",
+                label: qsTr("Clock"),
+                icon: "󰥔",
+                parent: "settings"
+            },
+            {
+                id: "keyboardLayout",
+                label: qsTr("Toggle Keyboard Layout"),
+                icon: "󰌌",
+                parent: "settings"
             }
-
-            onLoaded: item.focusMenu()
-        }
+        ]
+        popup: popup
     }
 
-    Component {
-        id: audioComp
+    Ui.Popup {
+        id: popup
 
-        Audio.Panel {
-            audio: root.audioService
-            controller: overlays
-        }
+        actions: ({
+                audio: function () {
+                    popup.toggle(audio.panel);
+                },
+                battery: function () {
+                    popup.toggle(battery.panel);
+                },
+                display: function () {
+                    popup.toggle(display.panel);
+                    if (popup.content === display.panel)
+                        display.refresh();
+                },
+                clock: function () {
+                    popup.toggle(clock.panel);
+                },
+                emoji: function () {
+                    popup.toggle(emoji.panel);
+                },
+                brightnessUp: function () {
+                    popup.close();
+                    brightness.increase();
+                    osd.showBrightness();
+                },
+                brightnessDown: function () {
+                    popup.close();
+                    brightness.decrease();
+                    osd.showBrightness();
+                },
+                screenshot: function () {
+                    root.run(["hx-screenshot"]);
+                },
+                screenshotSave: function () {
+                    root.run(["hx-screenshot", "--save"]);
+                },
+                idle: function () {
+                    root.run(["hx-idle-toggle"]);
+                },
+                keyboardLayout: function () {
+                    root.run(["keyboard-layout-toggle"]);
+                },
+                network: function () {
+                    root.run(["foot", "--app-id", "tui", "-e", "impala"]);
+                },
+                bluetooth: function () {
+                    root.run(["foot", "--app-id", "tui", "-e", "bluetui"]);
+                },
+                lock: function () {
+                    root.run(["hx-lock"]);
+                },
+                suspend: function () {
+                    root.run(["hx-suspend"]);
+                },
+                reboot: function () {
+                    root.run(["systemctl", "reboot"]);
+                },
+                shutdown: function () {
+                    root.run(["systemctl", "poweroff"]);
+                }
+            })
     }
 
-    Component {
-        id: batteryComp
-
-        Battery.Panel {
-            battery: root.batteryService
-            controller: overlays
-        }
-    }
-
-    Component {
-        id: displayComp
-
-        Display.Panel {
-            controller: overlays
-            display: root.displayService
-        }
-    }
-
-    Component {
-        id: clockComp
-
-        Clock.Panel {
-            controller: overlays
-        }
-    }
-
-    Component {
-        id: menuComp
-
-        Menu.Panel {
-            controller: overlays
-            popup: popupWindow
-        }
-    }
-
-    Component {
-        id: emojiComp
-
-        Emoji.Panel {
-            controller: overlays
-        }
-    }
-
-    Ui.OsdWindow {
+    Ui.Osd {
         id: osd
 
         property bool isVolume: true
-        function showVolume(): void { isVolume = true; show(); }
-        function showBrightness(): void { isVolume = false; show(); }
+
+        function showBrightness(): void {
+            isVolume = false;
+            show();
+        }
+
+        function showVolume(): void {
+            isVolume = true;
+            show();
+        }
+
         icon: !isVolume ? "󰍹" : audio.outputMuted ? "" : ""
         value: isVolume ? (audio.outputMuted ? 0 : audio.outputVolume) : brightness.value
         valueText: `${Math.round(value * 100)}%`
     }
 
-    Notifications.Panel {
-        notifications: notifications
-    }
+    IpcHandler {
+        function activateNotification(): string {
+            return notifications.activateNewest();
+        }
 
-    // Minimal overlay controller: which Appearance-based overlay is open.
-    QtObject {
-        id: overlays
+        function audio(): void {
+            popup.activate("audio");
+        }
 
-        property string current: ""
+        function battery(): void {
+            popup.activate("battery");
+        }
 
-        function activate(name: string): void {
-            if (["audio", "battery", "display", "clock"].indexOf(name) >= 0) {
-                current = name;
-                if (name === "display")
-                    display.refresh();
-            } else {
-                close();
-                if (name === "brightnessUp" || name === "brightnessDown") {
-                    if (name === "brightnessUp")
-                        brightness.increase();
-                    else
-                        brightness.decrease();
-                    osd.showBrightness();
-                } else if (name === "screenshot")
-                    Quickshell.execDetached(["hx-screenshot"]);
-                else if (name === "screenshotSave")
-                    Quickshell.execDetached(["hx-screenshot", "--save"]);
-                else if (name === "idle")
-                    Quickshell.execDetached(["hx-idle-toggle"]);
-                else if (name === "keyboardLayout")
-                    Quickshell.execDetached(["keyboard-layout-toggle"]);
-                else if (name === "network")
-                    Quickshell.execDetached(["foot", "--app-id", "tui", "-e", "impala"]);
-                else if (name === "bluetooth")
-                    Quickshell.execDetached(["foot", "--app-id", "tui", "-e", "bluetui"]);
-                else if (name === "lock")
-                    Quickshell.execDetached(["hx-lock"]);
-                else if (name === "suspend")
-                    Quickshell.execDetached(["hx-suspend"]);
-                else if (name === "reboot")
-                    Quickshell.execDetached(["systemctl", "reboot"]);
-                else if (name === "shutdown")
-                    Quickshell.execDetached(["systemctl", "poweroff"]);
-            }
+        function brightnessDown(): void {
+            root.changeBrightness(-1);
+        }
+
+        function brightnessUp(): void {
+            root.changeBrightness(1);
+        }
+
+        function clock(): void {
+            popup.activate("clock");
         }
 
         function close(): void {
-            current = "";
+            popup.close();
         }
 
-        function toggle(name: string): void {
-            current = current === name ? "" : name;
+        function display(): void {
+            popup.activate("display");
         }
+
+        function emoji(): void {
+            popup.activate("emoji");
+        }
+
+        function launcher(): void {
+            root.openLauncher("apps");
+        }
+
+        function launcherMenu(mode: string): void {
+            root.openLauncher(mode);
+        }
+
+        function menu(): void {
+            root.openLauncher("go");
+        }
+
+        function openRecent(): void {
+            root.openLauncher("open");
+        }
+
+        function volumeDown(): void {
+            root.changeVolume(-1);
+        }
+
+        function volumeMute(): void {
+            root.changeVolume(0);
+        }
+
+        function volumeUp(): void {
+            root.changeVolume(1);
+        }
+
+        target: "shell"
     }
 }

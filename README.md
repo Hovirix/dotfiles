@@ -67,9 +67,29 @@ Powered by Mango and modern Rust/C tools.
 | Media        | YouTube desktop client | [FreeTube](https://github.com/FreeTubeApp/FreeTube)     | ![][ts]  |
 | Productivity | Document / PDF viewer  | [zathura](https://github.com/pwmt/zathura)              |  ![][c]  |
 
+## Quickshell
+
+`dot_config/quickshell/` contains:
+
+- `shell.qml`: feature instances, menu entries and the public `shell` IPC commands.
+- `features/<name>/Main.qml`: feature lifecycle and lazy panel construction.
+- `ui/`: shared styling and the single popup host.
+- `Theme.qml`: shared appearance defaults.
+
+Remove a feature's folder and its references in `shell.qml` together. Keep feature-specific logic inside its folder; bind native Quickshell models directly instead of copying them.
+
+Checks (inside a running Wayland session):
+
+```sh
+dbus-run-session -- python3 .opencode/tests/shell.py
+dbus-run-session -- quickshell -p .opencode/tests/notifications.qml
+```
+
+The shell check briefly opens each panel. Tests use a separate notification bus and do not change volume, brightness or monitor settings.
+
 ## Omarchy attribution
 
-The Quickshell UI incorporates code and design from [Omarchy's quattro branch](https://github.com/omacom/omarchy/tree/quattro), copyright (c) David Heinemeier Hansson, under the [MIT license](dot_config/quickshell/Ui/OMARCHY-LICENSE).
+The Quickshell UI incorporates code and design from [Omarchy's quattro branch](https://github.com/omacom/omarchy/tree/quattro), copyright (c) David Heinemeier Hansson, under the [MIT license](https://github.com/omacom/omarchy/blob/quattro/LICENSE).
 
 Adapted components include the menu and search model, application search, emoji picker and catalog, filter input, pointer handling, cursor surfaces, section headers, separators, switches, sliders, and OSD. The Catppuccin theme uses a peach accent, JetBrains Mono text, and separate Nerd Font glyphs; desktop actions are integrated with Mango rather than Omarchy's runtime scripts.
 
