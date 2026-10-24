@@ -33,9 +33,8 @@ function within(item, category, items) {
     return category === "root";
 }
 
-function score(label, query) {
+function score(label, needle) {
     var name = label.toLowerCase();
-    var needle = query.toLowerCase();
     if (name === needle)
         return 0;
     if (name.indexOf(needle) === 0)
@@ -118,8 +117,8 @@ function selfCheck() {
         && foldedListHeight(totals.slice(0, 3), 1000, 3, 28, 50) === 156;
 }
 
-function isSubmenu(id) {
-    return ["apps", "files", "system", "settings", "utilities", "screenrecording"].indexOf(id) >= 0;
+function isSubmenu(id, items) {
+    return id === "apps" || id === "files" || items.some(function (item) { return item.parent === id; });
 }
 
 function foldedListHeight(totals, available, spacing, peek, rowHeight) {

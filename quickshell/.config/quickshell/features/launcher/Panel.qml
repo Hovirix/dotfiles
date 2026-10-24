@@ -27,14 +27,8 @@ Ui.Panel {
     required property var popup
     property string query: ""
     readonly property var results: {
-        if (mode === "open" || mode === "go" && category === "files")
-            return files.entries.map(function (path) {
-                return {
-                    kind: "file",
-                    label: FileUtils.name(path),
-                    path: path
-                };
-            });
+        if (fileMenu)
+            return files.entries;
         if (mode === "apps")
             return apps.entries.map(function (entry) {
                 return {
@@ -49,7 +43,8 @@ Ui.Panel {
     readonly property int rowPeek: Math.round(Theme.menuRowHeight * 0.55)
     readonly property var rowTotals: {
         var totals = [], total = 0;
-        for (var i = 0; i < results.length; i++) {
+        var count = appMenu || fileMenu ? Math.min(10, results.length) : results.length;
+        for (var i = 0; i < count; i++) {
             if (i)
                 total += Theme.menuRowGap;
             total += rowHeight(results[i]);
@@ -57,7 +52,7 @@ Ui.Panel {
         }
         return totals;
     }
-    readonly property int rowsHeight: Utils.foldedListHeight(appMenu || fileMenu ? rowTotals.slice(0, 10) : rowTotals, availableRowsHeight, Theme.menuRowGap, rowPeek, Theme.menuRowHeight)
+    readonly property int rowsHeight: Utils.foldedListHeight(rowTotals, availableRowsHeight, Theme.menuRowGap, rowPeek, Theme.menuRowHeight)
     property int selectedIndex: 0
 
     function activate(): void {
@@ -70,9 +65,7 @@ Ui.Panel {
         } else if (row.kind === "file") {
             files.open(row.path);
             controller.close();
-        } else if (row.id === "emoji") {
-            controller.activate("emoji");
-        } else if (Utils.isSubmenu(row.id)) {
+        } else if (Utils.isSubmenu(row.id, items)) {
             history = history.concat([category]);
             enter(row.id);
         } else {
@@ -277,7 +270,7 @@ Ui.Panel {
                         required property int index
                         readonly property bool isApp: !!modelData && modelData.kind === "app"
                         required property var modelData
-                        readonly property bool submenu: !!modelData && Utils.isSubmenu(modelData.id)
+                        readonly property bool submenu: !!modelData && Utils.isSubmenu(modelData.id, root.items)
 
                         color: hasCursor ? Theme.cursorFill : "transparent"
                         height: root.rowHeight(modelData)

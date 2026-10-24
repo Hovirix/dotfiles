@@ -1,11 +1,36 @@
 function logicalWidth(output) {
     if (!output)
         return 0;
-    var match = String(output.resolution || "").match(/^(\d+)x/);
+    var match = String(output.resolution || "").match(/^(\d+)x(\d+)$/);
     var scale = Number(output.scale);
     if (!match || !isFinite(scale) || scale <= 0)
         return 0;
-    return Math.round(Number(match[1]) / scale);
+    var rotated = /^(?:flipped-)?(?:90|270)$/.test(output.transform);
+    return Math.round(Number(match[rotated ? 2 : 1]) / scale);
+}
+
+function layout(anchor, outputs) {
+    if (!anchor || !anchor.enabled)
+        return "";
+    var active = outputs.filter(function (output) { return output.enabled; });
+    if (active.length < 2)
+        return "";
+    var position = String(anchor.position).match(/^(-?\d+),\s*(-?\d+)$/);
+    if (!position)
+        return "Custom";
+    if (active.every(function (output) { return output.position === anchor.position; }))
+        return "Mirror";
+    var left = true, right = true;
+    for (var output of active) {
+        if (output.name === anchor.name)
+            continue;
+        var other = String(output.position).match(/^(-?\d+),\s*(-?\d+)$/);
+        if (!other || Number(other[2]) !== Number(position[2]))
+            return "Custom";
+        left = left && Number(other[1]) + logicalWidth(output) <= Number(position[1]);
+        right = right && Number(other[1]) >= Number(position[1]) + logicalWidth(anchor);
+    }
+    return left ? "Extend left" : right ? "Extend right" : "Custom";
 }
 
 function parse(text) {
@@ -54,18 +79,18 @@ function parse(text) {
         if (listedMode) {
             current.modes.push({
                 resolution: listedMode[1],
-                refresh: Math.round(Number(listedMode[2]))
+                refresh: Number(listedMode[2])
             });
         }
         var mode = line.match(/^\s+(\d+x\d+) px,\s*([\d.]+) Hz \([^)]*current[^)]*\)$/);
         if (mode) {
             current.resolution = mode[1];
-            current.refresh = `${Math.round(Number(mode[2]))} Hz`;
+            current.refresh = `${Number(mode[2])} Hz`;
             continue;
         }
         var scale = line.match(/^\s+Scale:\s*([\d.]+)$/);
         if (scale)
-            current.scale = Number(scale[1]).toFixed(2).replace(/\.00$/, "");
+            current.scale = String(Number(scale[1]));
         var position = line.match(/^\s+Position:\s*(.+)$/);
         if (position)
             current.position = position[1];

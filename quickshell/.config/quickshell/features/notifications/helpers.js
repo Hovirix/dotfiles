@@ -112,25 +112,24 @@ function duration(urgency, low, normal, critical) {
 }
 
 function groups(values, order) {
-    var rows = values.map(function (notification) {
-        return {
-            id: notification.id,
-            key: (iconName(notification.desktopEntry) || bounded(notification.appName, 256) || "Notification").toLowerCase(),
-            count: 1
-        };
-    });
-    rows.sort(function (a, b) { return (order[b.id] || 0) - (order[a.id] || 0); });
     var result = [], byApp = Object.create(null);
-    for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        var key = row.key;
-        if (byApp[key])
-            byApp[key].count++;
-        else {
-            byApp[key] = row;
-            result.push(row);
+    for (var i = 0; i < values.length; i++) {
+        var notification = values[i];
+        var key = (iconName(notification.desktopEntry) || bounded(notification.appName, 256) || "Notification").toLowerCase();
+        var group = byApp[key];
+        if (!group) {
+            group = {id: notification.id, key: key, count: 0, index: i, notification: notification};
+            byApp[key] = group;
+            result.push(group);
+        }
+        group.count++;
+        if ((order[notification.id] || 0) > (order[group.id] || 0)) {
+            group.id = notification.id;
+            group.index = i;
+            group.notification = notification;
         }
     }
+    result.sort(function (a, b) { return (order[b.id] || 0) - (order[a.id] || 0); });
     return result;
 }
 

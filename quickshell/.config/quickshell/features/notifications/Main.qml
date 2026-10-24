@@ -120,9 +120,7 @@ NotificationServer {
     function activateNewest(): string {
         if (!groups.length)
             return "none";
-        var newest = groups[0].id;
-        var notification = trackedNotifications.values.find(function (item) { return item.id === newest; });
-        return notification ? activate(notification) : "none";
+        return activate(groups[0].notification);
     }
 
     actionsSupported: true
@@ -134,7 +132,7 @@ NotificationServer {
         if (count === 0)
             targetMonitor = focusedMonitor;
         // Bound memory even when a sender floods us with critical alerts.
-        if (trackedNotifications.values.length >= 100)
+        if (!notification.tracked && count >= 100)
             trackedNotifications.values[0].expire();
         notification.tracked = true;
     }

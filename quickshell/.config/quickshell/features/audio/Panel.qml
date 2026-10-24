@@ -15,18 +15,8 @@ Ui.Panel {
     required property var controller
     property bool cursorActive: false
 
-    // Native models and their lifetime guards belong to the service.
-
-    //   "output"  — output slider + audio.output device list
-    //   "input"   — input slider + audio.source device list
-    //   "streams" — per-app playback streams
-    // selectedIndex semantics within a section:
-    //   -1            → on the slider row (h/l adjusts volume, m/Enter mute)
-    //   0..N-1        → on the Nth device/stream row
+    // -1 selects a section's slider; non-negative indices select devices/streams.
     property string focusSection: "output"
-    // The hero switch mirrors the output mute only. It used to track
-    // output+input combined, which left it stuck on whenever the mic stayed
-    // unmuted even though the output had muted.
     readonly property bool hasOutput: !!(audio.output && audio.output.audio)
 
     // "header" is a virtual section for the hero output mute toggle; it sits
@@ -36,18 +26,7 @@ Ui.Panel {
     readonly property int menuWidth: Theme.popupWidthStandard
     property int selectedIndex: -1
 
-    // Order of visible sections, recomputed reactively so dropping a section
-    // (e.g. no input devices) doesn't leave the cursor pointing at it.
-    readonly property var visibleSections: {
-        var list = [];
-        if (sectionVisible("output"))
-            list.push("output");
-        if (sectionVisible("input"))
-            list.push("input");
-        if (sectionVisible("streams"))
-            list.push("streams");
-        return list;
-    }
+    readonly property var visibleSections: ["output", "input", "streams"].filter(sectionVisible)
 
     // Enter/Space: activate whatever the cursor is on.
     function activateCursor(): void {
@@ -119,12 +98,8 @@ Ui.Panel {
             return;
         }
         var count = sectionCount(focusSection);
-        var hasSlider = sectionHasSlider(focusSection);
-        var floor = hasSlider ? -1 : 0;
-        if (selectedIndex > count - 1)
-            selectedIndex = Math.max(floor, count - 1);
-        if (selectedIndex < floor)
-            selectedIndex = floor;
+        var floor = sectionHasSlider(focusSection) ? -1 : 0;
+        selectedIndex = Math.max(floor, Math.min(count - 1, selectedIndex));
     }
 
     // Tab keeps navigation at the section level: output, input, then app
@@ -288,9 +263,6 @@ Ui.Panel {
     }
 
     Component.onCompleted: Qt.callLater(resetScroll)
-
-    // The hero switch mirrors the output mute, so it always follows what the
-    // output row below does. Input keeps its own mute in its section.
 
     Connections {
         function onModelsChanged() {
@@ -476,28 +448,12 @@ Ui.Panel {
                                 value: audio.outputVolume
                             }
 
-                            // Output level meter docked under the slider so this row
-                            // keeps the exact geometry of the input slider row.
-                            Rectangle {
+                            LevelMeter {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.top: outputSlider.bottom
-                                color: Qt.rgba(Theme.foreground.r, Theme.foreground.g, Theme.foreground.b, 0.18)
-                                height: Theme.space05
                                 opacity: audio.outputMuted ? 0.35 : 1.0
-
-                                Rectangle {
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.left
-                                    anchors.top: parent.top
-                                    width: parent.width * Math.max(0, Math.min(1, audio.outputPeak))
-
-                                    Behavior on width {
-                                        NumberAnimation {
-                                            duration: 70
-                                        }
-                                    }
-                                }
+                                peak: audio.outputPeak
                             }
                         }
                     }
@@ -587,28 +543,12 @@ Ui.Panel {
                                 value: audio.inputVolume
                             }
 
-                            // Mic level meter docked under the slider so this row
-                            // keeps the exact geometry of the output slider row.
-                            Rectangle {
+                            LevelMeter {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.top: inputSlider.bottom
-                                color: Qt.rgba(Theme.foreground.r, Theme.foreground.g, Theme.foreground.b, 0.18)
-                                height: Theme.space05
                                 opacity: audio.inputMuted ? 0.35 : 1.0
-
-                                Rectangle {
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.left
-                                    anchors.top: parent.top
-                                    width: parent.width * Math.max(0, Math.min(1, audio.inputPeak))
-
-                                    Behavior on width {
-                                        NumberAnimation {
-                                            duration: 70
-                                        }
-                                    }
-                                }
+                                peak: audio.inputPeak
                             }
                         }
                     }
@@ -660,7 +600,27 @@ Ui.Panel {
         }
     }
 
-    // ---- Reusable inline components ----
+    component LevelMeter: Rectangle {
+        id: meter
+
+        required property real peak
+
+        color: Qt.rgba(Theme.foreground.r, Theme.foreground.g, Theme.foreground.b, 0.18)
+        height: Theme.space05
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.top: parent.top
+            width: parent.width * Math.max(0, Math.min(1, meter.peak))
+
+            Behavior on width {
+                NumberAnimation {
+                    duration: 70
+                }
+            }
+        }
+    }
 
     // Device row — cursor target inside the "output" or "input" section.
 

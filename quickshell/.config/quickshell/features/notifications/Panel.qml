@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Services.Notifications
 import "../.."
 
 PanelWindow {
@@ -35,17 +34,14 @@ PanelWindow {
         width: parent.width
 
         Repeater {
-            model: window.notifications.trackedNotifications
+            // Preserve stack order while creating only each group's visible toast.
+            model: window.notifications.groups.slice().sort((a, b) => a.index - b.index)
 
             Toast {
-                required property Notification modelData
+                required property var modelData
 
-                notification: modelData
-                groupCount: {
-                    var group = window.notifications.groups.find(group => group.id === modelData.id);
-                    return group ? group.count : 0;
-                }
-                visible: groupCount > 0
+                notification: modelData.notification
+                groupCount: modelData.count
                 width: stack.width
             }
         }

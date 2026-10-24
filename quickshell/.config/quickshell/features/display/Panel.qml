@@ -5,6 +5,7 @@ import QtQuick.Controls as Controls
 
 import "../.."
 import "../../ui" as Ui
+import "outputs.js" as Utils
 
 Ui.Panel {
     id: root
@@ -47,7 +48,7 @@ Ui.Panel {
         if (options.length === 0)
             return;
         editingSetting = true;
-        optionIndex = Math.max(0, options.indexOf(settingCurrentValue()));
+        optionIndex = Math.max(0, options.indexOf(settingValue(settingIndex)));
     }
 
     function focusMenu(): void {
@@ -74,13 +75,11 @@ Ui.Panel {
             return qsTr("Extend left");
         if (value === "Mirror")
             return qsTr("Mirror");
+        if (value === "Custom")
+            return qsTr("Custom");
         if (value === "normal")
             return qsTr("normal");
         return value;
-    }
-
-    function settingCurrentValue(): string {
-        return settingValue(settingIndex);
     }
 
     function settingOptions(): list<string> {
@@ -95,7 +94,7 @@ Ui.Panel {
             }
         } else if (settingIndex === 1) {
             for (var j = 0; j < modes.length; j++) {
-                if (modes[j].resolution === selectedOutput.resolution)
+                if (modes[j].resolution === selectedOutput.resolution && list.indexOf(`${modes[j].refresh} Hz`) < 0)
                     list.push(`${modes[j].refresh} Hz`);
             }
         } else if (settingIndex === 2) {
@@ -103,7 +102,7 @@ Ui.Panel {
         } else if (settingIndex === 3) {
             list = ["normal", "90", "180", "270"];
         } else {
-            list = ["Extend right", "Extend left", "Mirror"];
+            list = selectedOutput.enabled && display.enabledCount > 1 ? ["Extend right", "Extend left", "Mirror"] : [];
         }
         return list;
     }
@@ -119,7 +118,7 @@ Ui.Panel {
             return selectedOutput.scale;
         if (index === 3)
             return selectedOutput.transform;
-        return selectedOutput.position === "0,0" ? "Mirror" : "Extend right";
+        return Utils.layout(selectedOutput, display.outputs);
     }
 
     function toggleSelectedOutput(): void {
@@ -156,9 +155,7 @@ Ui.Panel {
                 root.optionIndex = Math.max(0, Math.min(options.length - 1, root.optionIndex + (dx !== 0 ? dx : dy)));
             } else if (dy !== 0) {
                 root.cursorActive = true;
-                if (root.editingSetting) {
-                    root.editingSetting = false;
-                } else if (root.focusArea === "outputs") {
+                if (root.focusArea === "outputs") {
                     root.moveCursor(dy);
                 } else {
                     root.settingIndex = Math.max(0, Math.min(4, root.settingIndex + dy));

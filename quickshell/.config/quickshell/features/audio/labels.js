@@ -18,10 +18,6 @@ function isAudioSource(node) {
     return mediaClass.indexOf("Audio/Source") !== -1 || mediaClass.indexOf("AudioSource") !== -1 || mediaClass.indexOf("Source") !== -1;
 }
 
-function listSnapshot(list) {
-    return list && list.slice ? list.slice() : [];
-}
-
 function outputVolumeName(volume, muted) {
     if (muted)
         return qsTr("Muted");

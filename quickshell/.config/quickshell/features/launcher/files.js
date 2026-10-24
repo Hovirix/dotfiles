@@ -21,7 +21,19 @@ function icon(path) {
 }
 
 function name(path) {
-    var parts = String(path).split("/");
-    return parts[parts.length - 1];
+    return path.slice(path.lastIndexOf("/") + 1);
 }
 
+function entries(text) {
+    var paths = text.split("\0");
+    if (paths[paths.length - 1] === "")
+        paths.pop();
+    return paths.map(function (path) {
+        return {kind: "file", label: name(path), path: path, searchText: path.toLowerCase()};
+    });
+}
+
+function search(items, query) {
+    var needle = query.trim().toLowerCase();
+    return needle ? items.filter(function (item) { return item.searchText.indexOf(needle) >= 0; }) : items;
+}

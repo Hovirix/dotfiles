@@ -56,12 +56,14 @@ QtObject {
     // Reposition active outputs together so layout selection is atomic.
     // The currently selected output is the anchor for the extended desktop.
     function setLayout(anchor: var, layout: string): void {
-        if (!anchor)
+        if (!anchor || !anchor.enabled || apply.running || ["Mirror", "Extend left", "Extend right"].indexOf(layout) < 0)
             return;
         var active = outputs.filter(function (output) {
             return output.enabled;
         });
         if (active.length < 2)
+            return;
+        if (active.some(function (output) { return Utils.logicalWidth(output) <= 0; }))
             return;
         var others = active.filter(function (output) {
             return output.name !== anchor.name;

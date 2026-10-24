@@ -247,75 +247,37 @@ ShellRoot {
         screen: root.focusedScreen
 
         actions: ({
-                audio: function () {
-                    popup.toggle(audio.panel);
-                },
+                audio: () => popup.toggle(audio.panel),
                 display: function () {
                     popup.toggle(display.panel);
                     if (popup.content === display.panel)
                         display.refresh();
                 },
-                clock: function () {
-                    popup.toggle(clock.panel);
-                },
-                emoji: function () {
-                    popup.toggle(emoji.panel);
-                },
+                clock: () => popup.toggle(clock.panel),
+                emoji: () => popup.toggle(emoji.panel),
                 brightnessUp: function () {
                     popup.close();
-                    brightness.increase();
-                    osd.showBrightness();
+                    root.changeBrightness(1);
                 },
                 brightnessDown: function () {
                     popup.close();
-                    brightness.decrease();
-                    osd.showBrightness();
+                    root.changeBrightness(-1);
                 },
-                screenshot: function () {
-                    root.run(["hx-screenshot"]);
-                },
-                recordSilent: function () {
-                    root.run(["hx-record"]);
-                },
-                recordStop: function () {
-                    root.run(["hx-record", "--stop"]);
-                },
-                reminder: function () {
-                    popup.open(reminderPanel);
-                },
-                recordDesktop: function () {
-                    root.run(["hx-record", "--desktop-audio"]);
-                },
-                recordMicrophone: function () {
-                    root.run(["hx-record", "--audio"]);
-                },
-                screenshotSave: function () {
-                    root.run(["hx-screenshot", "--save"]);
-                },
-                idle: function () {
-                    root.run(["hx-idle-toggle"]);
-                },
-                keyboardLayout: function () {
-                    root.run(["keyboard-layout-toggle"]);
-                },
-                network: function () {
-                    root.run(["foot", "--app-id", "tui", "-e", "impala"]);
-                },
-                bluetooth: function () {
-                    root.run(["foot", "--app-id", "tui", "-e", "bluetui"]);
-                },
-                lock: function () {
-                    root.run(["hx-lock"]);
-                },
-                suspend: function () {
-                    root.run(["hx-suspend"]);
-                },
-                reboot: function () {
-                    root.run(["systemctl", "reboot"]);
-                },
-                shutdown: function () {
-                    root.run(["systemctl", "poweroff"]);
-                }
+                screenshot: () => root.run(["hx-screenshot"]),
+                recordSilent: () => root.run(["hx-record"]),
+                recordStop: () => root.run(["hx-record", "--stop"]),
+                reminder: () => popup.open(reminderPanel),
+                recordDesktop: () => root.run(["hx-record", "--desktop-audio"]),
+                recordMicrophone: () => root.run(["hx-record", "--audio"]),
+                screenshotSave: () => root.run(["hx-screenshot", "--save"]),
+                idle: () => root.run(["hx-idle-toggle"]),
+                keyboardLayout: () => root.run(["keyboard-layout-toggle"]),
+                network: () => root.run(["foot", "--app-id", "tui", "-e", "impala"]),
+                bluetooth: () => root.run(["foot", "--app-id", "tui", "-e", "bluetui"]),
+                lock: () => root.run(["hx-lock"]),
+                suspend: () => root.run(["hx-suspend"]),
+                reboot: () => root.run(["systemctl", "reboot"]),
+                shutdown: () => root.run(["systemctl", "poweroff"])
             })
     }
 

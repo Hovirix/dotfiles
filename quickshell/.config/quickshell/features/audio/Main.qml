@@ -103,9 +103,9 @@ Item {
     function refreshDisplayAudioModels(): void {
         if (!active)
             return;
-        displayAudioSinks = Utils.listSnapshot(audioSinks);
-        displayAudioSources = Utils.listSnapshot(audioSources);
-        displayAudioStreams = Utils.listSnapshot(audioStreams);
+        displayAudioSinks = audioSinks.slice();
+        displayAudioSources = audioSources.slice();
+        displayAudioStreams = audioStreams.slice();
         modelsChanged();
     }
 
@@ -164,13 +164,11 @@ Item {
     }
 
     function volumeDown(): void {
-        if (output && output.audio)
-            output.audio.volume = Math.max(0, Math.min(1, output.audio.volume - 0.02));
+        setOutputVolume(outputVolume - 0.02);
     }
 
     function volumeUp(): void {
-        if (output && output.audio)
-            output.audio.volume = Math.max(0, Math.min(1, output.audio.volume + 0.02));
+        setOutputVolume(outputVolume + 0.02);
     }
 
     Component.onCompleted: if (active)
@@ -194,7 +192,11 @@ Item {
     }
 
     PwObjectTracker {
-        objects: root.audioStreams
+        objects: root.candidateStreams
+    }
+
+    PwObjectTracker {
+        objects: root.active ? [root.source] : []
     }
 
     PwNodePeakMonitor {
