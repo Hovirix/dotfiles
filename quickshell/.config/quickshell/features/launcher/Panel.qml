@@ -17,6 +17,7 @@ Ui.Panel {
     property int cardTop: -1
     property string category: "root"
     required property var controller
+    required property var files
     property var history: []
     required property var items
     property real maxRowsHeight: -1
@@ -208,10 +209,10 @@ Ui.Panel {
         query: root.mode === "apps" || root.category === "apps" || root.mode === "go" && root.category === "root" ? root.query : ""
     }
 
-    Files {
-        id: files
-
-        query: root.query
+    Binding {
+        target: root.files
+        property: "query"
+        value: root.query
     }
 
     Ui.Navigation {

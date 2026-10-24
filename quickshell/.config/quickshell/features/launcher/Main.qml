@@ -9,11 +9,16 @@ Scope {
     readonly property Component panel: Component {
         Panel {
             controller: root.popup
+            files: fileSearch
             items: root.items
             popup: root.popup
         }
     }
     required property Ui.Popup popup
+
+    Files {
+        id: fileSearch
+    }
 
     function open(mode: string): void {
         popup.open(panel);
