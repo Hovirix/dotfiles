@@ -184,7 +184,7 @@ QtObject {
         const pct = Math.round(root.percentage);
         const remaining = Utils.timeShort(root.timeRemaining);
         const body = remaining !== "" ? qsTr("%1 · %2% · %3 remaining").arg(label).arg(pct).arg(remaining) : qsTr("%1 · %2% remaining").arg(label).arg(pct);
-        root.notifier.exec(["notify-send", "-a", "Battery", "-u", urgency, "-i", root.levelIcon(false), qsTr("Battery"), body]);
+        root.notifier.exec(["notify-send", "-a", "Battery", "-u", urgency, "-i", root.levelIcon(false), qsTr("%1 battery").arg(label), body]);
     }
 
     function sendPlugged(): void {
@@ -195,8 +195,9 @@ QtObject {
             body = qsTr("Fully charged · %1%").arg(pct);
         else if (remaining !== "")
             body = qsTr("Charging · %1% · %2 to full").arg(pct).arg(remaining);
+        const title = root.state === UPowerDeviceState.FullyCharged ? qsTr("Battery fully charged") : qsTr("Battery charging");
         // battery-state hint lets the panel paint title and border green.
-        root.notifier.exec(["notify-send", "-a", "Battery", "-u", "low", "-i", root.levelIcon(true), "-h", "string:battery-state:charging", qsTr("Battery"), body]);
+        root.notifier.exec(["notify-send", "-a", "Battery", "-u", "low", "-i", root.levelIcon(true), "-h", "string:battery-state:charging", title, body]);
     }
 
     // "3h 42m" / "42m" / "" when unknown.

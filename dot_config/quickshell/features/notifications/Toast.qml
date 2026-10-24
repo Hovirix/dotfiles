@@ -5,18 +5,51 @@ import Quickshell.Services.Notifications
 import Quickshell.Widgets
 import "../.."
 import "../../ui" as Ui
+import "helpers.js" as Utils
 
 Ui.Panel {
     id: root
 
     required property Notification notification
+    property int groupCount: 1
+    readonly property string app: Utils.bounded(notification.appName, 256) || Utils.iconName(notification.desktopEntry) || "Notification"
+    readonly property var entry: DesktopEntries.heuristicLookup(Utils.iconName(notification.desktopEntry) || app)
+    readonly property string iconSource: {
+        var names = [notification.appIcon, Utils.iconName(notification.image), notification.desktopEntry, app,
+                     app.toLowerCase().replace(/\s+/g, "-")];
+        for (var i = 0; i < names.length; i++) {
+            var name = Utils.iconName(names[i]);
+            var path = name ? Quickshell.iconPath(name, true) : "";
+            if (path)
+                return path;
+        }
+        return entry ? Utils.localImage(entry.icon) || (Utils.iconName(entry.icon) ? Quickshell.iconPath(entry.icon, true) : "") : "";
+    }
+    readonly property string pictureSource: Utils.imageSource(notification.image) || Utils.localImage(notification.appIcon)
+    property bool pictureFailed: false
+    onPictureSourceChanged: pictureFailed = false
+    readonly property bool battery: notification.appName === "Battery"
+    readonly property color accent: battery && notification.hints["battery-state"] === "charging" ? Theme.success
+        : notification.urgency === 2 ? Theme.destructive : notification.urgency === 0 ? Theme.mutedForeground : Theme.primary
+    readonly property int peek: Math.max(0, Math.min(2, groupCount - 1)) * Theme.space1
 
-    implicitHeight: card.implicitHeight
+    implicitHeight: card.implicitHeight + peek
+
+    Rectangle {
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        border.color: root.accent
+        border.width: Theme.borderWidth
+        color: Theme.popover
+        height: card.height
+        visible: root.peek > 0
+        width: parent.width - Theme.space2
+    }
 
     Rectangle {
         id: card
 
-        border.color: root.notification.urgency === NotificationUrgency.Critical ? Theme.destructive : Theme.primary
+        border.color: root.accent
         border.width: Theme.popupBorderWidth
         color: Theme.popover
         height: implicitHeight
@@ -26,18 +59,18 @@ Ui.Panel {
         Item {
             id: icon
 
-            anchors.verticalCenter: parent.verticalCenter
             height: width
             width: Theme.notificationImageSize
             x: Theme.space3
+            y: Theme.space3
 
             IconImage {
                 id: image
 
                 anchors.fill: parent
                 asynchronous: true
-                // Only theme names: sender-controlled file paths are not loaded.
-                source: /^[a-zA-Z0-9_.-]{1,256}$/.test(root.notification.appIcon) ? Quickshell.iconPath(root.notification.appIcon, true) : ""
+                source: root.pictureSource && !root.pictureFailed ? root.pictureSource : root.iconSource
+                onStatusChanged: if (status === Image.Error) root.pictureFailed = true
             }
 
             Controls.Label {
@@ -59,22 +92,12 @@ Ui.Panel {
             y: Theme.space3
 
             Controls.Label {
-                color: Theme.mutedForeground
-                elide: Text.ElideRight
-                font.pixelSize: Theme.fontSizeCaption
-                text: root.notification.appName.slice(0, 256)
-                textFormat: Text.PlainText
-                visible: text !== ""
-                width: parent.width
-            }
-
-            Controls.Label {
-                color: root.notification.urgency === NotificationUrgency.Critical ? Theme.destructive : Theme.foreground
+                color: root.battery || root.notification.urgency === 2 ? root.accent : Theme.foreground
                 elide: Text.ElideRight
                 font.pixelSize: Theme.fontSizeTitle
                 font.weight: Theme.fontWeightMedium
                 maximumLineCount: 3
-                text: root.notification.summary.slice(0, 2048)
+                text: Utils.bounded(root.notification.summary, 2048) + (root.groupCount > 1 ? " · " + root.groupCount : "")
                 textFormat: Text.PlainText
                 width: parent.width
                 wrapMode: Text.Wrap
@@ -85,12 +108,13 @@ Ui.Panel {
                 elide: Text.ElideRight
                 font.pixelSize: Theme.fontSizeBody
                 maximumLineCount: 4
-                text: root.notification.body.slice(0, 32768)
-                textFormat: Text.PlainText
+                text: Utils.render(root.notification.body)
+                textFormat: Text.StyledText
                 visible: text !== ""
                 width: parent.width
                 wrapMode: Text.Wrap
             }
+
         }
     }
 }
