@@ -1,9 +1,8 @@
-
 ## Context
 
-You're managing a dotfiles repository using chezmoi
+Manage this dotfiles repository with chezmoi.
 
 ## Rules
-- Strict minimal code
-- Follow KISS DRY
-- Chezmoi folder is autoritative apply uing chezmoi apply and reads configs in this folder
+- Keep code minimal. Follow KISS and DRY.
+- Treat the chezmoi source directory as authoritative. Read and edit configurations here, then apply changes with `chezmoi apply`.
+- Never edit `README.md` unless explicitly asked.
