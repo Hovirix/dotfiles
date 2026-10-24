@@ -5,13 +5,19 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+temporary=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$temporary"' 0
+trap 'exit 1' HUP INT TERM
+status=0
+
 for target in "$@"; do
   if [ ! -e "$target" ]; then
     echo "Error: '$target' does not exist" >&2
+    status=1
     continue
   fi
 
-  name=$(basename "$target")
+  name=$(basename -- "$target")
 
   echo "Select format for '$name':"
   echo "1) tar.gz"
@@ -22,31 +28,39 @@ for target in "$@"; do
   read -r ans || exit 1
 
   case "$ans" in
-    1)
-      archive="${name}.tar.gz"
-      tar czf "$archive" "$target"
-      ;;
-    2)
-      archive="${name}.tar.bz2"
-      tar cjf "$archive" "$target"
-      ;;
-    3)
-      archive="${name}.zip"
-      zip -r "$archive" "$target"
-      ;;
-    4)
-      archive="${name}.7z"
-      7z a "$archive" "$target"
-      ;;
+    1) suffix=tar.gz ;;
+    2) suffix=tar.bz2 ;;
+    3) suffix=zip ;;
+    4) suffix=7z ;;
     *)
       echo "Invalid choice, skipping '$name'." >&2
+      status=1
       continue
       ;;
   esac
 
-  if [ $? -eq 0 ]; then
+  archive="${name}.${suffix}"
+  if [ -e "$archive" ] || [ -L "$archive" ]; then
+    echo "Error: '$archive' already exists" >&2
+    status=1
+    continue
+  fi
+
+  case "$ans" in
+    1) tar czf "$temporary/$archive" -- "$target" ;;
+    2) tar cjf "$temporary/$archive" -- "$target" ;;
+    3) zip -r "$temporary/$archive" -- "$target" ;;
+    4) 7z a "$temporary/$archive" -- "$target" ;;
+  esac
+
+  # Publish without replacing a file created by another writer.
+  if [ $? -eq 0 ] && mv -nT -- "$temporary/$archive" "$archive" && [ ! -e "$temporary/$archive" ]; then
     echo "Created: $archive"
   else
     echo "Failed to create archive for '$target'" >&2
+    status=1
   fi
+  rm -f -- "$temporary/$archive" || status=1
 done
+
+exit "$status"

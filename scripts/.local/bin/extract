@@ -5,9 +5,11 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
+status=0
 for f in "$@"; do
   if [ ! -f "$f" ]; then
     echo "Error: '$f' is not a valid file" >&2
+    status=1
     continue
   fi
 
@@ -22,6 +24,12 @@ for f in "$@"; do
     *.zip) unzip "$f" ;;
     *.rar) unrar x "$f" ;;
     *.7z) 7z x "$f" ;;
-    *) echo "Warning: '$f' cannot be extracted automatically" >&2 ;;
-  esac
+    *)
+      echo "Warning: '$f' cannot be extracted automatically" >&2
+      status=1
+      continue
+      ;;
+  esac || status=1
 done
+
+exit "$status"
