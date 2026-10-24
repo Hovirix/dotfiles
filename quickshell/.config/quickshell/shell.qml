@@ -220,7 +220,7 @@ ShellRoot {
             {
                 id: "network",
                 label: qsTr("Network"),
-                icon: "󰖩",
+                icon: "",
                 parent: "settings"
             },
             {
