@@ -21,14 +21,14 @@ Item {
         anchors.centerIn: parent
         border.color: Theme.normalBorder
         border.width: root.checked ? 0 : Theme.borderWidth
-        color: root.checked ? Theme.currentFill : Theme.normalFill
+        color: root.checked ? Theme.primary : Theme.normalFill
         height: Theme.switchHeight
         width: Math.round(Theme.switchHeight * 1.9)
 
         Rectangle {
             readonly property int inset: Math.max(1, Math.round((parent.height - height) / 2))
 
-            color: root.checked ? Theme.foreground : Qt.darker(Theme.foreground, 1.25)
+            color: root.checked ? Theme.primaryForeground : Qt.darker(Theme.foreground, 1.25)
             height: width
             width: Math.round(Theme.switchHeight * 0.72)
             x: (root.checked !== LayoutMirroring.enabled ? parent.width - width - inset : inset)

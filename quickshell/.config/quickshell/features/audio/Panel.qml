@@ -328,6 +328,7 @@ Ui.Panel {
                     Controls.Label {
                         id: heroIcon
 
+                        color: Theme.primary
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
                         font.family: Theme.iconFontFamily
