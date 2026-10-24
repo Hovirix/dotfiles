@@ -45,7 +45,7 @@ cleanup() {
     wait 2>/dev/null || true
     rm -f "$state.pid" ${geometry_file:+"$geometry_file"}
     if [[ "$record_status" == 0 && -s "$file" ]]; then
-        notify-send -i media-record "Recording saved" "$file" 9>&- || true
+        notify-send -i camera-video "Screen recording saved" "Saved to: $file" 9>&- || true
     fi
 }
 trap cleanup EXIT
@@ -104,7 +104,6 @@ mkdir -p "$dir"
 file="$dir/recording-$(date '+%Y-%m-%d_%H-%M-%S-%N').mkv"
 wf-recorder -g "$geometry" "${audio[@]}" -f "$file" 9>&- &
 recorder=$!
-notify-send -i media-record "Recording" "Started; hx-record --stop to save" 9>&- || true
 record_status=0
 wait "$recorder" || record_status=$?
 recorder=""
