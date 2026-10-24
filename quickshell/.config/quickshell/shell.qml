@@ -12,10 +12,13 @@ import "features/display" as Display
 import "features/launcher" as Launcher
 import "features/emoji" as Emoji
 import "features/notifications" as Notifications
+import "features/reminder" as Reminder
 import "ui" as Ui
 
 ShellRoot {
     id: root
+
+    readonly property var focusedScreen: Quickshell.screens.find(output => output.name === notifications.focusedMonitor) || Quickshell.screens[0] || null
 
     function changeBrightness(direction: int): void {
         if (direction > 0)
@@ -51,9 +54,6 @@ ShellRoot {
     }
 
     Battery.Main {
-        id: battery
-
-        popup: popup
     }
 
     Brightness.Main {
@@ -85,6 +85,23 @@ ShellRoot {
     Launcher.Main {
         id: launcher
 
+        property bool recording: false
+
+        Process {
+            id: recordingStatus
+
+            command: ["hx-record", "--status"]
+            onExited: (exitCode, exitStatus) => launcher.recording = exitCode === 0
+        }
+
+        Timer {
+            interval: 1000
+            repeat: true
+            running: popup.content === launcher.panel
+            triggeredOnStart: true
+            onTriggered: if (!recordingStatus.running) recordingStatus.running = true
+        }
+
         items: [
             {
                 id: "apps",
@@ -102,7 +119,13 @@ ShellRoot {
                 id: "emoji",
                 label: qsTr("Emoji"),
                 icon: "",
-                parent: "root"
+                parent: "utilities"
+            },
+            {
+                id: "reminder",
+                label: qsTr("Reminder"),
+                icon: "󰃭",
+                parent: "utilities"
             },
             {
                 id: "system",
@@ -115,6 +138,48 @@ ShellRoot {
                 label: qsTr("Settings"),
                 icon: "",
                 parent: "root"
+            },
+            {
+                id: "utilities",
+                label: qsTr("Utilities"),
+                icon: "",
+                parent: "root"
+            },
+            {
+                id: "screenshotSave",
+                label: qsTr("Screenshot"),
+                icon: "",
+                parent: "utilities"
+            },
+            {
+                id: "screenrecording",
+                label: qsTr("Screenrecording"),
+                icon: "",
+                parent: "utilities"
+            },
+            {
+                id: "recordStop",
+                label: qsTr("Stop recording"),
+                icon: "",
+                parent: "screenrecording"
+            },
+            {
+                id: "recordSilent",
+                label: qsTr("With no audio"),
+                icon: "",
+                parent: "screenrecording"
+            },
+            {
+                id: "recordDesktop",
+                label: qsTr("With desktop audio"),
+                icon: "",
+                parent: "screenrecording"
+            },
+            {
+                id: "recordMicrophone",
+                label: qsTr("With desktop + microphone audio"),
+                icon: "",
+                parent: "screenrecording"
             },
             {
                 id: "lock",
@@ -141,24 +206,6 @@ ShellRoot {
                 parent: "system"
             },
             {
-                id: "idle",
-                label: qsTr("Toggle Idle Lock"),
-                icon: "󰒲",
-                parent: "system"
-            },
-            {
-                id: "screenshot",
-                label: qsTr("Screenshot"),
-                icon: "",
-                parent: "system"
-            },
-            {
-                id: "screenshotSave",
-                label: qsTr("Save Screenshot"),
-                icon: "",
-                parent: "system"
-            },
-            {
                 id: "audio",
                 label: qsTr("Audio"),
                 icon: "",
@@ -181,50 +228,27 @@ ShellRoot {
                 label: qsTr("Bluetooth"),
                 icon: "󰂯",
                 parent: "settings"
-            },
-            {
-                id: "battery",
-                label: qsTr("Battery"),
-                icon: "󰁹",
-                parent: "settings"
-            },
-            {
-                id: "brightnessUp",
-                label: qsTr("Brightness Up"),
-                icon: "󰃟",
-                parent: "settings"
-            },
-            {
-                id: "brightnessDown",
-                label: qsTr("Brightness Down"),
-                icon: "󰃞",
-                parent: "settings"
-            },
-            {
-                id: "clock",
-                label: qsTr("Clock"),
-                icon: "󰥔",
-                parent: "settings"
-            },
-            {
-                id: "keyboardLayout",
-                label: qsTr("Toggle Keyboard Layout"),
-                icon: "󰌌",
-                parent: "settings"
             }
-        ]
+        ].filter(item => item.id !== "recordStop" || launcher.recording)
         popup: popup
+    }
+
+    Component {
+        id: reminderPanel
+
+        Reminder.Panel {
+            controller: popup
+        }
     }
 
     Ui.Popup {
         id: popup
 
+        screen: root.focusedScreen
+
         actions: ({
                 audio: function () {
                     popup.toggle(audio.panel);
-                },
-                battery: function () {
-                    popup.toggle(battery.panel);
                 },
                 display: function () {
                     popup.toggle(display.panel);
@@ -249,6 +273,21 @@ ShellRoot {
                 },
                 screenshot: function () {
                     root.run(["hx-screenshot"]);
+                },
+                recordSilent: function () {
+                    root.run(["hx-record"]);
+                },
+                recordStop: function () {
+                    root.run(["hx-record", "--stop"]);
+                },
+                reminder: function () {
+                    popup.open(reminderPanel);
+                },
+                recordDesktop: function () {
+                    root.run(["hx-record", "--desktop-audio"]);
+                },
+                recordMicrophone: function () {
+                    root.run(["hx-record", "--audio"]);
                 },
                 screenshotSave: function () {
                     root.run(["hx-screenshot", "--save"]);
@@ -283,6 +322,8 @@ ShellRoot {
     Ui.Osd {
         id: osd
 
+        screen: root.focusedScreen
+
         property bool isVolume: true
 
         function showBrightness(): void {
@@ -307,10 +348,6 @@ ShellRoot {
 
         function audio(): void {
             popup.activate("audio");
-        }
-
-        function battery(): void {
-            popup.activate("battery");
         }
 
         function brightnessDown(): void {

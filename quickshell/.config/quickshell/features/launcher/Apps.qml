@@ -14,6 +14,11 @@ Item {
     readonly property var runningWindows: ToplevelManager.toplevels
 
     function launch(entry: DesktopEntry): void {
+        if (!focusExisting(entry))
+            entry.execute();
+    }
+
+    function focusExisting(entry: DesktopEntry): bool {
         var id = String(entry.id).toLowerCase();
         var startupClass = String(entry.startupClass || "").toLowerCase();
         var webApp = "";
@@ -29,10 +34,10 @@ Item {
             var appId = String(window.appId || "").toLowerCase();
             if (appId === id || (startupClass && appId === startupClass) || (!startupClass && webApp && appId.indexOf(webApp) === 0)) {
                 window.activate();
-                return;
+                return true;
             }
         }
-        entry.execute();
+        return false;
     }
 
     Component.onCompleted: console.assert(Utils.sortedEntries([

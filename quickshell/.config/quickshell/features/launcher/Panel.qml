@@ -11,6 +11,8 @@ import "search.js" as Utils
 Ui.Panel {
     id: root
 
+    readonly property bool appMenu: mode === "apps" || category === "apps"
+    readonly property bool fileMenu: mode === "open" || category === "files"
     readonly property real availableRowsHeight: Math.max(0, Math.min(popup.screenH * 0.7, popup.screenH - (cardTop >= 0 ? cardTop : Theme.menuScreenMargin) - Theme.menuScreenMargin - Theme.menuPadding * 2 - Theme.menuHeaderHeight - Theme.space15, maxRowsHeight >= 0 ? maxRowsHeight : Infinity))
     property int cardTop: -1
     property string category: "root"
@@ -20,7 +22,7 @@ Ui.Panel {
     property real maxRowsHeight: -1
     readonly property int menuHeight: Theme.menuPadding * 2 + Theme.menuHeaderHeight + Theme.space15 + rowsHeight
     readonly property bool menuStyle: true
-    readonly property int menuWidth: Theme.popupWidthCompact
+    readonly property int menuWidth: fileMenu ? Theme.popupWidthPicker : Theme.popupWidthCompact
     property string mode: "go"
     required property var popup
     property string query: ""
@@ -55,7 +57,7 @@ Ui.Panel {
         }
         return totals;
     }
-    readonly property int rowsHeight: Utils.foldedListHeight(rowTotals, availableRowsHeight, Theme.menuRowGap, rowPeek, Theme.menuRowHeight)
+    readonly property int rowsHeight: Utils.foldedListHeight(appMenu || fileMenu ? rowTotals.slice(0, 10) : rowTotals, availableRowsHeight, Theme.menuRowGap, rowPeek, Theme.menuRowHeight)
     property int selectedIndex: 0
 
     function activate(): void {
@@ -91,6 +93,10 @@ Ui.Panel {
     function enter(id: string): void {
         freezeCardTop();
         category = id;
+        if (appMenu || fileMenu) {
+            cardTop = -1;
+            maxRowsHeight = -1;
+        }
         query = "";
         selectedIndex = 0;
 
@@ -106,7 +112,7 @@ Ui.Panel {
     }
 
     function freezeCardTop(): void {
-        if (cardTop >= 0)
+        if (appMenu || fileMenu || cardTop >= 0)
             return;
         cardTop = popup.cardTop;
         maxRowsHeight = rowsHeight;
@@ -148,7 +154,7 @@ Ui.Panel {
     }
 
     function rowHeight(row): int {
-        return query && row && row.path ? Theme.menuRowHeightDetail : Theme.menuRowHeight;
+        return !fileMenu && query && row && row.path ? Theme.menuRowHeightDetail : Theme.menuRowHeight;
     }
 
     function select(delta: int): void {
@@ -302,7 +308,7 @@ Ui.Panel {
 
                                 anchors.centerIn: parent
                                 fallback: "application-x-executable"
-                                height: Theme.launcherIconSize
+                                height: Theme.launcherIconSize * 1.25
                                 sources: resultRow.isApp ? [resultRow.modelData.entry.icon] : []
                                 visible: resultRow.isApp
                                 width: height
@@ -337,7 +343,7 @@ Ui.Panel {
                                 opacity: 0.52
                                 text: resultRow.modelData ? String(resultRow.modelData.path || "") : ""
                                 textFormat: Text.PlainText
-                                visible: !!root.query && !!text
+                                visible: !root.fileMenu && !!root.query && !!text
                                 width: parent.width
                             }
                         }

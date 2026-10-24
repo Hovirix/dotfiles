@@ -12,7 +12,7 @@ PanelWindow {
     property alias content: loader.sourceComponent
     readonly property int contentHeight: item ? item.menuHeight : Theme.buttonHeight
     readonly property int contentPadding: menuStyle ? Theme.menuPadding : Theme.dialogPadding
-    readonly property int contentTop: item && item.cardTop !== undefined ? item.cardTop : -1
+    readonly property int contentTop: item && item.appMenu !== true && item.fileMenu !== true && item.cardTop !== undefined ? item.cardTop : -1
     readonly property int contentWidth: item ? item.menuWidth : Theme.popupWidthStandard
     readonly property alias item: loader.item
     readonly property bool menuStyle: item && item.menuStyle === true

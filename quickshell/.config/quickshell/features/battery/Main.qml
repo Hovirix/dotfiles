@@ -1,5 +1,4 @@
 import QtQuick
-import "../../ui" as Ui
 import "format.js" as Utils
 import Quickshell.Io
 import Quickshell.Services.UPower
@@ -7,8 +6,6 @@ import Quickshell.Services.UPower
 // UPower-backed battery service.
 //
 // Percentage, state, and time come from the aggregate display device.
-// Energy, full capacity, and health come from the physical battery when available.
-//
 // Threshold alerts (low <= 30, critical <= 15 while discharging, plus
 // charger-plugged) are emitted here via notify-send so they render
 // through the notification server like every other notification.
@@ -24,41 +21,6 @@ QtObject {
     }
     property bool emergencyNotified: false
     readonly property int emergencyThreshold: 5
-    readonly property real energy: {
-        if (!available)
-            return 0;
-        return root.batteryNumber("energy");
-    }
-    readonly property real energyCapacity: {
-        if (!available)
-            return 0;
-        return root.batteryNumber("energyCapacity");
-    }
-
-    // 0..100 design-health; 0 when unknown (overlay hides the row).
-    readonly property real healthPercentage: {
-        if (!available)
-            return 0;
-        const sources = [root.laptopBattery, device];
-        for (let i = 0; i < sources.length; i++) {
-            const source = sources[i];
-            if (source && source.healthSupported) {
-                const health = Number(source.healthPercentage);
-                if (isFinite(health) && health > 0)
-                    return Math.max(0, Math.min(100, health));
-            }
-        }
-        return 0;
-    }
-    readonly property UPowerDevice laptopBattery: {
-        const list = (UPower.devices && UPower.devices.values) || [];
-        for (let i = 0; i < list.length; i++) {
-            const candidate = list[i];
-            if (candidate && candidate.ready && candidate.isLaptopBattery && candidate.isPresent)
-                return candidate;
-        }
-        return null;
-    }
     property bool lastDischarging: false
 
     // Latched so each threshold notifies once per discharge cycle.
@@ -68,12 +30,6 @@ QtObject {
     // Emergency (5) resends a final warning after low (30) and critical (15).
     readonly property int lowThreshold: 30
     property Process notifier: Process {
-    }
-    readonly property Component panel: Component {
-        Panel {
-            battery: root
-            controller: root.popup
-        }
     }
 
     // 0..100 scale (UPower reports 0..1).
@@ -85,39 +41,7 @@ QtObject {
             return 0;
         return Math.max(0, Math.min(100, p <= 1 ? p * 100 : p));
     }
-    required property Ui.Popup popup
-
-    // Current power draw in watts (absolute rate).
-    readonly property real powerUsage: {
-        if (!available)
-            return 0;
-        const sources = [root.laptopBattery, device];
-        for (let i = 0; i < sources.length; i++) {
-            const rate = sources[i] ? Number(sources[i].changeRate) : NaN;
-            if (isFinite(rate) && rate !== 0)
-                return Math.abs(rate);
-        }
-        return 0;
-    }
     readonly property int state: device ? device.state : UPowerDeviceState.Unknown
-    readonly property string stateText: {
-        if (!device || !device.isPresent)
-            return qsTr("Unavailable");
-        switch (state) {
-        case UPowerDeviceState.Charging:
-            return qsTr("Charging");
-        case UPowerDeviceState.Discharging:
-            return qsTr("Discharging");
-        case UPowerDeviceState.FullyCharged:
-            return qsTr("Fully charged");
-        case UPowerDeviceState.PendingCharge:
-            return qsTr("Pending charge");
-        case UPowerDeviceState.Empty:
-            return qsTr("Empty");
-        default:
-            return qsTr("Unknown");
-        }
-    }
 
     // Seconds remaining (to empty while discharging, to full otherwise).
     readonly property real timeRemaining: {
@@ -125,17 +49,6 @@ QtObject {
             return 0;
         const t = root.discharging ? Number(device.timeToEmpty) : Number(device.timeToFull);
         return isFinite(t) && t > 0 ? t : 0;
-    }
-
-    // Physical-battery value first, display-device fallback, else 0.
-    function batteryNumber(name: string): real {
-        const physical = root.laptopBattery ? Number(root.laptopBattery[name]) : NaN;
-        if (isFinite(physical) && physical > 0)
-            return physical;
-        const composite = root.device ? Number(root.device[name]) : NaN;
-        if (isFinite(composite) && composite > 0)
-            return composite;
-        return 0;
     }
 
     function checkBattery(): void {
@@ -199,8 +112,6 @@ QtObject {
         // battery-state hint lets the panel paint title and border green.
         root.notifier.exec(["notify-send", "-a", "Battery", "-u", "low", "-i", root.levelIcon(true), "-h", "string:battery-state:charging", title, body]);
     }
-
-    // "3h 42m" / "42m" / "" when unknown.
 
     Component.onCompleted: {
         root.lastDischarging = root.discharging;

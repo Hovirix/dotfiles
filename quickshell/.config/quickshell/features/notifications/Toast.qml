@@ -89,7 +89,7 @@ Ui.Panel {
             spacing: Theme.space05
             width: card.width - x - Theme.space3
             x: icon.x + icon.width + Theme.space3
-            y: Theme.space3
+            y: bodyText.visible ? Theme.space3 : (card.height - height) / 2
 
             Controls.Label {
                 color: root.battery || root.notification.urgency === 2 ? root.accent : Theme.foreground
@@ -104,6 +104,8 @@ Ui.Panel {
             }
 
             Controls.Label {
+                id: bodyText
+
                 color: Theme.mutedForeground
                 elide: Text.ElideRight
                 font.pixelSize: Theme.fontSizeBody

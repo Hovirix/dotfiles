@@ -110,13 +110,16 @@ function selfCheck() {
         {id: "test", label: "Test", parent: "settings"}
     ];
     var rows = search("test", "root", [], items);
+    var totals = Array.from({length: 12}, function (_, index) { return (index + 1) * 53 - 3; });
     return rows.length === 1 && rows[0].id === "test" && rows[0].path === "Settings"
         && search("", "root", [], items).length === 1
-        && search("missing", "root", [], items).length === 0;
+        && search("missing", "root", [], items).length === 0
+        && foldedListHeight(totals.slice(0, 10), 1000, 3, 28, 50) === 527
+        && foldedListHeight(totals.slice(0, 3), 1000, 3, 28, 50) === 156;
 }
 
 function isSubmenu(id) {
-    return ["apps", "files", "system", "settings"].indexOf(id) >= 0;
+    return ["apps", "files", "system", "settings", "utilities", "screenrecording"].indexOf(id) >= 0;
 }
 
 function foldedListHeight(totals, available, spacing, peek, rowHeight) {

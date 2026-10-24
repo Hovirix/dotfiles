@@ -10,13 +10,3 @@ function timeShort(seconds) {
         return qsTr("%1m").arg(m);
     return "";
 }
-
-function batteryStatusColor(percent, available, discharging, theme) {
-    if (!available)
-        return theme.mutedForeground;
-    if (discharging && percent <= 15)
-        return theme.destructive;
-    if (discharging && percent <= 30)
-        return "#f9e2af";
-    return theme.success;
-}

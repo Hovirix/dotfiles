@@ -1,8 +1,10 @@
 import QtQuick
 import QtQml.Models
+import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
 import "helpers.js" as Utils
+import "../launcher" as Launcher
 
 NotificationServer {
     id: root
@@ -12,6 +14,8 @@ NotificationServer {
     property int criticalTimeout: 4000
     property string focusedMonitor: ""
     property string targetMonitor: ""
+    property Launcher.Apps appWindows: Launcher.Apps {
+    }
     property var arrivalOrder: ({})
     property int sequence: 0
     readonly property var groups: {
@@ -99,6 +103,9 @@ NotificationServer {
             }
             var url = Utils.firstUrl(notification.summary + "\n" + notification.body);
             if (url && Qt.openUrlExternally(url))
+                return "activated";
+            var entry = DesktopEntries.heuristicLookup(Utils.iconName(notification.desktopEntry) || notification.appName);
+            if (entry && appWindows.focusExisting(entry))
                 return "activated";
             return "dismissed";
         } catch (error) {
