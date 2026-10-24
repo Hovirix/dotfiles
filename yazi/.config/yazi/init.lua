@@ -1,4 +1,4 @@
-require("full-border"):setup { type = ui.Border.PLAIN }
+require("full-border"):setup { set = ui.Border.PLAIN }
 require("no-status"):setup()
 
 -- Remaining plugins are invoked through keymap bindings. They export
