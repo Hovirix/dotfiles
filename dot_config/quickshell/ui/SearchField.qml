@@ -1,4 +1,5 @@
 import QtQuick
+import ".."
 
 // TextInput receives input-method commits that a Keys-driven Text cannot.
 TextInput {
@@ -9,7 +10,10 @@ TextInput {
     Keys.forwardTo: keyHandler ? [keyHandler] : []
     Keys.priority: Keys.BeforeItem
     clip: true
+    color: Theme.foreground
     focus: true
+    font.family: Theme.fontFamily
+    font.pixelSize: Theme.fontSizeBody
 
     cursorDelegate: Item {
     }
