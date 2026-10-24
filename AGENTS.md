@@ -13,5 +13,5 @@ The Git repository is the single source of truth. GNU Stow links individual file
 - Preserve existing behavior unless explicitly requested otherwise.
 - Keep `~/.gnupg` and `~/.ssh` real directories with mode 0700; managed configuration targets need mode 0600. Never track keys, credentials, or runtime data.
 - Review changes with `git diff`. Run only tests relevant to modified configurations.
-- Use Conventional Commits with the Stow package name as the scope (e.g. `fix(zsh): ...`); omit the scope for repository-wide changes.
+- Use Conventional Commits with the Stow package name as the scope (e.g. `fix(zsh): ...`). Split changes across packages into separate package-scoped commits; omit the scope only for repository-level changes such as `AGENTS.md`.
 - Never edit `README.md` unless explicitly asked.
