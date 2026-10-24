@@ -70,7 +70,7 @@ function search(query, category, apps, items) {
     }
     var rows = [];
     for (var item of items) {
-        if (!within(item, category, items))
+        if (item.parent === "screenrecord" || !within(item, category, items))
             continue;
         var rank = score(item.label, needle);
         if (rank < 0)
@@ -109,10 +109,17 @@ function selfCheck() {
         {id: "test", label: "Test", parent: "settings"}
     ];
     var rows = search("test", "root", [], items);
+    var recordingItems = [
+        {id: "screenrecord", label: "Screenrecord", parent: "root"},
+        {id: "recordSilent", label: "With no audio", parent: "screenrecord"}
+    ];
     var totals = Array.from({length: 12}, function (_, index) { return (index + 1) * 53 - 3; });
     return rows.length === 1 && rows[0].id === "test" && rows[0].path === "Settings"
         && search("", "root", [], items).length === 1
         && search("missing", "root", [], items).length === 0
+        && search("screenrecord", "root", [], recordingItems)[0].id === "screenrecord"
+        && search("audio", "root", [], recordingItems).length === 0
+        && search("", "screenrecord", [], recordingItems)[0].id === "recordSilent"
         && foldedListHeight(totals.slice(0, 10), 1000, 3, 28, 50) === 527
         && foldedListHeight(totals.slice(0, 3), 1000, 3, 28, 50) === 156;
 }

@@ -22,7 +22,16 @@ Ui.Panel {
     property real maxRowsHeight: -1
     readonly property int menuHeight: Theme.menuPadding * 2 + Theme.menuHeaderHeight + Theme.space15 + rowsHeight
     readonly property bool menuStyle: true
-    readonly property int menuWidth: fileMenu ? Theme.popupWidthPicker : Theme.popupWidthCompact
+    readonly property int popupChrome: Theme.menuPadding * 2 + Theme.popupBorderWidth * 2
+    readonly property int rowChrome: Theme.launcherIconSize * 2 + Theme.space2 * 2 + Theme.space15 * 2 + Theme.iconSize
+    readonly property int menuWidth: {
+        if (fileMenu)
+            return Theme.popupWidthPicker;
+        if (appMenu || category === "root")
+            return Theme.popupWidthCompact;
+        var width = Math.max(Theme.popupWidthCompact, Math.ceil(labelSizer.childrenRect.width) + rowChrome + popupChrome);
+        return popup.screenW > 0 ? Math.min(width, popup.screenW - Theme.menuScreenMargin * 2) : width;
+    }
     property string mode: "go"
     required property var popup
     property string query: ""
@@ -173,6 +182,25 @@ Ui.Panel {
         selectedIndex = Math.max(0, Math.min(selectedIndex, results.length - 1));
         revealCursor();
     })
+
+    Item {
+        id: labelSizer
+
+        visible: false
+
+        Repeater {
+            model: root.fileMenu || root.appMenu || root.category === "root" ? [] : root.results
+
+            Controls.Label {
+                required property var modelData
+
+                font.pixelSize: Theme.fontSizeHeading
+                font.weight: Theme.fontWeightMedium
+                text: String(modelData.label || "")
+                textFormat: Text.PlainText
+            }
+        }
+    }
 
     Apps {
         id: apps

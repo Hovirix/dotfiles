@@ -152,8 +152,8 @@ ShellRoot {
                 parent: "utilities"
             },
             {
-                id: "screenrecording",
-                label: qsTr("Screenrecording"),
+                id: "screenrecord",
+                label: qsTr("Screenrecord"),
                 icon: "",
                 parent: "utilities"
             },
@@ -161,25 +161,25 @@ ShellRoot {
                 id: "recordStop",
                 label: qsTr("Stop recording"),
                 icon: "",
-                parent: "screenrecording"
+                parent: "screenrecord"
             },
             {
                 id: "recordSilent",
                 label: qsTr("With no audio"),
                 icon: "",
-                parent: "screenrecording"
+                parent: "screenrecord"
             },
             {
                 id: "recordDesktop",
                 label: qsTr("With desktop audio"),
                 icon: "",
-                parent: "screenrecording"
+                parent: "screenrecord"
             },
             {
                 id: "recordMicrophone",
                 label: qsTr("With desktop + microphone audio"),
                 icon: "",
-                parent: "screenrecording"
+                parent: "screenrecord"
             },
             {
                 id: "lock",
