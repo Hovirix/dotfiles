@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 
 state="${XDG_RUNTIME_DIR:?}/hx-record"
 exec 9>"$state.lock"
+pid=""
+active() {
+    [[ -s "$state.pid" ]] && read -r pid < "$state.pid" &&
+        [[ "$pid" =~ ^[1-9][0-9]*$ && "$state.lock" -ef "/proc/$pid/fd/9" ]]
+}
 case "${1:-}" in
     --status)
-        if [[ -s "$state.pid" ]] && ! flock -n 9; then
+        if ! flock -n 9 && active; then
             exit 0
         fi
         exit 1
         ;;
     --stop)
-        if ! flock -n 9; then
-            [[ ! -s "$state.pid" ]] || kill -INT "$(cat "$state.pid")"
+        if ! flock -n 9 && active; then
+            kill -TERM "$pid" 2>/dev/null || true
         fi
         exit 0
         ;;
@@ -21,51 +27,69 @@ case "${1:-}" in
 esac
 flock -n 9 || { echo "Recording already active" >&2; exit 1; }
 
-geometry="$(
-    mmsg get all-clients |
-    jq -r '
-        .clients[]
-        | select(.is_visible and (.is_minimized | not))
-        | "\(.x),\(.y) \(.width)x\(.height)"
-    ' |
-    slurp -o
-)" || exit 0
-[[ -n "$geometry" ]] || exit 0
-
 children=()
 recorder=""
+geometry_file=""
+file=""
+record_status=1
 cleanup() {
-    trap '' INT TERM
+    trap '' HUP INT TERM
     if [[ -n "$recorder" ]]; then
         kill -INT "$recorder" 2>/dev/null || true
-        wait "$recorder" 2>/dev/null || true
+        record_status=0
+        wait "$recorder" 2>/dev/null || record_status=$?
     fi
     for pid in "${children[@]}"; do
         kill "$pid" 2>/dev/null || true
     done
     wait 2>/dev/null || true
-    rm -f "$state.pid"
+    rm -f "$state.pid" ${geometry_file:+"$geometry_file"}
+    if [[ "$record_status" == 0 && -s "$file" ]]; then
+        notify-send -i media-record "Recording saved" "$file" 9>&- || true
+    fi
 }
 trap cleanup EXIT
+trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
+echo "$$" > "$state.pid"
+
+geometry_file=$(mktemp "$state.geometry.XXXXXX")
+slurp -o < <(
+    exec 9>&-
+    mmsg get all-clients |
+    jq -r '
+        .clients[]
+        | select(.is_visible and (.is_minimized | not))
+        | "\(.x),\(.y) \(.width)x\(.height)"
+    '
+) > "$geometry_file" 9>&- &
+selector=$!
+children+=("$selector")
+wait "$selector" || exit 0
+children=()
+geometry=$(< "$geometry_file")
+[[ -n "$geometry" ]] || exit 0
 
 audio=()
 if [[ "${1:-}" == --audio || "${1:-}" == --desktop-audio ]]; then
     pw-loopback -n hx-record-mix \
         --capture-props='media.class=Audio/Sink node.name=hx-record-sink node.virtual=true priority.session=0' \
-        --playback-props='media.class=Audio/Source node.name=hx-record-source node.virtual=true priority.session=0' &
+        --playback-props='media.class=Audio/Source node.name=hx-record-source node.virtual=true priority.session=0' 9>&- &
     children+=("$!")
     if [[ "${1:-}" == --audio ]]; then
-        pw-loopback -n hx-record-mic -C '@DEFAULT_AUDIO_SOURCE@' -P hx-record-sink &
+        pw-loopback -n hx-record-mic -C '@DEFAULT_AUDIO_SOURCE@' -P hx-record-sink 9>&- &
         children+=("$!")
     fi
     pw-loopback -n hx-record-system -C '@DEFAULT_AUDIO_SINK@' \
-        --capture-props='stream.capture.sink=true' -P hx-record-sink &
+        --capture-props='stream.capture.sink=true' -P hx-record-sink 9>&- &
     children+=("$!")
     ready=false
     for ((attempt = 0; attempt < 50; attempt++)); do
-        if pw-dump | jq -e 'any(.[]; .info.props["node.name"] == "hx-record-source")' >/dev/null; then
+        for pid in "${children[@]}"; do
+            kill -0 "$pid" 2>/dev/null || { echo "Recording audio process exited" >&2; exit 1; }
+        done
+        if pw-dump 9>&- | jq -e 'any(.[]; .info.props["node.name"] == "hx-record-source")' 9>&- >/dev/null; then
             ready=true
             break
         fi
@@ -77,11 +101,11 @@ fi
 
 dir="${XDG_VIDEOS_DIR:-$HOME/Videos}/Recordings"
 mkdir -p "$dir"
-file="$dir/recording-$(date '+%Y-%m-%d_%H-%M-%S').mkv"
-wf-recorder -g "$geometry" "${audio[@]}" -f "$file" &
+file="$dir/recording-$(date '+%Y-%m-%d_%H-%M-%S-%N').mkv"
+wf-recorder -g "$geometry" "${audio[@]}" -f "$file" 9>&- &
 recorder=$!
-echo "$recorder" > "$state.pid"
-notify-send -i media-record "Recording" "Started; hx-record --stop to save"
-wait "$recorder"
+notify-send -i media-record "Recording" "Started; hx-record --stop to save" 9>&- || true
+record_status=0
+wait "$recorder" || record_status=$?
 recorder=""
-notify-send -i media-record "Recording saved" "$file"
+exit "$record_status"
