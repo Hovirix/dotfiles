@@ -131,7 +131,6 @@ alias ll='eza --long'
 alias tree='ls -T'
 alias cat='bat'
 alias grep='grep --color=auto'
-alias cze='chezmoi edit --apply'
 alias oc='opencode2'
 alias y='yazi'
 
