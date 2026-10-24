@@ -444,8 +444,7 @@ Ui.Panel {
                 elide: Text.ElideRight
                 font.pixelSize: Theme.fontSizeBody
                 renderType: Text.NativeRendering
-                text: `${outputRow.output.name} · ${String(outputRow.output.resolution || "").replace("x", " × ")} @
-${outputRow.output.refresh || ""}${outputRow.rowIndex === 0 ? " · " + qsTr("Primary") : ""}`
+                text: `${outputRow.output.name} · ${String(outputRow.output.resolution || "").replace("x", " × ")} @ ${outputRow.output.refresh || ""}${outputRow.rowIndex === 0 ? " · " + qsTr("Primary") : ""}`
                 width: parent.width
             }
         }
