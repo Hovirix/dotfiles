@@ -1,2 +1,3 @@
 timeout 150 'hx-lock && { mmsg dispatch sleep_monitor,eDP-1; mmsg dispatch sleep_monitor,DP-2; }' resume 'mmsg dispatch wakeup_monitor,eDP-1; mmsg dispatch wakeup_monitor,DP-2'
 timeout 300 'hx-suspend'
+before-sleep 'hx-lock'
