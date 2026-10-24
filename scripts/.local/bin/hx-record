@@ -4,14 +4,20 @@ set -euo pipefail
 state="${XDG_RUNTIME_DIR:?}/hx-record"
 exec 9>"$state.lock"
 case "${1:-}" in
+    --status)
+        if [[ -s "$state.pid" ]] && ! flock -n 9; then
+            exit 0
+        fi
+        exit 1
+        ;;
     --stop)
         if ! flock -n 9; then
             [[ ! -s "$state.pid" ]] || kill -INT "$(cat "$state.pid")"
         fi
         exit 0
         ;;
-    ""|--audio) ;;
-    *) echo "Usage: hx-record [--audio|--stop]" >&2; exit 1 ;;
+    ""|--desktop-audio|--audio) ;;
+    *) echo "Usage: hx-record [--desktop-audio|--audio|--stop|--status]" >&2; exit 1 ;;
 esac
 flock -n 9 || { echo "Recording already active" >&2; exit 1; }
 
@@ -45,13 +51,15 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 
 audio=()
-if [[ "${1:-}" == --audio ]]; then
+if [[ "${1:-}" == --audio || "${1:-}" == --desktop-audio ]]; then
     pw-loopback -n hx-record-mix \
         --capture-props='media.class=Audio/Sink node.name=hx-record-sink node.virtual=true priority.session=0' \
         --playback-props='media.class=Audio/Source node.name=hx-record-source node.virtual=true priority.session=0' &
     children+=("$!")
-    pw-loopback -n hx-record-mic -C '@DEFAULT_AUDIO_SOURCE@' -P hx-record-sink &
-    children+=("$!")
+    if [[ "${1:-}" == --audio ]]; then
+        pw-loopback -n hx-record-mic -C '@DEFAULT_AUDIO_SOURCE@' -P hx-record-sink &
+        children+=("$!")
+    fi
     pw-loopback -n hx-record-system -C '@DEFAULT_AUDIO_SINK@' \
         --capture-props='stream.capture.sink=true' -P hx-record-sink &
     children+=("$!")

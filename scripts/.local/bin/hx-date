@@ -1,0 +1,2 @@
+#!/bin/sh
+notify-send -i appointment-soon "$(date '+%A, %d %B %Y - %H:%M:%S')"

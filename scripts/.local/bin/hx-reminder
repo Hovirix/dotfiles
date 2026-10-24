@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+minutes="${1:-}"
+if [[ ! "$minutes" =~ ^[1-9][0-9]*$ ]]; then
+    notify-send -a Reminder -i appointment-soon -- 'Invalid reminder' 'Enter a positive whole number of minutes.'
+    exit 1
+fi
+message="${2:-}"
+[[ "$message" =~ [^[:space:]] ]] || exit 0
+
+systemd-run --user --quiet --collect --on-active="${minutes}m" -- \
+    notify-send -a Reminder -i appointment-soon -- 'Reminder' "$message"
+notify-send -a Reminder -i appointment-soon -- "Reminder set · ${minutes} min" "$message"
