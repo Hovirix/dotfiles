@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+podman start bentopdf 2>/dev/null ||
+    podman run -d --name bentopdf -p 127.0.0.1:3000:8080 ghcr.io/alam00000/bentopdf-simple:latest
+curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 --output /dev/null http://localhost:3000/
+exec chromium --app=http://localhost:3000/

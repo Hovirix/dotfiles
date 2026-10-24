@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=BentoPDF
+Exec=bentopdf
+Icon=bentopdf
+Terminal=false
