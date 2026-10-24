@@ -7,7 +7,7 @@ import Quickshell.Io
 QtObject {
     id: root
 
-    property Process apply: Process {
+    property Process applyProcess: Process {
         onRunningChanged: if (!running)
             refreshTimer.restart()
     }
@@ -47,16 +47,23 @@ QtObject {
     }
 
     function refresh(): void {
-        if (query.running)
+        if (query.running || applyProcess.running)
             return;
         loading = true;
         query.exec(["wlr-randr"]);
     }
 
+    function applyChanges(command: list<string>): void {
+        if (loading || query.running || applyProcess.running)
+            return;
+        loading = true;
+        applyProcess.exec(command);
+    }
+
     // Reposition active outputs together so layout selection is atomic.
     // The currently selected output is the anchor for the extended desktop.
     function setLayout(anchor: var, layout: string): void {
-        if (!anchor || !anchor.enabled || apply.running || ["Mirror", "Extend left", "Extend right"].indexOf(layout) < 0)
+        if (!anchor || !anchor.enabled || ["Mirror", "Extend left", "Extend right"].indexOf(layout) < 0)
             return;
         var active = outputs.filter(function (output) {
             return output.enabled;
@@ -88,28 +95,28 @@ QtObject {
                 x += Utils.logicalWidth(others[k]);
             }
         }
-        apply.exec(args);
+        applyChanges(args);
     }
 
     function setMode(output: var, mode: string): void {
         if (output && mode)
-            apply.exec(["wlr-randr", "--output", output.name, "--mode", mode]);
+            applyChanges(["wlr-randr", "--output", output.name, "--mode", mode]);
     }
 
     function setOutputEnabled(output: var, enabled: bool): void {
         if (!output || (!enabled && output.enabled && enabledCount <= 1))
             return;
-        apply.exec(["wlr-randr", "--output", output.name, enabled ? "--on" : "--off"]);
+        applyChanges(["wlr-randr", "--output", output.name, enabled ? "--on" : "--off"]);
     }
 
     function setScale(output: var, scale: string): void {
         if (output && scale)
-            apply.exec(["wlr-randr", "--output", output.name, "--scale", String(scale)]);
+            applyChanges(["wlr-randr", "--output", output.name, "--scale", String(scale)]);
     }
 
     function setTransform(output: var, transform: string): void {
         if (output && transform)
-            apply.exec(["wlr-randr", "--output", output.name, "--transform", transform]);
+            applyChanges(["wlr-randr", "--output", output.name, "--transform", transform]);
     }
 
     function toggleOutput(output: var): void {
