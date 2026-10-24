@@ -215,6 +215,9 @@ monitor_name = "DP-2"
 "SUPER+space" = "spawn,quickshell ipc call shell menu"
 "SUPER+n" = "spawn,quickshell ipc call shell activateNotification"
 
+# Triggers
+"SUPER+c" = "spawn,hx-date"
+
 # Scripts
 "SUPER+i" = "spawn,hx-idle-toggle"
 "SUPER+s" = "spawn,hx-screenshot"
