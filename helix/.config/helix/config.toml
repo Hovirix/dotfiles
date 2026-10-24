@@ -56,10 +56,10 @@ cursor-line = "warning"
 [keys.normal]
 esc = ["collapse_selection", "keep_primary_selection"]
 C-y = [
-  ':sh rm -f /tmp/unique-ca1ea106',
-  ':insert-output yazi "%{buffer_name}" --chooser-file=/tmp/unique-ca1ea106',
+  ':sh rm -f "${XDG_RUNTIME_DIR:?}/helix-yazi-$PPID"',
+  ':insert-output yazi --chooser-file="${XDG_RUNTIME_DIR:?}/helix-yazi-$PPID"',
   ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
-  ':open %sh{cat /tmp/unique-ca1ea106}',
+  ':open %sh{cat "${XDG_RUNTIME_DIR:?}/helix-yazi-$PPID" && rm -f "${XDG_RUNTIME_DIR:?}/helix-yazi-$PPID"}',
   ':redraw',
   ':set mouse false',
   ':set mouse true',
