@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Windows
+Exec=windows
+Icon=windows
+Terminal=false
