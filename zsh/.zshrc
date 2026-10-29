@@ -125,9 +125,8 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 # -----------------------------------------------------
 
 # Core
-alias ls='eza --icons --group-directories-first'
-alias la='eza --all'
-alias ll='eza --long'
+alias ls='eza -lh --icons --group-directories-first'
+alias lsa='ls -a'
 alias tree='ls -T'
 alias cat='bat'
 alias grep='grep --color=auto'
@@ -138,29 +137,6 @@ alias y='yazi'
 alias g='git'
 alias gd='gh-dash'
 alias lg='lazygit'
-
-# Systemd
-alias sc='systemctl'
-alias scu='systemctl --user'
-
-# Journald
-alias j='journalctl'
-alias ju='journalctl --user'
-
-alias jc='journalctl --unit'
-alias jf='journalctl --follow'
-
-alias juc='journalctl --user --unit'
-alias juf='journalctl --user --follow'
-
-# Containers
-alias p='podman'
-alias pps='podman ps -a'
-alias pc='podman compose'
-alias pvl='podman volume list'
-alias pql='podman quadlet list'
-alias pnl='podman network list'
-alias psl='podman secret list'
 
 # Nix
 alias nfc='nix flake check'
@@ -185,6 +161,15 @@ alias -g C='| wl-copy'
 
 nsh() {
   nix shell "${@/#/nixpkgs#}"
+}
+
+ns() {
+  if [[ $1 == o ]]; then
+    shift
+    nix run nixpkgs#nh -- search options --scope=all "$*"
+  else
+    nix search nixpkgs "$@"
+  fi
 }
 
 # --- Directory navigation ----------------------------
