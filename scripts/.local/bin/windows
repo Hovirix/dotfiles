@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile="${XDG_DATA_HOME:-$HOME/.local/share}/windows/chromium"
+mkdir -p "$profile"
+exec 9>"$profile/launcher.lock"
+flock -n 9 || exit 0
+
+podman start windows 2>/dev/null ||
+    podman run -d \
+        --name windows \
+        -e VERSION=11 \
+        --device /dev/kvm \
+        --device /dev/net/tun \
+        --cap-add NET_ADMIN \
+        -p 127.0.0.1:8006:8006 \
+        -p 127.0.0.1:3389:3389/tcp \
+        -p 127.0.0.1:3389:3389/udp \
+        -v /home/nixos/Vm/win11:/storage \
+        --stop-timeout 120 \
+        docker.io/dockurr/windows
+trap 'podman stop --time 120 windows >/dev/null' EXIT
+curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 --output /dev/null http://127.0.0.1:8006/
+chromium --user-data-dir="$profile" --no-first-run --app=http://127.0.0.1:8006/
