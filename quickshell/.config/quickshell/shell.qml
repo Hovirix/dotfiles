@@ -54,6 +54,7 @@ ShellRoot {
     }
 
     Battery.Main {
+        id: batteryService
     }
 
     Brightness.Main {
@@ -75,6 +76,14 @@ ShellRoot {
     Emoji.Main {
         id: emoji
 
+        popup: popup
+    }
+
+    Emoji.Main {
+        id: characters
+
+        dataSource: Qt.resolvedUrl("features/emoji/characters.json")
+        searchPlaceholder: qsTr("Search special characters…")
         popup: popup
     }
 
@@ -122,6 +131,12 @@ ShellRoot {
                 parent: "utilities"
             },
             {
+                id: "characters",
+                label: qsTr("Special characters"),
+                icon: "é",
+                parent: "utilities"
+            },
+            {
                 id: "reminder",
                 label: qsTr("Reminder"),
                 icon: "󰃭",
@@ -149,6 +164,12 @@ ShellRoot {
                 id: "screenshotSave",
                 label: qsTr("Screenshot"),
                 icon: "",
+                parent: "utilities"
+            },
+            {
+                id: "ocr",
+                label: qsTr("OCR"),
+                icon: "󰈙",
                 parent: "utilities"
             },
             {
@@ -255,6 +276,7 @@ ShellRoot {
                 },
                 clock: () => popup.toggle(clock.panel),
                 emoji: () => popup.toggle(emoji.panel),
+                characters: () => popup.toggle(characters.panel),
                 brightnessUp: function () {
                     popup.close();
                     root.changeBrightness(1);
@@ -264,6 +286,7 @@ ShellRoot {
                     root.changeBrightness(-1);
                 },
                 screenshot: () => root.run(["hx-screenshot"]),
+                ocr: () => root.run(["hx-ocr"]),
                 recordSilent: () => root.run(["hx-record"]),
                 recordStop: () => root.run(["hx-record", "--stop"]),
                 reminder: () => popup.open(reminderPanel),
@@ -304,6 +327,10 @@ ShellRoot {
     }
 
     IpcHandler {
+        function battery(): void {
+            batteryService.showStatus();
+        }
+
         function activateNotification(): string {
             return notifications.activateNewest();
         }

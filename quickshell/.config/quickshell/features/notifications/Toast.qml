@@ -30,7 +30,9 @@ Ui.Panel {
     onPictureSourceChanged: pictureFailed = false
     readonly property bool battery: notification.appName === "Battery"
     readonly property color accent: battery && notification.hints["battery-state"] === "charging" ? Theme.success
-        : notification.urgency === 2 ? Theme.destructive : notification.urgency === 0 ? Theme.mutedForeground : Theme.primary
+        : notification.urgency === 2 ? Theme.destructive
+        : battery && notification.hints["battery-state"] === "low" ? "#f9e2af"
+        : notification.urgency === 0 ? Theme.mutedForeground : Theme.primary
     readonly property int peek: Math.max(0, Math.min(2, groupCount - 1)) * Theme.space1
 
     implicitHeight: card.implicitHeight + peek

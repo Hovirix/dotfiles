@@ -11,6 +11,9 @@ import "../../ui" as Ui
 Scope {
     id: feature
 
+    property url dataSource: Qt.resolvedUrl("emojis.json")
+    property string searchPlaceholder: qsTr("Search emojis…")
+
     readonly property Component panel: Component {
         Ui.Panel {
             id: root
@@ -62,11 +65,11 @@ Scope {
                 property string query: root.query
 
                 function copy(item: string): void {
-                    Quickshell.execDetached(["wl-copy", item]);
+                    Quickshell.execDetached(["sh", "-c", 'wl-copy "$1" && notify-send "Copied to clipboard" "$1"', "sh", item]);
                 }
 
                 FileView {
-                    path: Qt.resolvedUrl("emojis.json")
+                    path: feature.dataSource
 
                     onLoaded: emoji.allItems = Utils.parseEmojis(text())
                 }
@@ -117,7 +120,7 @@ Scope {
                             anchors.fill: filterInput
                             font.pixelSize: Theme.fontSizeHeading
                             opacity: 0.58
-                            text: qsTr("Search emojis…")
+                            text: feature.searchPlaceholder
                             textFormat: Text.PlainText
                             verticalAlignment: Text.AlignVCenter
                             visible: !root.query && !filterInput.preeditText

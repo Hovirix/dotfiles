@@ -86,7 +86,7 @@ function escapeText(text) {
 
 function render(body) {
     // Escape first; only attribute-free formatting is restored, never images.
-    return escapeText(decode(body))
+    return escapeText(decode(body).replace(/^web\.whatsapp\.com[ \t]*(?:\r?\n|<br\s*\/?>)(?:\s|<br\s*\/?>)*/i, ""))
         .replace(/&lt;(\/?)(b|i|u|s|strong|em)&gt;/gi, function (_, close, tag) {
             tag = tag.toLowerCase();
             return "<" + close + (tag === "em" ? "i" : tag) + ">";

@@ -51,6 +51,20 @@ QtObject {
         return isFinite(t) && t > 0 ? t : 0;
     }
 
+    function showStatus(): void {
+        if (!available) {
+            notifier.exec(["notify-send", "-a", "Battery", "-i", "battery-missing", qsTr("No battery detected")]);
+            return;
+        }
+        const status = discharging ? qsTr("Discharging") : state === UPowerDeviceState.FullyCharged ? qsTr("Fully charged") : state === UPowerDeviceState.Charging ? qsTr("Charging") : qsTr("Plugged in");
+        const remaining = Utils.timeShort(timeRemaining);
+        const summary = qsTr("Battery · %1% · %2").arg(Math.round(percentage)).arg(status);
+        const body = remaining ? (discharging ? qsTr("%1 remaining") : qsTr("%1 to full")).arg(remaining) : "";
+        const urgency = discharging && percentage <= criticalThreshold ? "critical" : "normal";
+        const colorState = !discharging ? "charging" : percentage <= lowThreshold ? "low" : "discharging";
+        notifier.exec(["notify-send", "-a", "Battery", "-u", urgency, "-i", levelIcon(!discharging), "-h", "string:battery-state:" + colorState, summary, body]);
+    }
+
     function checkBattery(): void {
         if (!root.available || !root.discharging)
             return;
@@ -97,7 +111,7 @@ QtObject {
         const pct = Math.round(root.percentage);
         const remaining = Utils.timeShort(root.timeRemaining);
         const body = remaining !== "" ? qsTr("%1 · %2% · %3 remaining").arg(label).arg(pct).arg(remaining) : qsTr("%1 · %2% remaining").arg(label).arg(pct);
-        root.notifier.exec(["notify-send", "-a", "Battery", "-u", urgency, "-i", root.levelIcon(false), qsTr("%1 battery").arg(label), body]);
+        root.notifier.exec(["notify-send", "-a", "Battery", "-u", urgency, "-i", root.levelIcon(false), "-h", "string:battery-state:low", qsTr("%1 battery").arg(label), body]);
     }
 
     function sendPlugged(): void {

@@ -120,15 +120,18 @@ function selfCheck() {
         && search("screenrecord", "root", [], recordingItems)[0].id === "screenrecord"
         && search("audio", "root", [], recordingItems).length === 0
         && search("", "screenrecord", [], recordingItems)[0].id === "recordSilent"
-        && foldedListHeight(totals.slice(0, 10), 1000, 3, 28, 50) === 527
-        && foldedListHeight(totals.slice(0, 3), 1000, 3, 28, 50) === 156;
+        && listHeight(totals.slice(0, 10), 1000, 50) === 527
+        && listHeight(totals.slice(0, 3), 1000, 50) === 156
+        && listHeight(totals.slice(0, 5), 262, 50) === 262
+        && listHeight(totals, 250, 50) === 209
+        && listHeight([], 1000, 50) === 50;
 }
 
 function isSubmenu(id, items) {
     return id === "apps" || id === "files" || items.some(function (item) { return item.parent === id; });
 }
 
-function foldedListHeight(totals, available, spacing, peek, rowHeight) {
+function listHeight(totals, available, rowHeight) {
     var count = totals.length;
     if (!count)
         return rowHeight;
@@ -137,9 +140,7 @@ function foldedListHeight(totals, available, spacing, peek, rowHeight) {
     var full = 0;
     while (full < count && totals[full] <= available)
         full++;
-    while (full > 1 && totals[full - 1] + spacing + peek > available)
-        full--;
     if (full < 1)
-        return Math.max(available, rowHeight);
-    return totals[full - 1] + spacing + peek;
+        return totals[0];
+    return totals[full - 1];
 }

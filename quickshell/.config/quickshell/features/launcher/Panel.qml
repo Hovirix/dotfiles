@@ -13,14 +13,12 @@ Ui.Panel {
 
     readonly property bool appMenu: mode === "apps" || category === "apps"
     readonly property bool fileMenu: mode === "open" || category === "files"
-    readonly property real availableRowsHeight: Math.max(0, Math.min(popup.screenH * 0.7, popup.screenH - (cardTop >= 0 ? cardTop : Theme.menuScreenMargin) - Theme.menuScreenMargin - Theme.menuPadding * 2 - Theme.menuHeaderHeight - Theme.space15, maxRowsHeight >= 0 ? maxRowsHeight : Infinity))
-    property int cardTop: -1
+    readonly property real availableRowsHeight: Math.max(0, Math.min(popup.screenH * 0.7, popup.screenH - Theme.menuScreenMargin * 2 - Theme.menuPadding * 2 - Theme.popupBorderWidth * 2 - Theme.menuHeaderHeight - Theme.space15))
     property string category: "root"
     required property var controller
     required property var files
     property var history: []
     required property var items
-    property real maxRowsHeight: -1
     readonly property int menuHeight: Theme.menuPadding * 2 + Theme.menuHeaderHeight + Theme.space15 + rowsHeight
     readonly property bool menuStyle: true
     readonly property int popupChrome: Theme.menuPadding * 2 + Theme.popupBorderWidth * 2
@@ -50,10 +48,10 @@ Ui.Panel {
             });
         return Utils.search(query, category, apps.matches, items);
     }
-    readonly property int rowPeek: Math.round(Theme.menuRowHeight * 0.55)
     readonly property var rowTotals: {
         var totals = [], total = 0;
-        var count = appMenu || fileMenu ? Math.min(10, results.length) : results.length;
+        var limit = appMenu || fileMenu ? 10 : items.filter(function (item) { return item.parent === category; }).length;
+        var count = Math.min(limit, results.length);
         for (var i = 0; i < count; i++) {
             if (i)
                 total += Theme.menuRowGap;
@@ -62,7 +60,7 @@ Ui.Panel {
         }
         return totals;
     }
-    readonly property int rowsHeight: Utils.foldedListHeight(rowTotals, availableRowsHeight, Theme.menuRowGap, rowPeek, Theme.menuRowHeight)
+    readonly property int rowsHeight: Utils.listHeight(rowTotals, availableRowsHeight, Theme.menuRowHeight)
     property int selectedIndex: 0
 
     function activate(): void {
@@ -94,12 +92,7 @@ Ui.Panel {
     }
 
     function enter(id: string): void {
-        freezeCardTop();
         category = id;
-        if (appMenu || fileMenu) {
-            cardTop = -1;
-            maxRowsHeight = -1;
-        }
         query = "";
         selectedIndex = 0;
 
@@ -114,20 +107,11 @@ Ui.Panel {
         });
     }
 
-    function freezeCardTop(): void {
-        if (appMenu || fileMenu || cardTop >= 0)
-            return;
-        cardTop = popup.cardTop;
-        maxRowsHeight = rowsHeight;
-    }
-
     function open(nextMode: string): void {
         mode = nextMode;
         category = "root";
         query = "";
         selectedIndex = 0;
-        cardTop = -1;
-        maxRowsHeight = -1;
         history = [];
 
         if (nextMode === "open")
@@ -139,25 +123,10 @@ Ui.Panel {
         if (!results.length)
             return;
         resultList.positionViewAtIndex(selectedIndex, ListView.Contain);
-        var item = resultList.itemAtIndex(selectedIndex);
-        if (!item)
-            return;
-        var reach = rowPeek + Theme.menuRowGap;
-        if (selectedIndex < results.length - 1) {
-            var maxY = Math.max(resultList.originY, resultList.originY + resultList.contentHeight - resultList.height);
-            var overhang = item.y + item.height + reach - (resultList.contentY + resultList.height);
-            if (overhang > 0)
-                resultList.contentY = Math.min(resultList.contentY + overhang, maxY);
-        }
-        if (selectedIndex > 0) {
-            var underhang = resultList.contentY - (item.y - reach);
-            if (underhang > 0)
-                resultList.contentY = Math.max(resultList.contentY - underhang, resultList.originY);
-        }
     }
 
     function rowHeight(row): int {
-        return !fileMenu && query && row && row.path ? Theme.menuRowHeightDetail : Theme.menuRowHeight;
+        return Theme.menuRowHeight;
     }
 
     function select(delta: int): void {
@@ -169,7 +138,6 @@ Ui.Panel {
     }
 
     function setQuery(text: string): void {
-        freezeCardTop();
         query = text;
         selectedIndex = 0;
 
@@ -359,15 +327,6 @@ Ui.Panel {
                                 width: parent.width
                             }
 
-                            Controls.Label {
-                                elide: Text.ElideRight
-                                font.pixelSize: Theme.fontSizeBodySmall
-                                opacity: 0.52
-                                text: resultRow.modelData ? String(resultRow.modelData.path || "") : ""
-                                textFormat: Text.PlainText
-                                visible: !root.fileMenu && !!root.query && !!text
-                                width: parent.width
-                            }
                         }
 
                         Controls.Label {
