@@ -207,7 +207,6 @@ monitor_name = "DP-2"
 # Applications
 "SUPER+Return" = "spawn,wezterm"
 "SUPER+w" = "spawn,foot --app-id tui -e impala"
-"SUPER+b" = "spawn,foot --app-id tui -e bluetui"
 "SUPER+m" = "spawn,foot --app-id tui -e btop"
 "SUPER+g" = "toggle_named_scratchpad,(?i).*chatgpt.*,none,chatgpt"
 "SUPER+BackSpace" = "toggle_named_scratchpad,^foot-scratchpad$,none,foot --app-id foot-scratchpad"
@@ -217,6 +216,7 @@ monitor_name = "DP-2"
 "SUPER+n" = "spawn,quickshell ipc call shell activateNotification"
 
 # Triggers
+"SUPER+b" = "spawn,quickshell ipc call shell battery"
 "SUPER+c" = "spawn,hx-date"
 
 # Scripts
@@ -234,7 +234,7 @@ monitor_name = "DP-2"
 "XF86AudioMute" = "spawn,quickshell ipc call shell volumeMute"
 
 # Mango
-"SUPER+SHIFT+r" = "reload_config"
+"SUPER+SHIFT+r" = "spawn,sh -c 'mmsg dispatch reload_config && notify-send -a Mango -i view-refresh \"Mango\" \"Configuration reloaded\"'"
 
 # Window management
 "SUPER+q" = "killclient"
