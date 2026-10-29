@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+grim -g "$(slurp)" - | tesseract stdin stdout 2>/dev/null | wl-copy
