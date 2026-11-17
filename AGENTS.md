@@ -4,6 +4,7 @@ The Git repository is the single source of truth. GNU Stow links individual file
 
 ## Rules
 - Follow KISS and DRY. Write minimal, readable code.
+- Source SVG icons from https://thesvg.org/; keep local copies. No custom icons: use the closest suitable library icon when no exact match exists. Preserve dark-launcher visibility.
 - Edit canonical repository files whenever possible; live files are symlinked here.
 - Never replace symlinks with regular files or use atomic replacement operations that break symlinks.
 - Run Stow with `--no-folding` only when installing, removing, or restructuring packages.
