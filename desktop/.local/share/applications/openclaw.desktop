@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=OpenClaw
+Exec=chromium --app=https://openclaw.hovirix.dev
+Icon=openclaw
+Terminal=false

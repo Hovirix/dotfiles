@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Miniflux
+Exec=chromium --app=https://miniflux.hovirix.dev
+Icon=miniflux
+Terminal=false

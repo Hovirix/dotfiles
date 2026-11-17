@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Infomaniak Mail
+Exec=chromium --app=https://ksuite.infomaniak.com/mail
+Icon=infomaniak-mail
+Terminal=false
