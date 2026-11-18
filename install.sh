@@ -22,7 +22,6 @@ if [[ -f ssh/.ssh/config ]]; then
     chmod 600 ssh/.ssh/config
 fi
 
-stow --no-folding -t "$HOME" */
+stow --no-folding -t "$HOME" ./*/
 
 printf '%s\n' "Dotfiles installed."
-
