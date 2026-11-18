@@ -56,14 +56,6 @@ cursor-line = "warning"
 [keys.normal]
 esc = ["collapse_selection", "keep_primary_selection"]
 
-C-g = [
-  ":insert-output lazygit >/dev/tty",
-  ":redraw",
-  ":reload-all",
-]
+C-g = [":insert-output lazygit >/dev/tty", ":redraw", ":reload-all"]
 
-C-y = [
-  ":insert-output yazi >/dev/tty",
-  ":redraw",
-  ":reload-all",
-]
+C-y = [":insert-output yazi >/dev/tty", ":redraw", ":reload-all"]
