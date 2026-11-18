@@ -6,24 +6,26 @@ TextInput {
     id: root
 
     property Item keyHandler: null
+    property string placeholderText: ""
 
     Keys.forwardTo: keyHandler ? [keyHandler] : []
     Keys.priority: Keys.BeforeItem
+    Keys.enabled: !inputMethodComposing
     clip: true
     color: Theme.foreground
     focus: true
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSizeBody
+    verticalAlignment: Text.AlignVCenter
+    Accessible.name: placeholderText
 
-    cursorDelegate: Item {
+    Text {
+        anchors.fill: parent
+        text: root.placeholderText
+        textFormat: Text.PlainText
+        font: root.font
+        color: Theme.mutedForeground
+        verticalAlignment: Text.AlignVCenter
+        visible: !root.text && !root.preeditText
     }
-
-    Keys.onPressed: function (event) {
-        if (event.modifiers & (Qt.AltModifier | Qt.MetaModifier))
-            event.accepted = true;
-    }
-    onCursorPositionChanged: if (cursorPosition !== length)
-        cursorPosition = length
-    onSelectedTextChanged: if (selectedText)
-        deselect()
 }

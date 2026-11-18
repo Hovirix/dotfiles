@@ -4,393 +4,175 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "features/audio" as Audio
-import "features/battery" as Battery
-import "features/brightness" as Brightness
-import "features/clock" as Clock
-import "features/display" as Display
-import "features/launcher" as Launcher
-import "features/emoji" as Emoji
-import "features/notifications" as Notifications
-import "features/reminder" as Reminder
-import "ui" as Ui
+import "core" as Core
+import "plugins/apps" as Apps
+import "plugins/audio" as Audio
+import "plugins/battery" as Battery
+import "plugins/brightness" as Brightness
+import "plugins/capture" as Capture
+import "plugins/clock" as Clock
+import "plugins/display" as Display
+import "plugins/emoji" as Emoji
+import "plugins/files" as Files
+import "plugins/launcher" as Launcher
+import "plugins/notifications" as Notifications
+import "plugins/reminder" as Reminder
+import "plugins/share" as Share
+import "plugins/system" as System
 
 ShellRoot {
     id: root
 
-    readonly property var focusedScreen: Quickshell.screens.find(output => output.name === notifications.focusedMonitor) || Quickshell.screens[0] || null
-
-    function changeBrightness(direction: int): void {
-        if (direction > 0)
-            brightness.increase();
-        else
-            brightness.decrease();
-        osd.showBrightness();
-    }
-
     function changeVolume(direction: int): void {
         if (direction > 0)
-            audio.volumeUp();
+            audioPlugin.volumeUp();
         else if (direction < 0)
-            audio.volumeDown();
+            audioPlugin.volumeDown();
         else
-            audio.toggleMute();
-        osd.showVolume();
+            audioPlugin.toggleMute();
+        osd.isVolume = true;
+        osd.show();
     }
 
-    function openLauncher(mode: string): void {
-        launcher.open(mode);
+    Core.Compositor {
+        id: compositor
     }
-
-    function run(command: list<string>): void {
-        popup.close();
-        Quickshell.execDetached(command);
-    }
-
-    Audio.Main {
-        id: audio
-
-        popup: popup
-    }
-
-    Battery.Main {
-        id: batteryService
-    }
-
-    Brightness.Main {
-        id: brightness
-    }
-
-    Clock.Main {
-        id: clock
-
-        popup: popup
-    }
-
-    Display.Main {
-        id: display
-
-        popup: popup
-    }
-
-    Emoji.Main {
-        id: emoji
-
-        popup: popup
-    }
-
-    Emoji.Main {
-        id: characters
-
-        dataSource: Qt.resolvedUrl("features/emoji/characters.json")
-        searchPlaceholder: qsTr("Search special characters…")
-        popup: popup
-    }
-
-    Notifications.Main {
-        id: notifications
-    }
-
-    Launcher.Main {
-        id: launcher
-
-        property bool recording: false
-
-        Process {
-            id: recordingStatus
-
-            command: ["hx-record", "--status"]
-            onExited: (exitCode, exitStatus) => launcher.recording = exitCode === 0
-        }
-
-        Timer {
-            interval: 1000
-            repeat: true
-            running: popup.content === launcher.panel
-            triggeredOnStart: true
-            onTriggered: if (!recordingStatus.running) recordingStatus.running = true
-        }
-
-        items: [
-            {
-                id: "apps",
-                label: qsTr("Apps"),
-                icon: "󰀻",
-                parent: "root"
-            },
-            {
-                id: "files",
-                label: qsTr("Files"),
-                icon: "󰈙",
-                parent: "root"
-            },
-            {
-                id: "emoji",
-                label: qsTr("Emoji"),
-                icon: "",
-                parent: "utilities"
-            },
-            {
-                id: "characters",
-                label: qsTr("Special characters"),
-                icon: "é",
-                parent: "utilities"
-            },
-            {
-                id: "reminder",
-                label: qsTr("Reminder"),
-                icon: "󰃭",
-                parent: "utilities"
-            },
-            {
-                id: "system",
-                label: qsTr("System"),
-                icon: "",
-                parent: "root"
-            },
-            {
-                id: "settings",
-                label: qsTr("Settings"),
-                icon: "",
-                parent: "root"
-            },
-            {
-                id: "utilities",
-                label: qsTr("Utilities"),
-                icon: "",
-                parent: "root"
-            },
-            {
-                id: "screenshotSave",
-                label: qsTr("Screenshot"),
-                icon: "",
-                parent: "utilities"
-            },
-            {
-                id: "ocr",
-                label: qsTr("OCR"),
-                icon: "󰈙",
-                parent: "utilities"
-            },
-            {
-                id: "screenrecord",
-                label: qsTr("Screenrecord"),
-                icon: "",
-                parent: "utilities"
-            },
-            {
-                id: "recordStop",
-                label: qsTr("Stop recording"),
-                icon: "",
-                parent: "screenrecord"
-            },
-            {
-                id: "recordSilent",
-                label: qsTr("With no audio"),
-                icon: "",
-                parent: "screenrecord"
-            },
-            {
-                id: "recordDesktop",
-                label: qsTr("With desktop audio"),
-                icon: "",
-                parent: "screenrecord"
-            },
-            {
-                id: "recordMicrophone",
-                label: qsTr("With desktop + microphone audio"),
-                icon: "",
-                parent: "screenrecord"
-            },
-            {
-                id: "lock",
-                label: qsTr("Lock"),
-                icon: "",
-                parent: "system"
-            },
-            {
-                id: "suspend",
-                label: qsTr("Suspend"),
-                icon: "󰒲",
-                parent: "system"
-            },
-            {
-                id: "reboot",
-                label: qsTr("Reboot"),
-                icon: "",
-                parent: "system"
-            },
-            {
-                id: "shutdown",
-                label: qsTr("Shutdown"),
-                icon: "",
-                parent: "system"
-            },
-            {
-                id: "audio",
-                label: qsTr("Audio"),
-                icon: "",
-                parent: "settings"
-            },
-            {
-                id: "display",
-                label: qsTr("Display"),
-                icon: "󰍹",
-                parent: "settings"
-            },
-            {
-                id: "network",
-                label: qsTr("Network"),
-                icon: "",
-                parent: "settings"
-            },
-            {
-                id: "bluetooth",
-                label: qsTr("Bluetooth"),
-                icon: "󰂯",
-                parent: "settings"
-            }
-        ].filter(item => item.id !== "recordStop" || launcher.recording)
-        popup: popup
-    }
-
-    Component {
-        id: reminderPanel
-
-        Reminder.Panel {
-            controller: popup
-        }
-    }
-
-    Ui.Popup {
+    Core.Popup {
         id: popup
-
-        screen: root.focusedScreen
-
-        actions: ({
-                audio: () => popup.toggle(audio.panel),
-                display: function () {
-                    popup.toggle(display.panel);
-                    if (popup.content === display.panel)
-                        display.refresh();
-                },
-                clock: () => popup.toggle(clock.panel),
-                emoji: () => popup.toggle(emoji.panel),
-                characters: () => popup.toggle(characters.panel),
-                brightnessUp: function () {
-                    popup.close();
-                    root.changeBrightness(1);
-                },
-                brightnessDown: function () {
-                    popup.close();
-                    root.changeBrightness(-1);
-                },
-                screenshot: () => root.run(["hx-screenshot"]),
-                ocr: () => root.run(["hx-ocr"]),
-                recordSilent: () => root.run(["hx-record"]),
-                recordStop: () => root.run(["hx-record", "--stop"]),
-                reminder: () => popup.open(reminderPanel),
-                recordDesktop: () => root.run(["hx-record", "--desktop-audio"]),
-                recordMicrophone: () => root.run(["hx-record", "--audio"]),
-                screenshotSave: () => root.run(["hx-screenshot", "--save"]),
-                idle: () => root.run(["hx-idle-toggle"]),
-                keyboardLayout: () => root.run(["keyboard-layout-toggle"]),
-                network: () => root.run(["foot", "--app-id", "tui", "-e", "impala"]),
-                bluetooth: () => root.run(["foot", "--app-id", "tui", "-e", "bluetui"]),
-                lock: () => root.run(["hx-lock"]),
-                suspend: () => root.run(["hx-suspend"]),
-                reboot: () => root.run(["systemctl", "reboot"]),
-                shutdown: () => root.run(["systemctl", "poweroff"])
-            })
+        screen: compositor.focusedScreen
+        home: launcherPlugin.panel
     }
-
-    Ui.Osd {
+    Core.Osd {
         id: osd
-
-        screen: root.focusedScreen
-
+        screen: compositor.focusedScreen
         property bool isVolume: true
-
-        function showBrightness(): void {
-            isVolume = false;
-            show();
-        }
-
-        function showVolume(): void {
-            isVolume = true;
-            show();
-        }
-
-        icon: !isVolume ? "󰍹" : audio.outputMuted ? "" : ""
-        value: isVolume ? (audio.outputMuted ? 0 : audio.outputVolume) : brightness.value
+        icon: !isVolume ? "󰍹" : audioPlugin.outputMuted ? "" : ""
+        value: isVolume ? (audioPlugin.outputMuted ? 0 : audioPlugin.outputVolume) : brightness.value
         valueText: `${Math.round(value * 100)}%`
     }
 
+    Apps.Main {
+        id: apps
+    }
+    Files.Main {
+        id: files
+    }
+    Audio.Main {
+        id: audioPlugin
+        popup: popup
+    }
+    Battery.Main {
+        id: batteryService
+    }
+    Brightness.Main {
+        id: brightness
+        monitor: compositor.focusedScreen?.name ?? ""
+        onAdjusted: {
+            popup.close();
+            osd.isVolume = false;
+            osd.show();
+        }
+    }
+    Capture.Main {
+        id: capture
+        popup: popup
+        active: popup.content === launcherPlugin.panel
+    }
+    Clock.Main {
+        id: clockPlugin
+        popup: popup
+    }
+    Display.Main {
+        id: displayPlugin
+        popup: popup
+    }
+    Emoji.Main {
+        id: emojiPlugin
+        popup: popup
+    }
+    Emoji.Main {
+        id: characters
+        popup: popup
+        dataSource: Qt.resolvedUrl("plugins/emoji/characters.json")
+        searchPlaceholder: qsTr("Search special characters…")
+        actionId: "characters"
+        actionLabel: qsTr("Special characters")
+        actionIcon: "é"
+    }
+    Notifications.Main {
+        id: notifications
+        focusedMonitor: compositor.focusedMonitor
+        apps: apps
+    }
+    Reminder.Main {
+        id: reminder
+        popup: popup
+    }
+    Share.Main {
+        popup: popup
+    }
+    System.Main {
+        id: system
+        popup: popup
+    }
+    Launcher.Main {
+        id: launcherPlugin
+        popup: popup
+        apps: apps
+        files: files
+        actions: [].concat(audioPlugin.actions, brightness.actions, capture.actions, clockPlugin.actions, displayPlugin.actions, emojiPlugin.actions, characters.actions, reminder.actions, system.actions)
+    }
+
+    // Keep compositor bindings and external scripts compatible with existing IPC names.
     IpcHandler {
+        target: "shell"
         function battery(): void {
             batteryService.showStatus();
         }
-
         function activateNotification(): string {
             return notifications.activateNewest();
         }
-
         function audio(): void {
-            popup.activate("audio");
+            popup.toggle(audioPlugin.panel);
         }
-
         function brightnessDown(): void {
-            root.changeBrightness(-1);
+            brightness.decrease();
         }
-
         function brightnessUp(): void {
-            root.changeBrightness(1);
+            brightness.increase();
         }
-
         function clock(): void {
-            popup.activate("clock");
+            popup.toggle(clockPlugin.panel);
         }
-
         function close(): void {
             popup.close();
         }
-
         function display(): void {
-            popup.activate("display");
+            displayPlugin.open();
         }
-
         function emoji(): void {
-            popup.activate("emoji");
+            popup.toggle(emojiPlugin.panel);
         }
-
         function launcher(): void {
-            root.openLauncher("apps");
+            launcherPlugin.open("apps");
         }
-
         function launcherMenu(mode: string): void {
-            root.openLauncher(mode);
+            launcherPlugin.open(mode);
         }
-
         function menu(): void {
-            root.openLauncher("go");
+            launcherPlugin.open("go");
         }
-
         function openRecent(): void {
-            root.openLauncher("open");
+            launcherPlugin.open("open");
         }
-
         function volumeDown(): void {
             root.changeVolume(-1);
         }
-
         function volumeMute(): void {
             root.changeVolume(0);
         }
-
         function volumeUp(): void {
             root.changeVolume(1);
         }
-
-        target: "shell"
     }
 }

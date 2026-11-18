@@ -3,6 +3,8 @@ import QtQuick.Controls
 import ".."
 
 Control {
+    property string title: ""
+
     font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSizeBody
     palette.buttonText: Theme.foreground

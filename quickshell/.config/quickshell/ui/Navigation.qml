@@ -4,8 +4,7 @@ import QtQuick
 // state machine (focusSection, selectedIndex, action rules); the
 // boilerplate key handling lives here.
 //
-// Keys.priority: Keys.BeforeItem means this handler gets keys first, even
-// when a descendant has activeFocus.
+// Text fields forward navigation keys here; ordinary editing stays native.
 Item {
     id: root
 
@@ -27,10 +26,18 @@ Item {
     Keys.priority: Keys.BeforeItem
     focus: true
 
-    Keys.onPressed: function (event) {
+    function handlePressed(event): void {
         if (textInputEdits && event.key === Qt.Key_U && event.modifiers === Qt.ControlModifier) {
             clearTextRequested();
             event.accepted = true;
+            return;
+        }
+        if (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)) {
+            event.accepted = false;
+            return;
+        }
+        if (textInputEdits && (event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Home || event.key === Qt.Key_End)) {
+            event.accepted = false;
             return;
         }
         if (textInputEdits && (event.key === Qt.Key_PageUp || event.key === Qt.Key_PageDown)) {
@@ -103,8 +110,9 @@ Item {
                 textKey(event.text);
         }
     }
+    Keys.onPressed: event => root.handlePressed(event)
     Keys.onReleased: function (event) {
-        if (qCloses && event.key === Qt.Key_Q) {
+        if (qCloses && event.key === Qt.Key_Q && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
             closeRequested();
             event.accepted = true;
         }

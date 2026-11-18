@@ -1,38 +1,40 @@
 import QtQuick
+import QtQuick.Controls.Basic as Controls
 import ".."
 
-Item {
+Controls.Switch {
     id: root
-
-    property bool checked: false
     property bool hasCursor: false
 
-    implicitHeight: Theme.switchHeight + Theme.space15 * 2
-    implicitWidth: Math.round(Theme.switchHeight * 1.9) + Theme.space15 * 2
+    implicitWidth: Math.round(Theme.switchHeight * 1.9) + Theme.space2
+    implicitHeight: Theme.menuHeaderHeight
+    focusPolicy: Qt.NoFocus
+    padding: 0
+    opacity: enabled ? 1 : 0.4
+    contentItem: Item {}
 
-    Rectangle {
-        anchors.fill: parent
-        border.color: root.hasCursor ? Theme.cursorBorder : "transparent"
-        border.width: Theme.borderWidth
-        color: "transparent"
-    }
-
-    Rectangle {
-        anchors.centerIn: parent
-        border.color: Theme.normalBorder
-        border.width: root.checked ? 0 : Theme.borderWidth
+    indicator: Rectangle {
+        x: (root.width - width) / 2
+        y: (root.height - height) / 2
+        implicitWidth: Math.round(Theme.switchHeight * 1.9)
+        implicitHeight: Theme.switchHeight
+        radius: height / 2
         color: root.checked ? Theme.primary : Theme.normalFill
-        height: Theme.switchHeight
-        width: Math.round(Theme.switchHeight * 1.9)
+        border.width: Theme.borderWidth
+        border.color: root.checked ? Theme.primary : Theme.normalBorder
 
         Rectangle {
-            readonly property int inset: Math.max(1, Math.round((parent.height - height) / 2))
-
-            color: root.checked ? Theme.primaryForeground : Qt.darker(Theme.foreground, 1.25)
+            width: parent.height - Theme.space15
             height: width
-            width: Math.round(Theme.switchHeight * 0.72)
-            x: (root.checked !== LayoutMirroring.enabled ? parent.width - width - inset : inset)
-            y: inset
+            radius: width / 2
+            x: root.checked ? parent.width - width - Theme.space15 / 2 : Theme.space15 / 2
+            y: (parent.height - height) / 2
+            color: root.checked ? Theme.primaryForeground : Theme.foreground
         }
+    }
+    background: Rectangle {
+        color: "transparent"
+        border.width: Theme.borderWidth
+        border.color: root.hasCursor ? Theme.cursorBorder : "transparent"
     }
 }

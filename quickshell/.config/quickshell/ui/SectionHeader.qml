@@ -1,14 +1,14 @@
 import QtQuick
 import ".."
 
-// Small-caps-style label introducing a menu section.
+// Secondary label introducing a section.
 Text {
     property color foreground: Theme.foreground
 
     color: Qt.darker(foreground, 1.4)
-    font.bold: true
+    font.weight: Theme.fontWeightMedium
     font.family: Theme.fontFamily
-    font.pixelSize: Theme.fontSizeCaption
+    font.pixelSize: Theme.fontSizeBodySmall
     renderType: Text.NativeRendering
     textFormat: Text.PlainText
     topPadding: Math.ceil(font.pixelSize * 0.15)
