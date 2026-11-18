@@ -2,10 +2,10 @@
   "$schema": "https://opencode.ai/v2/cli.json",
   "theme": {
     "name": "catppuccin",
-    "mode": "system"
+    "mode": "system",
   },
   "attention": {
-    "notifications": true
+    "notifications": true,
   },
   "session": {
     "sidebar": "auto",
@@ -15,28 +15,28 @@
     "image_preview": true,
     "tps": true,
     "new_location": "launch",
-    "permissions": "prompt"
+    "permissions": "prompt",
   },
   "animations": true,
   "tabs": {
     "mode": "auto",
     "scope": "cwd",
     "layout": "horizontal",
-    "indicators": "status"
+    "indicators": "status",
   },
   "diffs": {
     "view": "auto",
-    "single": false
+    "single": false,
   },
   "prompt": {
-    "paste": "compact"
+    "paste": "compact",
   },
   "terminal": {
     "title": true,
-    "copy": "select"
+    "copy": "select",
   },
   "debug": {
-    "devtools": false
+    "devtools": false,
   },
-  "plugins": ["./herdr-opencode"]
+  "plugins": ["./herdr-opencode"],
 }

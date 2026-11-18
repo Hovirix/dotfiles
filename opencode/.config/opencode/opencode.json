@@ -4,10 +4,8 @@
     {
       "action": "provider.use",
       "resource": "opencode",
-      "effect": "deny"
-    }
+      "effect": "deny",
+    },
   ],
-  "plugins": [
-    "@dietrichgebert/ponytail"
-  ]
+  "plugins": ["@dietrichgebert/ponytail"],
 }
