@@ -2,8 +2,8 @@
 set -eu
 
 command -v mmsg >/dev/null 2>&1 || {
-  notify-send -a 'Keyboard' -i dialog-error -u critical 'Keyboard' "mmsg not found"
-  exit 1
+    notify-send -a 'Keyboard' -i dialog-error -u critical 'Keyboard' "mmsg not found"
+    exit 1
 }
 
 mmsg dispatch switch_keyboard_layout >/dev/null

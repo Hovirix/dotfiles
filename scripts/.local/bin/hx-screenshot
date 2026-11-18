@@ -12,20 +12,24 @@ fi
 
 geometry="$(
     mmsg get all-clients |
-    jq -r '
+        jq -r '
         .clients[]
         | select(.is_visible and (.is_minimized | not))
         | "\(.x),\(.y) \(.width)x\(.height)"
     ' |
-    slurp -o
+        slurp -o
 )" || exit 0
 
 [[ -n "$geometry" ]] || exit 0
 
 if "$save"; then
-    [[ -n "$file" ]] || file="$dir/screenshot-$(date '+%Y-%m-%d_%H-%M-%S').png"
+    [[ -n "$file" ]] || file="$dir/screenshot-$(date '+%Y-%m-%d_%H-%M-%S-%N').png"
     mkdir -p "$(dirname "$file")"
-    grim -g "$geometry" - | tee "$file" | wl-copy --type image/png
+    (
+        set -C
+        exec 3>"$file"
+        grim -g "$geometry" - | tee /dev/fd/3 | wl-copy --type image/png
+    )
     notify-send -i camera-photo "Screenshot" "$file"
 else
     grim -g "$geometry" - | wl-copy --type image/png

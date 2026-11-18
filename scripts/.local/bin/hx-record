@@ -6,7 +6,7 @@ state="${XDG_RUNTIME_DIR:?}/hx-record"
 exec 9>"$state.lock"
 pid=""
 active() {
-    [[ -s "$state.pid" ]] && read -r pid < "$state.pid" &&
+    [[ -s "$state.pid" ]] && read -r pid <"$state.pid" &&
         [[ "$pid" =~ ^[1-9][0-9]*$ && "$state.lock" -ef "/proc/$pid/fd/9" ]]
 }
 case "${1:-}" in
@@ -22,10 +22,16 @@ case "${1:-}" in
         fi
         exit 0
         ;;
-    ""|--desktop-audio|--audio) ;;
-    *) echo "Usage: hx-record [--desktop-audio|--audio|--stop|--status]" >&2; exit 1 ;;
+    "" | --desktop-audio | --audio) ;;
+    *)
+        echo "Usage: hx-record [--desktop-audio|--audio|--stop|--status]" >&2
+        exit 1
+        ;;
 esac
-flock -n 9 || { echo "Recording already active" >&2; exit 1; }
+flock -n 9 || {
+    echo "Recording already active" >&2
+    exit 1
+}
 
 children=()
 recorder=""
@@ -52,23 +58,23 @@ trap cleanup EXIT
 trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
-echo "$$" > "$state.pid"
+echo "$$" >"$state.pid"
 
 geometry_file=$(mktemp "$state.geometry.XXXXXX")
 slurp -o < <(
     exec 9>&-
     mmsg get all-clients |
-    jq -r '
+        jq -r '
         .clients[]
         | select(.is_visible and (.is_minimized | not))
         | "\(.x),\(.y) \(.width)x\(.height)"
     '
-) > "$geometry_file" 9>&- &
+) >"$geometry_file" 9>&- &
 selector=$!
 children+=("$selector")
 wait "$selector" || exit 0
 children=()
-geometry=$(< "$geometry_file")
+geometry=$(<"$geometry_file")
 [[ -n "$geometry" ]] || exit 0
 
 audio=()
@@ -87,7 +93,10 @@ if [[ "${1:-}" == --audio || "${1:-}" == --desktop-audio ]]; then
     ready=false
     for ((attempt = 0; attempt < 50; attempt++)); do
         for pid in "${children[@]}"; do
-            kill -0 "$pid" 2>/dev/null || { echo "Recording audio process exited" >&2; exit 1; }
+            kill -0 "$pid" 2>/dev/null || {
+                echo "Recording audio process exited" >&2
+                exit 1
+            }
         done
         if pw-dump 9>&- | jq -e 'any(.[]; .info.props["node.name"] == "hx-record-source")' 9>&- >/dev/null; then
             ready=true
@@ -95,7 +104,10 @@ if [[ "${1:-}" == --audio || "${1:-}" == --desktop-audio ]]; then
         fi
         sleep 0.1
     done
-    "$ready" || { echo "Recording audio source unavailable" >&2; exit 1; }
+    "$ready" || {
+        echo "Recording audio source unavailable" >&2
+        exit 1
+    }
     audio=(--audio-backend=pipewire --audio=hx-record-source)
 fi
 

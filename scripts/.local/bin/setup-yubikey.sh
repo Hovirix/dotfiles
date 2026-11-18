@@ -20,18 +20,18 @@ read -rp "Configure this YubiKey for USB+NFC passkeys and OpenPGP? [y/N] " ok
 
 echo
 for iface in usb nfc; do
-  echo "Configuring ${iface} apps..."
-  ykman config "$iface" \
-    --enable u2f \
-    --enable fido2 \
-    --enable openpgp \
-    --disable otp \
-    --disable oath \
-    --disable piv \
-    --disable hsmauth \
-    --force
+    echo "Configuring ${iface} apps..."
+    ykman config "$iface" \
+        --enable u2f \
+        --enable fido2 \
+        --enable openpgp \
+        --disable otp \
+        --disable oath \
+        --disable piv \
+        --disable hsmauth \
+        --force
 
-  echo
+    echo
 done
 
 echo

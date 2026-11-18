@@ -2,9 +2,9 @@
 set -eu
 
 if pgrep -x swayidle >/dev/null 2>&1; then
-  pkill -x swayidle
-  notify-send -a 'Idle' -i hx-keep-awake -u low 'Keep awake on'
+    pkill -x swayidle
+    notify-send -a 'Idle' -i hx-keep-awake -u low 'Keep awake on'
 else
-  swayidle -w >/dev/null 2>&1 &
-  notify-send -a 'Idle' -i hx-idle -u normal 'IDLE on'
+    swayidle -w >/dev/null 2>&1 &
+    notify-send -a 'Idle' -i hx-idle -u normal 'IDLE on'
 fi
