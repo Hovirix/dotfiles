@@ -35,7 +35,7 @@ config.window_padding = {
   right = 0,
 }
 
-config.warn_about_missing_glyphs=false
+config.warn_about_missing_glyphs = false
 
 ------------------------------------------------------
 -- Key Assignments
