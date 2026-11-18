@@ -13,14 +13,14 @@ WLR_RENDERER = "vulkan"
 
 # Autostart
 exec_once = [
-    "swaybg -i ~/Pictures/Wallpapers/nixos-mocha.png -m fill",
-    "wlsunset -t 3000 -T 6500 -s 18:00 -S 07:00",
-    "swayidle -w",
-    "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE",
-    "quickshell --daemonize --no-duplicate",
-    "chatgpt",
-    "chromium",
-    "chromium --app=https://app.notion.com",
+  "swaybg -i ~/Pictures/Wallpapers/nixos-mocha.png -m fill",
+  "wlsunset -t 3000 -T 6500 -s 18:00 -S 07:00",
+  "swayidle -w",
+  "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE",
+  "quickshell --daemonize --no-duplicate",
+  "chatgpt",
+  "chromium",
+  "chromium --app=https://app.notion.com",
 ]
 
 # -------------------------------------------------------------------
@@ -171,21 +171,21 @@ app_id = "(?i).*qemu.*"
 # Floating Windows
 [[rule.window_rule]]
 is_floating = 1
-width = 0.75
-height = 0.75
+width = 0.7
+height = 0.7
 app_id = "^tui$"
 
 [[rule.window_rule]]
 is_floating = 1
-width = 0.6
-height = 0.6
+width = 0.5
+height = 0.5
 title = "(?i).*localsend.*"
 
 # Named Scratchpad
 [[rule.window_rule]]
 is_named_scratchpad = 1
-width = 0.8
-height = 0.8
+width = 0.6
+height = 0.6
 app_id = "^foot-scratchpad$"
 
 [[rule.window_rule]]
